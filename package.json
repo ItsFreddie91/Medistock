@@ -1,0 +1,30 @@
+{
+  "name": "login",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "bootstrap": "^5.3.3",
+    "connect-flash": "^0.1.1",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-ejs-layouts": "^2.5.1",
+    "express-myconnection": "^1.0.4",
+    "express-session": "^1.18.0",
+    "flash": "^1.1.0",
+    "html-pdf": "^3.0.1",
+    "mysql": "^2.18.1",
+    "nodemon": "^3.1.4",
+    "path": "^0.12.7",
+    "pdfkit": "^0.15.1"
+  }
+}

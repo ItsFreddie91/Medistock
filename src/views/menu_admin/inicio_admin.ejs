@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Panel de Administración</title>
+        <link rel="stylesheet" href="/inicio_admi.css">
+    </head>
+    <body>
+        <div class="container">
+            <aside class="sidebar">
+                <div class="logo"></div>
+                <br>
+                <br>
+                <nav>
+                    <ul>
+                        <li>
+                            <img width="40" height="40" src="/icons/icons2.png" alt="user" class="menu-icon"/>
+                            <a href="/menu_admin/inicio_admin">Inicio</a>
+                        </li>
+                        <li>
+                            <img width="40" height="40" src="/icons/icons3.png" alt="user" class="menu-icon"/>
+                            <a href="/menu_admin/datos_medicamentos_admin">Datos de Medicamentos</a>
+                        </li>
+                        <li>
+                            <img width="40" height="40" src="/icons/icons4.png" alt="user" class="menu-icon"/>
+                            <a href="/menu_admin/medicamentos_admin">Registro de Medicamentos</a>
+                        </li>
+                        <li>
+                            <img width="40" height="40" src="/icons/iconusuario.png" alt="user" class="menu-icon"/>
+                            <a href="/menu_admin/clientes_admin">Clientes</a>
+                        </li>
+                        <li>
+                            <img width="40" height="40" src="/icons/icons5.png" alt="user" class="menu-icon"/>
+                            <a href="/menu_admin/proveedores_admin">Proveedores</a>
+                        </li>
+                        <li>
+                            <img width="40" height="40" src="/icons/iconadministra.png" alt="user" class="menu-icon"/>
+                            <a href="/menu_admin/administrar_usuarios">Administrar Usuarios</a>
+                        </li>
+                        <li>
+                            <img width="40" height="40" src="/icons/compra.png" alt="user" class="menu-icon"/>
+                            <a href="/menu_admin/venta">Venta</a>
+                        </li>
+                        <li>
+                            <img width="40" height="40" src="/icons/cerrar-sesion.png" alt="user" class="menu-icon"/>
+                            <a href="/">Cerrar Sesion</a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <main class="content">
+                <section class="dashboard">
+                    <a href="/menu_admin/clientes_admin" class="card blue">
+                        <p class="titulo">Historial</p>
+                    </a>
+                    <a href="/menu_admin/medicamentos_admin" class="card green">
+                        <p class="titulo">Datos de entrada de Medicamentos</p>
+                    </a>
+                    <a href="/menu_admin/datos_medicamentos_admin" class="card orange">
+                        <p class="titulo">Stock Medicamentos</p>
+                    </a>
+                    <a href="/menu_admin/proveedores_admin" class="card red">
+                        <p class="titulo">Proveedores</p>
+                    </a>
+                </section>
+            </main>
+        </div>
+
+        <!-- Scripts para mostrar alertas -->
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                // Establecer un retraso para mostrar los mensajes después de cargar la página
+                setTimeout(() => {
+                    const mensajesProximos = <%- mensajesProximos %>;
+                    const mensajesAgotarse = <%- mensajesAgotarse %>;
+        
+                    // Construir una alerta con todos los medicamentos próximos a caducar
+                    if (mensajesProximos.length > 0) {
+                        const alertaProximos = mensajesProximos.join('\n'); // Une los mensajes con saltos de línea
+                        alert(`Medicamentos próximos a caducar:\n\n${alertaProximos}`);
+                    }
+        
+                    // Construir una alerta con todos los medicamentos con cantidad baja
+                    if (mensajesAgotarse.length > 0) {
+                        const alertaAgotarse = mensajesAgotarse.join('\n'); // Une los mensajes con saltos de línea
+                        alert(`Medicamentos con cantidades bajas:\n\n${alertaAgotarse}`);
+                    }
+                }, 500); // Retraso de 500 ms (medio segundo)
+            });
+        </script>
+        
+        
+        
+
+        
+    </body>
+</html>

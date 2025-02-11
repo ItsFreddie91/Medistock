@@ -1,0 +1,203 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e3e1fc;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    display: flex;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    width: 250px;
+    height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+}
+
+.logo h2 {
+    color: #ecf0f1;
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.sidebar nav ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar nav ul li {
+    margin-bottom: 20px;
+}
+
+.sidebar nav ul li a {
+    color: #ecf0f1;
+    text-decoration: none;
+    font-size: 18px;
+    display: block;
+    padding: 12px 15px;
+    border-radius: 100px;
+    transition: background-color 0.3s, padding-left 0.3s;
+}
+
+.sidebar nav ul li a:hover {
+    background-color: #34495e;
+    padding-left: 15px;
+}
+
+.sidebar nav ul li a.active {
+    background-color: #2980b9;
+    padding-left: 15px;
+}
+
+/* Content Styles */
+.content {
+    flex: 1;
+    padding: 20px;
+}
+
+/* Dashboard Styles */
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+    gap: 25px;
+    margin-top: 2px;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border-radius: 10px;
+    padding: 35px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+    height: 200px;
+}
+
+.card h3, .card p {
+    color: white;
+}
+
+.card.blue {
+    background-color: #2980b9;
+}
+
+.card.green {
+    background-color: #27ae60;
+}
+
+.card.orange {
+    background-color: #e67e22;
+}
+
+.card.red {
+    background-color: #c0392b;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 300px rgba(0, 0, 0, 0.2);
+}
+
+/* Form Styles */
+    form {
+        background-color: #ffffffa0;
+        justify-content: center; /* Centra horizontalmente */
+        align-items: center;  
+        padding: 19px;
+        border-radius: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin: 0;
+        max-width: none; /* Eliminar la restricción de ancho máximo */
+        width: 100%; /* Ocupa todo el ancho disponible */
+        box-sizing: border-box; /* Asegura que el padding y el border no superen el ancho del contenedor */
+    }
+
+    form label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: bold;
+    }
+
+    form input[type="text"],
+    form select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 500px;
+        border: 1px solid  #2c3e50;
+        box-sizing: border-box;
+        
+    }
+
+    form input[type="number"],
+    form select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 500px;
+        border: 1px solid  #2c3e50;
+        box-sizing: border-box;
+        
+    }
+
+    form input[type="date"],
+    form select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 500px;
+        border: 1px solid  #2c3e50;
+        box-sizing: border-box;
+        
+    }
+
+    .form-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px; /* Espacio entre los botones */
+        margin-top: 2px; /* Espacio arriba de los botones */
+    }
+
+    .form-buttons button {
+        background-color:#2c3e50;
+        color: white;
+        padding: 10px 50px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .form-buttons button:hover {
+        background-color: #3498db;
+    }
+
+.centered-text {
+    text-align: center;
+    font-size: 36px; /* Ajusta el tamaño según lo necesites */
+    font-weight: bold;
+    font-family: "Helvetica", "Arial", sans-serif;
+}
+
+.titulo {
+    font-size: 24px; /* Aumenta el tamaño de la fuente */
+    font-weight: bold; /* Aplica negritas */
+}
+
+.center-text {
+    text-align: center;
+}
+

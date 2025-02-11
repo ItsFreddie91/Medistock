@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <link rel="stylesheet" href="/inicio_admi.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+            </div>
+            <nav>
+                <ul>
+                    <li>
+                        <img width="40" height="40" src="/icons/icons2.png" alt="user" class="menu-icon"/>
+                        <a href="/menu/inicio">Inicio</a>
+                    </li>
+                    <li>
+                        <img width="40" height="40" src="/icons/icons3.png" alt="user" class="menu-icon"/>
+                        <a href="/menu/datos_medicamentos">Datos de Medicamentos</a>
+                    </li>
+                    <li>
+                        <img width="40" height="40" src="/icons/icons4.png" alt="user" class="menu-icon"/>
+                        <a href="/menu/medicamentos">Registro de Medicamentos</a>
+                    </li>
+                    <li>
+                        <img width="40" height="40" src="/icons/iconusuario.png" alt="user" class="menu-icon"/>
+                        <a href="/menu/clientes">Clientes</a>
+                    </li>
+                    <li>
+                        <img width="40" height="40" src="/icons/compra.png" alt="user" class="menu-icon"/>
+                        <a href="/menu/venta">Venta</a>
+                    </li>
+                    <li>
+                        <img width="40" height="40" src="/icons/cerrar-sesion.png" alt="user" class="menu-icon"/>
+                        <a href="/">Cerrar Sesion</a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="content">
+            <section class="dashboard">
+                <a href="/menu/clientes" class="card blue">
+                    <p class="titulo">Historial</p>
+                </a>
+                <a href="/menu/medicamentos" class="card green">
+                    <p class="titulo">Datos de entrada de Medicamentos</p>
+                </a>
+                <a href="/menu/datos_medicamentos" class="card orange">
+                    <p class="titulo">Stock Medicamentos</p>
+                </a>
+                <a href="/menu/proveedores" class="card red">
+                    <p class="titulo">Proveedores</p>
+                </a>
+            </section>
+        </main>
+    </div>
+</body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            const mensajesProximos = <%- mensajesProximos %>;
+            const mensajesAgotarse = <%- mensajesAgotarse %>;
+
+            if (mensajesProximos.length > 0) {
+                const alertaProximos = mensajesProximos.join('\n');
+                alert(`Medicamentos próximos a caducar:\n\n${alertaProximos}`);
+            }
+
+            if (mensajesAgotarse.length > 0) {
+                const alertaAgotarse = mensajesAgotarse.join('\n');
+                alert(`Medicamentos con cantidades bajas:\n\n${alertaAgotarse}`);
+            }
+        }, 500);
+    });
+</script>
+
+
+
+
+  
+  
+  
+  
+
+</html>
