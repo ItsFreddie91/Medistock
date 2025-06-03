@@ -10,49 +10,64 @@
     <div class="container">
         <aside class="sidebar">
             <div class="logo"></div>
-            <br>
-            <br>
             <nav>
                 <ul>
-                    <li>
-                        <img width="40" height="40" src="/icons/icons2.png" alt="user" class="menu-icon"/>
-                        <a href="/menu_admin/inicio_admin">Inicio</a>
-                    </li>
-                    <li>
-                        <img width="40" height="40" src="/icons/icons3.png" alt="user" class="menu-icon"/>
-                        <a href="/menu_admin/datos_medicamentos_admin">Datos de Medicamentos</a>
-                    </li>
-                    <li>
-                        <img width="40" height="40" src="/icons/icons4.png" alt="user" class="menu-icon"/>
-                        <a href="/menu_admin/medicamentos_admin">Registro de Medicamentos</a>
-                    </li>
-                    <li>
-                        <img width="40" height="40" src="/icons/iconusuario.png" alt="user" class="menu-icon"/>
-                        <a href="/menu_admin/clientes_admin">Clientes</a>
-                    </li>
-                    <li>
-                        <img width="40" height="40" src="/icons/icons5.png" alt="user" class="menu-icon"/>
-                        <a href="/menu_admin/proveedores_admin">Proveedores</a>
-                    </li>
-                    <li>
-                        <img width="40" height="40" src="/icons/iconadministra.png" alt="user" class="menu-icon"/>
-                        <a href="/menu_admin/administrar_usuarios">Administrar Usuarios</a>
-                    </li>
-                    <li>
-                        <img width="40" height="40" src="/icons/compra.png" alt="user" class="menu-icon"/>
-                        <a href="/menu_admin/venta">Venta</a>
-                    </li>
-                    <li>
-                        <img width="40" height="40" src="/icons/cerrar-sesion.png" alt="user" class="menu-icon"/>
-                        <a href="/">Cerrar Sesion</a>
-                    </li>  
-                </ul>
+                    <ul>
+                        <li>
+                            <a href="/menu_admin/inicio_admin">
+                                <img width="40" height="40" src="/icons/icons2.png" alt="user" class="menu-icon"/>
+                                Inicio
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/menu_admin/datos_medicamentos_admin">
+                                <img width="40" height="40" src="/icons/icons3.png" alt="user" class="menu-icon"/>
+                                Datos de Medicamentos
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/menu_admin/medicamentos_admin">
+                                <img width="40" height="40" src="/icons/icons4.png" alt="user" class="menu-icon"/>
+                                Registro de Medicamentos
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/menu_admin/clientes_admin" class="active">
+                                <img width="40" height="40" src="/icons/iconusuario.png" alt="user" class="menu-icon"/>
+                                Clientes
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/menu_admin/proveedores_admin">
+                                <img width="40" height="40" src="/icons/icons5.png" alt="user" class="menu-icon"/>
+                                Proveedores
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/menu_admin/administrar_usuarios">
+                                <img width="40" height="40" src="/icons/iconadministra.png" alt="user" class="menu-icon"/>
+                                Administrar Usuarios
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/menu_admin/venta">
+                                <img width="40" height="40" src="/icons/compra.png" alt="user" class="menu-icon"/>
+                                Venta
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/">
+                                <img width="40" height="40" src="/icons/cerrar-sesion.png" alt="user" class="menu-icon"/>
+                                Cerrar Sesión
+                            </a>
+                        </li>
+                    </ul>                    </ul>
             </nav>
         </aside>
         <main class="content">
             <div class="layout-superior-derecha">
                 <div class="MediStock-a_la_derecha">
-                    <label class="medistock-label">MediStock - Administrador</label>
+                    <label class="medistock-label"></label>
                     <form action="/menu_admin/buscar-cliente" method="get" class="buscar-cliente-form">
                         <img width="30" height="30" src="/icons/lupa.png" alt="user" class="menu-icon buscar-cliente-icon"/>
                         <input type="text" name="nombre" placeholder="Buscar un Cliente" class="buscar-cliente-input"/>

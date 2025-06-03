@@ -9,39 +9,44 @@
 <body>
     <div class="container">
         <aside class="sidebar">
-            <div class="logo">
-                <br>
-                <br>
-                <br>
-                <br>
-                <br>
-                <br>
-            </div>
+            <div class="logo"></div>
             <nav>
                 <ul>
                     <li>
-                        <img width="40" height="40" src="/icons/icons2.png" alt="user" class="menu-icon"/>
-                        <a href="/menu/inicio">Inicio</a>
+                        <a href="/menu/inicio">
+                            <img width="40" height="40" src="/icons/icons2.png" alt="user" class="menu-icon"/>
+                            Inicio
+                        </a>
                     </li>
                     <li>
-                        <img width="40" height="40" src="/icons/icons3.png" alt="user" class="menu-icon"/>
-                        <a href="/menu/datos_medicamentos">Datos de Medicamentos</a>
+                        <a href="/menu/datos_medicamentos">
+                            <img width="40" height="40" src="/icons/icons3.png" alt="user" class="menu-icon"/>
+                            Datos de Medicamentos
+                        </a>
                     </li>
                     <li>
-                        <img width="40" height="40" src="/icons/icons4.png" alt="user" class="menu-icon"/>
-                        <a href="/menu/medicamentos">Registro de Medicamentos</a>
+                        <a href="/menu/medicamentos">
+                            <img width="40" height="40" src="/icons/icons4.png" alt="user" class="menu-icon"/>
+                            Registro de Medicamentos
+                        </a>
                     </li>
                     <li>
-                        <img width="40" height="40" src="/icons/iconusuario.png" alt="user" class="menu-icon"/>
-                        <a href="/menu/clientes">Clientes</a>
+                        <a href="/menu/clientes" class="active">
+                            <img width="40" height="40" src="/icons/iconusuario.png" alt="user" class="menu-icon"/>
+                            Clientes
+                        </a>
                     </li>
                     <li>
-                        <img width="40" height="40" src="/icons/compra.png" alt="user" class="menu-icon"/>
-                        <a href="/menu/venta">Venta</a>
+                        <a href="/menu/venta">
+                            <img width="40" height="40" src="/icons/compra.png" alt="user" class="menu-icon"/>
+                            Venta
+                        </a>
                     </li>
                     <li>
-                        <img width="40" height="40" src="/icons/cerrar-sesion.png" alt="user" class="menu-icon"/>
-                        <a href="/">Cerrar Sesion</a>
+                        <a href="/">
+                            <img width="40" height="40" src="/icons/cerrar-sesion.png" alt="user" class="menu-icon"/>
+                            Cerrar Sesión
+                        </a>
                     </li>
                 </ul>
             </nav>
@@ -49,7 +54,7 @@
         <main class="content">
             <div class="layout-superior-derecha">
                 <div class="MediStock-a_la_derecha">
-                    <label class="medistock-label">MediStock - Administrador</label>
+                    <label class="medistock-label"> </label>
                     <form action="/menu/buscar-cliente" method="get" class="buscar-cliente-form">
                         <img width="30" height="30" src="/icons/lupa.png" alt="user" class="menu-icon buscar-cliente-icon"/>
                         <input type="text" name="nombre" placeholder="Buscar un Cliente" class="buscar-cliente-input"/>
@@ -59,82 +64,43 @@
             </div>
             
             <div class="centrar_form">
-            <section id="agregar-medicamentos" class="section">
-                <div>
-                    <form id="formulario-cliente" action="/menu/clientes" method="POST" class="formulario-cliente">
-                        <h2 class="center-text">Agregar Nuevo Cliente:</h2>
-                    
-                        <div class="form-group">
-                            <label for="nombre" class="form-label">Nombre:</label>
-                            <input type="text" name="nombre" class="form-input" required>
-                        </div>
-                    
-                        <div class="form-group">
-                            <label for="apellido_paterno" class="form-label">Apellido Paterno:</label>
-                            <input type="text" name="apellido_paterno" class="form-input" required>
-                        </div>
-                    
-                        <div class="form-group">
-                            <label for="apellido_materno" class="form-label">Apellido Materno:</label>
-                            <input type="text" name="apellido_materno" class="form-input" required>
-                        </div>
-                    
-                        <div class="form-group">
-                            <label for="receta" class="form-label">Tipo de Receta:</label>
-                            <select name="receta" class="form-select" required>
-                                <option value="" disabled selected>Selecciona una opción</option>
-                                <option value="Ordinaria">Ordinaria</option>
-                                <option value="Especial">Especial</option>
-                            </select>
-                        </div>
-                    
-                            <button type="submit" class="btn-guardar">Guardar</button>
-                    
-                        <% if (message) { %>
-                            <div class="alert alert-success">
-                                <%= message %>
+                <section id="agregar-medicamentos" class="section">
+                    <div>
+                        <form id="formulario-cliente" action="/menu/clientes" method="POST" class="formulario-cliente">
+                            <h2 class="center-text">Agregar Nuevo Cliente:</h2>
+                        
+                            <div class="form-group">
+                                <label for="nombre" class="form-label">Nombre:</label>
+                                <input type="text" name="nombre" class="form-input" required>
                             </div>
-                        <% } %>
-                    </form>
-                    
-                </div>                  
-            </section>
+                        
+                            <div class="form-group">
+                                <label for="apellido_paterno" class="form-label">Apellido Paterno:</label>
+                                <input type="text" name="apellido_paterno" class="form-input" required>
+                            </div>
+                        
+                            <div class="form-group">
+                                <label for="apellido_materno" class="form-label">Apellido Materno:</label>
+                                <input type="text" name="apellido_materno" class="form-input" required>
+                            </div>
+                        
+                            <div class="form-group">
+                                <label for="receta" class="form-label">Tipo de Receta:</label>
+                                <select name="receta" class="form-select" required>
+                                    <option value="" disabled selected>Selecciona una opción</option>
+                                    <option value="Ordinaria">Ordinaria</option>
+                                    <option value="Especial">Especial</option>
+                                </select>
+                            </div>
+                        
+                            <button type="submit" class="btn-guardar">Guardar</button>
+                            <div id="mensaje-alerta" style="display: none;">Cliente agregado exitosamente!</div> <!-- Contenedor de alerta -->
+                        </form>
+                    </div>                  
+                </section>
+            </div>
         </main>
     </div>
+    <script src="/js/clientes.js"></script>
 </body>
-<script>
-    // Capturar el evento submit del formulario
-    document.getElementById('formulario-cliente').addEventListener('submit', async (event) => {
-        event.preventDefault(); // Evita la recarga de la página
-
-        // Obtener los datos del formulario
-        const formData = new FormData(event.target);
-        const data = Object.fromEntries(formData);
-
-        try {
-            // Enviar los datos al servidor
-            const response = await fetch('/menu/clientes', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
-
-            // Verificar si la respuesta fue exitosa
-            if (response.ok) {
-                // Mostrar el mensaje de alerta
-                alert('Cliente agregado exitosamente!');
-
-                // Limpiar el formulario
-                event.target.reset();
-            } else {
-                alert('Hubo un error al agregar el cliente.');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('No se pudo conectar con el servidor.');
-        }
-    });
-</script>
 </html>

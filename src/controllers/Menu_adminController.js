@@ -115,11 +115,6 @@ function insertarMedicamento(req, res) {
 }
 
 
-
-
-
-
-
 ///////////////////////////////////////////////////////////////////////
 
 // RENDERIZA A LA PAGINA DE PROVEEDORES
@@ -391,6 +386,67 @@ function eliminarCliente(req, res) {
 
 //MUESRA LA TABLA DE MEDICAMENTOS
 function vista_datos_medicamentos(req, res) {
+    const cantidad = parseInt(req.query.cantidad, 10); // Captura la cantidad desde la URL
+
+    // Construir la consulta con o sin límite dependiendo de si se especificó una cantidad válida
+    const query = cantidad
+        ? `SELECT 
+             m.id_medicamentos,
+             m.nombre,
+             m.cantidad,
+             m.precio,
+             m.fecha_caducidad,
+             p.presentacion AS nombre_presentacion,
+             c.controlado AS nombre_controlado,
+             IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
+           FROM 
+             Medicamentos m
+           JOIN 
+             Presentacion p ON m.presentation_id = p.id_presentacion
+           JOIN 
+             Controlado c ON m.controlado_id = c.id_controlado
+           LEFT JOIN 
+             Proveedores pr ON m.proveedores_id = pr.id_proveedores
+           ORDER BY 
+             m.id_medicamentos DESC
+           LIMIT ?`
+        : `SELECT 
+             m.id_medicamentos,
+             m.nombre,
+             m.cantidad,
+             m.precio,
+             m.fecha_caducidad,
+             p.presentacion AS nombre_presentacion,
+             c.controlado AS nombre_controlado,
+             IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
+           FROM 
+             Medicamentos m
+           JOIN 
+             Presentacion p ON m.presentation_id = p.id_presentacion
+           JOIN 
+             Controlado c ON m.controlado_id = c.id_controlado
+           LEFT JOIN 
+             Proveedores pr ON m.proveedores_id = pr.id_proveedores
+           ORDER BY 
+             m.id_medicamentos DESC`;
+
+    // Ejecutar consulta con o sin parámetros
+    conexion.query(query, cantidad ? [cantidad] : [], (err, results) => {
+        if (err) {
+            console.error('Error al consultar medicamentos:', err);
+            return res.status(500).send('Error al consultar medicamentos');
+        }
+
+        res.render('menu_admin/datos_medicamentos_admin', { 
+            medicamentos: results,
+            cantidad // por si deseas mostrar la cantidad actual en la vista
+        });
+    });
+}
+
+
+
+function tabla_medicamentos(req, res) {
     const query = `
     SELECT 
       m.id_medicamentos,
@@ -419,13 +475,95 @@ function vista_datos_medicamentos(req, res) {
             console.error('Error al consultar medicamentos:', err);
             return res.status(500).send('Error al consultar medicamentos');
         }
-        res.render('menu_admin/datos_medicamentos_admin', { medicamentos: results });
+        res.render('menu_admin/tabla_medicamentos', { medicamentos: results });
     });
 }
+
+function tabla_clientes(req, res) {
+    const query = `
+    SELECT 
+      id_clientes,
+      receta,
+      nombre,
+      apellido_paterno,
+      apellido_materno
+    FROM 
+      Clientes
+    ORDER BY 
+      id_clientes DESC;
+    `;
+
+    conexion.query(query, (err, results) => {
+        if (err) {
+            console.error('Error al consultar clientes:', err);
+            return res.status(500).send('Error al consultar clientes');
+        }
+        res.render('menu_admin/tabla_clientes', { clientes: results });
+    });
+}
+
+
+function tabla_proveedores(req, res) {
+    const query = `
+    SELECT 
+      id_proveedores,
+      nombre,
+      direccion,
+      telefono,
+      correo
+    FROM 
+      Proveedores
+    ORDER BY 
+      id_proveedores DESC;
+    `;
+
+    conexion.query(query, (err, results) => {
+        if (err) {
+            console.error('Error al consultar proveedores:', err);
+            return res.status(500).send('Error al consultar proveedores');
+        }
+        res.render('menu_admin/tabla_proveedores', { proveedores: results });
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function post_datos_medicamentos(req, res) {
     const cantidad = parseInt(req.body.cantidad, 10); // Captura la cantidad ingresada
 
+    // Si el parámetro de cantidad es válido, realiza una consulta para limitar los resultados
     const query = cantidad 
         ? `SELECT 
              m.id_medicamentos,
@@ -435,14 +573,14 @@ function post_datos_medicamentos(req, res) {
              m.fecha_caducidad,
              p.presentacion AS nombre_presentacion,
              c.controlado AS nombre_controlado,
-             pr.nombre AS nombre_proveedor
+             IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
            FROM 
              Medicamentos m
            JOIN 
              Presentacion p ON m.presentation_id = p.id_presentacion
            JOIN 
              Controlado c ON m.controlado_id = c.id_controlado
-           JOIN 
+           LEFT JOIN 
              Proveedores pr ON m.proveedores_id = pr.id_proveedores
            ORDER BY 
              m.id_medicamentos DESC
@@ -455,28 +593,32 @@ function post_datos_medicamentos(req, res) {
              m.fecha_caducidad,
              p.presentacion AS nombre_presentacion,
              c.controlado AS nombre_controlado,
-             pr.nombre AS nombre_proveedor
+             IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
            FROM 
              Medicamentos m
            JOIN 
              Presentacion p ON m.presentation_id = p.id_presentacion
            JOIN 
              Controlado c ON m.controlado_id = c.id_controlado
-           JOIN 
+           LEFT JOIN 
              Proveedores pr ON m.proveedores_id = pr.id_proveedores`;
 
+    // Ejecutar la consulta SQL
     conexion.query(query, cantidad ? [cantidad] : [], (err, results) => {
         if (err) {
             console.error('Error al consultar medicamentos:', err);
             return res.status(500).send('Error al consultar medicamentos');
         }
-        console.log(results);
+
+        // Renderizar la vista de los medicamentos
         res.render('menu_admin/datos_medicamentos_admin', { 
             medicamentos: results,
-            cantidad: cantidad // Asegúrate de pasar la cantidad
+            cantidad: cantidad, // Asegúrate de pasar la cantidad
         });
     });
 }
+
+
 
 
 
@@ -487,25 +629,25 @@ function generarReportePDF(req, res) {
     // Consulta para obtener los últimos 20 medicamentos con JOIN
     const query = `
         SELECT 
-    m.id_medicamentos,
-    m.nombre,
-    m.cantidad,
-    m.precio,
-    m.fecha_caducidad,
-    p.presentacion AS nombre_presentacion,
-    c.controlado AS nombre_controlado,
-    pr.nombre AS nombre_proveedor
-FROM 
-    Medicamentos m
-LEFT JOIN 
-    Presentacion p ON m.presentation_id = p.id_presentacion
-LEFT JOIN 
-    Controlado c ON m.controlado_id = c.id_controlado
-LEFT JOIN 
-    Proveedores pr ON m.proveedores_id = pr.id_proveedores
-ORDER BY 
-    m.id_medicamentos DESC
-LIMIT 20;`;
+            m.id_medicamentos,
+            m.nombre,
+            m.cantidad,
+            m.precio,
+            m.fecha_caducidad,
+            p.presentacion AS nombre_presentacion,
+            c.controlado AS nombre_controlado,
+            IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
+        FROM 
+            Medicamentos m
+        LEFT JOIN 
+            Presentacion p ON m.presentation_id = p.id_presentacion
+        LEFT JOIN 
+            Controlado c ON m.controlado_id = c.id_controlado
+        LEFT JOIN 
+            Proveedores pr ON m.proveedores_id = pr.id_proveedores
+        ORDER BY 
+            m.id_medicamentos DESC
+        LIMIT 20;`;
 
     // Realiza la consulta a la base de datos
     conexion.query(query, (err, medicamentos) => {
@@ -532,10 +674,9 @@ LIMIT 20;`;
         // Imprimir la lista de medicamentos
         medicamentos.forEach(medicamento => {
             doc.fontSize(12)
-                .text(`ID: ${medicamento.id_medicamentos}`)
                 .text(`Nombre: ${medicamento.nombre}`)
                 .text(`Cantidad: ${medicamento.cantidad}`)
-                .text(`Precio: ${medicamento.precio}`)
+                .text(`Precio: ${medicamento.precio} $`)
                 .text(`Fecha de Caducidad: ${new Date(medicamento.fecha_caducidad).toLocaleDateString()}`)
                 .text(`Presentación: ${medicamento.nombre_presentacion || 'No disponible'}`)  // Muestra 'No disponible' si es NULL
                 .text(`Controlado: ${medicamento.nombre_controlado || 'No disponible'}`)  // Muestra 'No disponible' si es NULL
@@ -552,18 +693,174 @@ LIMIT 20;`;
 
 
 
+
 // Función para obtener y mostrar todos los usuarios
+// GET - Mostrar lista de usuarios
 function administrar_usuarios(req, res) {
     const query = 'SELECT * FROM usuarios';
     conexion.query(query, (err, results) => {
         if (err) {
             console.error('Error al obtener usuarios:', err);
-            res.status(500).send('Error al obtener usuarios');
-        } else {
-            res.render('menu_admin/administrar_usuarios', { usuarios: results });
+            return res.status(500).render('menu_admin/administrar_usuarios', {
+                message: 'Error al obtener usuarios',
+                usuarios: [] // Pasa array vacío para evitar errores en EJS
+            });
         }
+        res.render('menu_admin/administrar_usuarios', { 
+            usuarios: results,
+            message: req.query.message // Para mensajes de redirección
+        });
     });
 }
+
+// POST - Registrar nuevo usuario
+function formulario(req, res) {
+    const { nombre, apellido_paterno, apellido_materno, usuario, contrasena } = req.body;
+
+    // Validación básica
+    if (!nombre || !usuario || !contrasena) {
+        return conexion.query('SELECT * FROM usuarios', (err, usuarios) => {
+            if (err) {
+                console.error('Error al obtener usuarios:', err);
+                return res.status(500).render('menu_admin/administrar_usuarios', {
+                    message: 'Error al validar datos',
+                    usuarios: []
+                });
+            }
+            res.render('menu_admin/administrar_usuarios', {
+                usuarios: usuarios,
+                message: 'Nombre, usuario y contraseña son obligatorios'
+            });
+        });
+    }
+
+    conexion.beginTransaction(err => {
+        if (err) {
+            console.error("Error en transacción:", err);
+            return res.status(500).render('menu_admin/administrar_usuarios', {
+                message: 'Error al iniciar transacción',
+                usuarios: []
+            });
+        }
+
+        // Verificar si usuario existe
+        conexion.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario], (err, results) => {
+            if (err) {
+                return conexion.rollback(() => {
+                    console.error("Error al verificar usuario:", err);
+                    res.status(500).render('menu_admin/administrar_usuarios', {
+                        message: 'Error al verificar usuario',
+                        usuarios: []
+                    });
+                });
+            }
+
+            if (results.length > 0) {
+                // Usuario existe, mostrar error con lista actual
+                conexion.query('SELECT * FROM usuarios', (err, usuarios) => {
+                    if (err) {
+                        return conexion.rollback(() => {
+                            res.status(500).render('menu_admin/administrar_usuarios', {
+                                message: 'Error al cargar usuarios',
+                                usuarios: []
+                            });
+                        });
+                    }
+                    res.render('menu_admin/administrar_usuarios', {
+                        usuarios: usuarios,
+                        message: 'El usuario ya existe. Elige otro nombre.'
+                    });
+                });
+            } else {
+                // Registrar nuevo usuario
+                bcrypt.hash(contrasena, 12, (err, hashedPassword) => {
+                    if (err) {
+                        return conexion.rollback(() => {
+                            console.error("Error al hashear:", err);
+                            res.status(500).render('menu_admin/administrar_usuarios', {
+                                message: 'Error al hashear contraseña',
+                                usuarios: []
+                            });
+                        });
+                    }
+
+                    conexion.query(
+                        'INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, usuario, contrasena) VALUES (?, ?, ?, ?, ?)',
+                        [nombre, apellido_paterno, apellido_materno, usuario, hashedPassword],
+                        (err, result) => {
+                            if (err) {
+                                return conexion.rollback(() => {
+                                    console.error("Error al insertar:", err);
+                                    res.status(500).render('menu_admin/administrar_usuarios', {
+                                        message: 'Error al registrar usuario',
+                                        usuarios: []
+                                    });
+                                });
+                            }
+
+                            conexion.commit(err => {
+                                if (err) {
+                                    return conexion.rollback(() => {
+                                        console.error("Error al commit:", err);
+                                        res.status(500).render('menu_admin/administrar_usuarios', {
+                                            message: 'Error al confirmar registro',
+                                            usuarios: []
+                                        });
+                                    });
+                                }
+                                
+                                // Redirigir a GET con mensaje de éxito
+                                res.redirect('/menu_admin/administrar_usuarios?message=Usuario registrado exitosamente');
+                            });
+                        }
+                    );
+                });
+            }
+        });
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Función para mostrar el formulario de edición de usuario
 function editarUsuario(req, res) {
@@ -589,49 +886,56 @@ function editarUsuario(req, res) {
 
 // Función para actualizar un usuario en la base de datos
 function actualizarUsuario(req, res) {
-    const id = req.params.id_usuarios;
-    const { nombre, apellido_paterno, apellido_materno, usuario, contrasena } = req.body;
-  
-    // Si el campo contrasena no está vacío, encripta la nueva contraseña
-    if (contrasena) {
-      bcrypt.hash(contrasena, 12, (err, hashedPassword) => {
-          if (err) {
-              console.error('Error al encriptar la contraseña:', err);
-              res.status(500).send('Error al encriptar la contraseña');
-              return;
-          }
-  
-          // Actualiza todos los campos, incluyendo la nueva contraseña
-          const query = 'UPDATE usuarios SET nombre = ?, apellido_paterno = ?, apellido_materno = ?, usuario = ?, contrasena = ? WHERE id_usuario = ?';
-          conexion.query(query, [nombre, apellido_paterno, apellido_materno, usuario, hashedPassword, id], (err) => {
-              if (err) {
-                  console.error('Error al actualizar usuario:', err);
-                  res.status(500).send('Error al actualizar usuario');
-              } else {
-                  res.redirect('/menu_admin/administrar_usuarios');
-              }
-          });
-      });
-    } else {
-      // Si no se proporcionó nueva contraseña, no actualices el campo de contraseña
-      const query = 'UPDATE usuarios SET nombre = ?, apellido_paterno = ?, apellido_materno = ?, usuario = ? WHERE id_usuario = ?';
-      conexion.query(query, [nombre, apellido_paterno, apellido_materno, usuario, id], (err) => {
-          if (err) {
-              console.error('Error al actualizar usuario:', err);
-              res.status(500).send('Error al actualizar usuario');
-          } else {
-              res.redirect('/menu_admin/administrar_usuarios');
-          }
-      });
+    const id = parseInt(req.params.id_usuarios, 10);
+    
+    // Impide modificar al administrador del sistema
+    if (id === 1) {
+        return res.redirect('/menu_admin/administrar_usuarios?alerta=No%20se%20puede%20modificar%20al%20Administrador%20del%20sistema');
     }
-  }
+
+    const { nombre, apellido_paterno, apellido_materno, usuario, contrasena } = req.body;
+
+    if (contrasena) {
+        bcrypt.hash(contrasena, 12, (err, hashedPassword) => {
+            if (err) {
+                console.error('Error al encriptar la contraseña:', err);
+                res.status(500).send('Error al encriptar la contraseña');
+                return;
+            }
+
+            const query = 'UPDATE usuarios SET nombre = ?, apellido_paterno = ?, apellido_materno = ?, usuario = ?, contrasena = ? WHERE id_usuario = ?';
+            conexion.query(query, [nombre, apellido_paterno, apellido_materno, usuario, hashedPassword, id], (err) => {
+                if (err) {
+                    console.error('Error al actualizar usuario:', err);
+                    res.status(500).send('Error al actualizar usuario');
+                } else {
+                    res.redirect('/menu_admin/administrar_usuarios');
+                }
+            });
+        });
+    } else {
+        const query = 'UPDATE usuarios SET nombre = ?, apellido_paterno = ?, apellido_materno = ?, usuario = ? WHERE id_usuario = ?';
+        conexion.query(query, [nombre, apellido_paterno, apellido_materno, usuario, id], (err) => {
+            if (err) {
+                console.error('Error al actualizar usuario:', err);
+                res.status(500).send('Error al actualizar usuario');
+            } else {
+                res.redirect('/menu_admin/administrar_usuarios');
+            }
+        });
+    }
+}
   
 
-  function eliminarUsuario(req, res) {
-    const id_usuario = req.params.id_usuario; // Obtén el ID del usuario desde los parámetros
-    const nombreBuscado = req.query.nombre; // Captura el nombre buscado desde la consulta en la URL
+function eliminarUsuario(req, res) {
+    const id_usuario = parseInt(req.params.id_usuario);
 
-    // Define la consulta para eliminar el usuario
+    // Prevenir eliminación del administrador
+if (id_usuario === 1) {
+    return res.redirect('/menu_admin/administrar_usuarios?alerta=No%20se%20puede%20eliminar%20al%20Administrador%20del%20sistema');
+}
+
+
     const query = 'DELETE FROM usuarios WHERE id_usuario = ?';
 
     conexion.query(query, [id_usuario], (err) => {
@@ -640,106 +944,51 @@ function actualizarUsuario(req, res) {
             return res.status(500).send('Error al eliminar el usuario');
         }
 
-        // Redirige a la página /administrar_usuarios después de eliminar el usuario
         res.redirect('/menu_admin/administrar_usuarios');
     });
 }
 
-function venta_medicamentos(req, res) {
-    conexion.query('SELECT * FROM medicamentos WHERE cantidad > 0', (err, results) => {
-        if (err) {
-            console.error(err);
-            req.flash('error', 'Ocurrió un error al cargar los medicamentos.');
-            return res.redirect('/menu_admin/inicio_admin');
-        }
-
-        res.render('menu_admin/venta', { medicamentos: results });
-    });
-}
-
-function venta_medicamentos_vista(req, res) {
-    const medicamentos = req.body.medicamentos;
-
-    if (!Array.isArray(medicamentos) || medicamentos.length === 0) {
-        req.flash('error', 'No se seleccionaron medicamentos.');
-        return res.redirect('/menu_admin/venta');
-    }
-
-    let errores = [];
-    let actualizaciones = medicamentos.map(medicamento => {
-        return new Promise((resolve, reject) => {
-            conexion.query('SELECT cantidad FROM medicamentos WHERE id_medicamentos = ?', [medicamento.id], (error, results) => {
-                if (error) {
-                    errores.push(`Error al consultar el medicamento ${medicamento.nombre}: ${error.message}`);
-                    return reject(error);
-                }
-
-                if (results.length === 0) {
-                    errores.push(`El medicamento ${medicamento.nombre} no existe.`);
-                    return reject(new Error('Medicamento no existe'));
-                }
-
-                const disponible = results[0].cantidad;
-
-                if (medicamento.cantidad > disponible) {
-                    errores.push(`Cantidad insuficiente en inventario para ${medicamento.nombre}.`);
-                    return reject(new Error('Cantidad insuficiente'));
-                }
-
-                conexion.query(
-                    'UPDATE medicamentos SET cantidad = cantidad - ? WHERE id_medicamentos = ?',
-                    [medicamento.cantidad, medicamento.id],
-                    (error) => {
-                        if (error) {
-                            errores.push(`Error al actualizar el inventario de ${medicamento.nombre}: ${error.message}`);
-                            return reject(error);
-                        }
-
-                        resolve();
-                    }
-                );
-            });
-        });
-    });
-
-    Promise.all(actualizaciones)
-        .then(() => {
-            if (errores.length > 0) {
-                req.flash('error', errores.join(' '));
-            } else {
-                req.flash('success', 'Venta realizada con éxito.');
-            }
-            res.json({ success: errores.length === 0 });
-        })
-        .catch(() => {
-            req.flash('error', 'Ocurrió un error al realizar la venta.');
-            res.json({ success: false });
-        });
-}
-
-
-
-
 
     //para meidicamentos
     //funciones de miecmantos 
-    function buscarMedicamento(req, res) {
-        const nombreBuscado = req.query.nombre; 
-        const query = 'SELECT * FROM medicamentos WHERE nombre LIKE ?';
-    
-        conexion.query(query, [`%${nombreBuscado}%`], (err, resultados) => {
-            if (err) {
-                console.error('Error al buscar medicamentos:', err);
-                return res.status(500).send('Error al buscar medicamentos');
-            }
-    
-            res.render('menu_admin/resultadoMedicamento_admin', {
-                medicamentos: resultados,
-                nombreBuscado 
-            });
+function buscarMedicamento(req, res) {
+    const nombreBuscado = req.query.nombre;
+
+    const query = `
+        SELECT m.*, 
+               p.presentacion AS nombre_presentacion, 
+               c.controlado AS nombre_controlado, 
+               pr.nombre AS nombre_proveedor
+        FROM medicamentos m
+        LEFT JOIN presentacion p ON m.presentation_id = p.id_presentacion
+        LEFT JOIN controlado c ON m.controlado_id = c.id_controlado
+        LEFT JOIN proveedores pr ON m.proveedores_id = pr.id_proveedores
+        WHERE m.nombre LIKE ?
+    `;
+
+    conexion.query(query, [`%${nombreBuscado}%`], (err, resultados) => {
+        if (err) {
+            console.error('Error al buscar medicamentos:', err);
+            return res.status(500).send('Error al buscar medicamentos');
+        }
+
+        // Formatear las fechas al formato YYYY-MM-DD para el input type="date"
+        const medicamentosFormateados = resultados.map(medicamento => {
+            const fecha = new Date(medicamento.fecha_caducidad);
+            const fechaISO = fecha.toISOString().split('T')[0]; // <-- este es el cambio
+
+            return {
+                ...medicamento,
+                fecha_caducidad: fechaISO
+            };
         });
-        
-    }
+
+        res.render('menu_admin/resultadoMedicamento_admin', {
+            medicamentos: medicamentosFormateados,
+            nombreBuscado 
+        });
+    });
+}
 
     function eliminarMedicamento(req, res) {
         const id_medicamentos = req.params.id_medicamentos; 
@@ -758,46 +1007,43 @@ function venta_medicamentos_vista(req, res) {
         });
     }
 
-    function actualizarMedicamento(req, res) {
-        const idMedicamento = req.params.id_medicamentos;
-        const { nombre, precio, cantidad, fecha_caducidad, presentation_id, controlado_id, proveedor_id } = req.body;
-    
-        console.log("Datos recibidos: ", req.body); // Para depuración
-    
-        if (!nombre || !precio || !cantidad || !fecha_caducidad || !presentation_id || !controlado_id) {
-            return res.status(400).send('Todos los campos son obligatorios.');
-        }
-    
-        const proveedorIdFinal = proveedor_id && proveedor_id !== '' ? proveedor_id : null;
-        const presentacionIdFinal = presentation_id && presentation_id !== '' ? presentation_id : null;
-    
-        const query = `
-            UPDATE medicamentos 
-            SET 
-                nombre = ?, 
-                precio = ?, 
-                cantidad = ?, 
-                fecha_caducidad = ?, 
-                presentation_id = ?, 
-                controlado_id = ?, 
-                proveedores_id = ?
-            WHERE id_medicamentos = ?
-        `;
-    
-        const values = [nombre, precio, cantidad, fecha_caducidad, presentacionIdFinal, controlado_id, proveedorIdFinal, idMedicamento];
-    
-        console.log("Consulta SQL: ", query); // Para depuración
-        console.log("Valores: ", values); // Para depuración
-    
-        conexion.query(query, values, (err, result) => {
-            if (err) {
-                console.error("Error al actualizar medicamento:", err);
-                return res.status(500).send("Error al actualizar medicamento");
-            }
-    
-            res.redirect('/menu_admin/medicamentos_admin');
-        });
+function actualizarMedicamento(req, res) {
+    const idMedicamento = req.params.id_medicamentos;
+    const { nombre, precio, cantidad, fecha_caducidad, presentation_id, controlado_id, proveedor_id } = req.body;
+
+    if (!nombre || !precio || !cantidad || !fecha_caducidad || !presentation_id || !controlado_id) {
+        return res.status(400).send('Todos los campos son obligatorios.');
     }
+
+    // Si no hay proveedor asignado (el anterior fue eliminado), asignar un proveedor nuevo
+    const proveedorIdFinal = proveedor_id && proveedor_id !== '' ? proveedor_id : null;
+    const presentacionIdFinal = presentation_id && presentation_id !== '' ? presentation_id : null;
+
+    const query = `
+        UPDATE medicamentos 
+        SET 
+            nombre = ?, 
+            precio = ?, 
+            cantidad = ?, 
+            fecha_caducidad = ?, 
+            presentation_id = ?, 
+            controlado_id = ?, 
+            proveedores_id = ?
+        WHERE id_medicamentos = ?
+    `;
+
+    const values = [nombre, precio, cantidad, fecha_caducidad, presentacionIdFinal, controlado_id, proveedorIdFinal, idMedicamento];
+
+    conexion.query(query, values, (err, result) => {
+        if (err) {
+            console.error("Error al actualizar medicamento:", err);
+            return res.status(500).send("Error al actualizar medicamento");
+        }
+
+        // Redirigir después de la actualización
+        res.redirect(`/menu_admin/buscar-medicamento?nombre=${encodeURIComponent(nombre)}`);
+    });
+}
     
     
     
@@ -862,6 +1108,360 @@ function venta_medicamentos_vista(req, res) {
     }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function venta_medicamentos(req, res) {
+        // Consultar los medicamentos disponibles
+        conexion.query('SELECT * FROM medicamentos WHERE cantidad > 0', (err, medicamentos) => {
+            if (err) {
+                console.error(err);
+                req.flash('error', 'Ocurrió un error al cargar los medicamentos.');
+                return res.redirect('/menu_admin/inicio_admin');
+            }
+    
+            // Consultar los clientes disponibles
+            conexion.query('SELECT * FROM clientes', (err, clientes) => {
+                if (err) {
+                    console.error(err);
+                    req.flash('error', 'Ocurrió un error al cargar los clientes.');
+                    return res.redirect('/menu_admin/inicio_admin');
+                }
+    
+                // Renderizar la vista con los datos de medicamentos y clientes
+                res.render('menu_admin/venta', { medicamentos: medicamentos, clientes: clientes });
+            });
+        });
+    }
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    function venta_medicamentos_vista(req, res) { 
+        console.log("Datos recibidos del frontend:", req.body);  // Verifica los datos recibidos del frontend
+        
+        const { medicamentos, total } = req.body;  // Recibe los datos de la venta
+        console.log("Medicamentos y total:", medicamentos, total);  // Muestra los datos específicos de los medicamentos
+    
+        // Verificación de si se han seleccionado medicamentos
+        if (!Array.isArray(medicamentos) || medicamentos.length === 0) {
+            req.flash('error', 'No se seleccionaron medicamentos.');
+            return res.json({ success: false, message: 'No se seleccionaron medicamentos.' });
+        }
+    
+        const id_usuario = req.session.usuarioId;
+        console.log("id_usuario desde la sesión:", id_usuario);  // Verifica el id_usuario
+    
+        // Verificación de que se ha seleccionado un cliente
+        const id_cliente = req.body.id_clientes || null;
+        console.log("ID cliente recibido:", id_cliente);  // Asegúrate de que el id_cliente se recibe correctamente
+    
+        if (!id_cliente) {
+            req.flash('error', 'Por favor, selecciona un cliente.');
+            return res.json({ success: false, message: 'Por favor, selecciona un cliente.' });
+        }
+    
+        let errores = [];
+    
+        // Procesar cada medicamento
+        let actualizaciones = medicamentos.map(medicamento => {
+            return new Promise((resolve, reject) => {
+                conexion.query('SELECT cantidad, precio FROM medicamentos WHERE id_medicamentos = ?', [medicamento.id], (error, results) => {
+                    if (error) {
+                        errores.push(`Error al consultar el medicamento ${medicamento.nombre}: ${error.message}`);
+                        return reject(error);
+                    }
+    
+                    if (results.length === 0) {
+                        errores.push(`El medicamento ${medicamento.nombre} no existe.`);
+                        return reject(new Error('Medicamento no existe'));
+                    }
+    
+                    const disponible = results[0].cantidad;
+                    const precio_unitario = results[0].precio;
+                    const cantidad_vendida = medicamento.cantidad;
+                    const total_venta = precio_unitario * cantidad_vendida;
+    
+                    // Verificar disponibilidad de inventario
+                    if (cantidad_vendida > disponible) {
+                        errores.push(`Cantidad insuficiente en inventario para ${medicamento.nombre}.`);
+                        return reject(new Error('Cantidad insuficiente'));
+                    }
+    
+                    // Actualizar inventario
+                    conexion.query(
+                        'UPDATE medicamentos SET cantidad = cantidad - ? WHERE id_medicamentos = ?',
+                        [cantidad_vendida, medicamento.id],
+                        (error) => {
+                            if (error) {
+                                errores.push(`Error al actualizar el inventario de ${medicamento.nombre}: ${error.message}`);
+                                return reject(error);
+                            }
+    
+                            // Insertar venta
+                            conexion.query(
+                                'INSERT INTO ventas (cantidad, precio_unitario, total, id_usuario, id_medicamento, id_cliente) VALUES (?, ?, ?, ?, ?, ?)',
+                                [cantidad_vendida, precio_unitario, total_venta, id_usuario, medicamento.id, id_cliente],
+                                (error) => {
+                                    if (error) {
+                                        errores.push(`Error al registrar la venta de ${medicamento.nombre}: ${error.message}`);
+                                        return reject(error);
+                                    }
+    
+                                    resolve();  // Venta registrada exitosamente
+                                }
+                            );
+                        }
+                    );
+                });
+            });
+        });
+    
+        // Ejecutar todas las actualizaciones de ventas
+        Promise.all(actualizaciones)
+            .then(() => {
+                if (errores.length > 0) {
+                    req.flash('error', errores.join(' '));
+                    return res.json({ success: false, message: errores.join(' ') });
+                } else {
+                    req.flash('success', 'Venta realizada con éxito.');
+                    res.json({ success: true });
+                }
+            })
+            .catch(err => {
+                console.error('Error al procesar la venta:', err);
+                req.flash('error', 'Ocurrió un error al realizar la venta.');
+                res.json({ success: false, message: 'Ocurrió un error al procesar la venta.' });
+            });
+    }
+    
+                
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    // Controlador para mostrar el historial de ventas
+    function historialVentas(req, res) {
+        const query = `
+            SELECT v.id_venta, v.fecha_venta, 
+                   IFNULL(m.nombre, 'Medicamento eliminado') AS medicamento,
+                   v.cantidad, v.precio_unitario, v.total,
+                   IFNULL(u.nombre, 'Sin vendedor') AS vendedor,
+                   IFNULL(c.nombre, 'Sin cliente') AS cliente
+            FROM ventas v
+            LEFT JOIN medicamentos m ON v.id_medicamento = m.id_medicamentos
+            LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
+            LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
+            ORDER BY v.fecha_venta DESC
+        `;
+        
+        conexion.query(query, function(err, ventas) {
+            if (err) {
+                console.error('Error en historialVentas:', err);
+                return res.status(500).render('error', { 
+                    error: 'Error al cargar el historial' 
+                });
+            }
+            
+            res.render('menu_admin/historial_ventas', { 
+                ventas: ventas,
+                titulo: 'Historial de Ventas'
+            });
+        });
+    }
+    
+
+
+// Controlador para buscar ventas
+function buscarVentas(req, res) {
+    const { fecha, cliente } = req.query;
+    let query = `
+        SELECT v.id_venta, v.fecha_venta, 
+               IFNULL(m.nombre, 'Medicamento eliminado') AS medicamento, 
+               v.cantidad, v.precio_unitario, v.total,
+               IFNULL(u.nombre, 'Sin vendedor') AS vendedor,
+               IFNULL(c.nombre, 'Sin cliente') AS cliente
+        FROM ventas v
+        LEFT JOIN medicamentos m ON v.id_medicamento = m.id_medicamentos
+        LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
+        LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
+        WHERE 1=1`;
+
+    const params = [];
+
+    if (fecha) {
+        query += ' AND DATE(v.fecha_venta) = ?';
+        params.push(fecha);
+    }
+
+    if (cliente) {
+        query += ' AND c.nombre LIKE ?';
+        params.push(`%${cliente}%`);
+    }
+
+    query += ' ORDER BY v.fecha_venta DESC';
+
+    conexion.query(query, params, function(err, ventas) {
+        if (err) {
+            console.error('Error en buscarVentas:', err);
+            return res.status(500).render('error', { 
+                error: 'Error en la búsqueda' 
+            });
+        }
+
+        res.render('menu_admin/historial_ventas', { 
+            ventas: ventas,
+            titulo: 'Resultados de Búsqueda',
+            criterios: { fecha, cliente }
+        });
+    });
+}
+
+
+
+
+
+
+
+
+function eliminarVenta(req, res) {
+    const id_venta = req.params.id_venta;
+    
+    const query = 'DELETE FROM ventas WHERE id_venta = ?';
+
+    conexion.query(query, [id_venta], (err) => {
+        if (err) {
+            console.error('Error al eliminar la venta:', err);
+            return res.status(500).send('Error al eliminar la venta');
+        }
+        
+        // Obtener las ventas actualizadas después de eliminar
+        conexion.query('SELECT * FROM ventas ORDER BY fecha_venta DESC', (err, ventas) => {
+            if (err) {
+                console.error('Error al cargar ventas:', err);
+                return res.status(500).send('Error al cargar el historial');
+            }
+
+            // Renderizar con los datos actualizados
+            res.render('menu_admin/historial_ventas', { 
+                ventas: ventas.map(v => ({
+                    ...v,
+                    // Asegurar formato de números (por si acaso)
+                    precio_unitario: parseFloat(v.precio_unitario),
+                    total: parseFloat(v.total)
+                }))
+            });
+        });
+    });
+}
+
+
 module.exports = {
     inicio_admin,
 
@@ -896,9 +1496,20 @@ module.exports = {
 
     venta_medicamentos,
     venta_medicamentos_vista,
+    historialVentas,
+    buscarVentas,
+
 
     buscarMedicamento,
     eliminarMedicamento,
     actualizarMedicamento,
-    editarMedicamento
+    editarMedicamento,
+
+
+    tabla_medicamentos,
+    tabla_clientes,
+    tabla_proveedores,
+    formulario,
+
+    eliminarVenta
 };

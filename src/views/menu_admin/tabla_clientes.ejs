@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/tabla_clientes.css">
+    <title>Clientes</title>
+</head>
+<body>
+    <div class="content">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Receta</th>
+                        <th>Nombre</th>
+                        <th>Apellido Paterno</th>
+                        <th>Apellido Materno</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (clientes && clientes.length > 0) { %>
+                        <% clientes.forEach(cliente => { %>
+                            <tr>
+                                <td><%= cliente.receta %></td>
+                                <td><%= cliente.nombre %></td>
+                                <td><%= cliente.apellido_paterno %></td>
+                                <td><%= cliente.apellido_materno %></td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="5">No hay clientes para mostrar</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+        <a href="/menu_admin/inicio_admin" class="btn-guardar" target="_blank">Regresar</a>
+    </div> 
+</body>
+</html>

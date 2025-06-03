@@ -1,5 +1,4 @@
 const mysql = require('mysql');
-
 const conexion = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -12,8 +11,7 @@ conexion.connect((err) => {
         console.error('Error conectando a la base de datos:', err.stack);
         return;
     }
-    console.log('BASE DE DATOS CONECTADA id:', conexion.threadId);
+    console.log('BASE DE DATOS CONECTADA');
 });
 
 module.exports = conexion;
-

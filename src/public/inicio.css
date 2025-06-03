@@ -3,14 +3,14 @@ body {
     background-color: #e3e1fc;
     margin: 0;
     padding: 0;
-    height: 100vh;
+    height: 100vh; /* Asegura que el body ocupe toda la altura de la pantalla */
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* Organiza los elementos en columna */
 }
 
 .container {
     display: flex;
-    flex: 1;
+    flex: 1; /* Ocupa todo el espacio disponible */
     flex-direction: column; /* Cambia a columna en móviles */
 }
 
@@ -71,45 +71,69 @@ body {
     flex-direction: column;
 }
 
-/* Table Styles */
-.table-container {
-    flex: 1;
-    border: 1px solid #ccc;
-    border-radius: 0px;
-    background-color: #f9f9f9;
-    margin-bottom: 5px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    overflow-x: auto; /* Permite el desplazamiento horizontal */
-    max-height: 500px; /* Altura máxima para el contenedor de la tabla */
-    overflow-y: auto; /* Permite el desplazamiento vertical */
+/* Dashboard Styles */
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr); /* 1 columna en móviles */
+    gap: 15px; /* Espacio reducido entre tarjetas */
+    margin-top: 10px;
 }
 
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(255, 255, 255);
+    border-radius: 10px;
+    padding: 20px; /* Padding reducido en móviles */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+    height: auto; /* Altura automática en móviles */
+}
+
+.card.blue {
+    background-color: #2980b9;
+}
+
+.card.green {
+    background-color: #27ae60;
+}
+
+.card.orange {
+    background-color: #e67e22;
+}
+
+.card.red {
+    background-color: #c0392b;
+}
+
+.card:hover {
+    transform: translateY(-5px); /* Efecto hover más sutil en móviles */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos para la tabla */
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px; /* Tamaño de fuente reducido en móviles */
-    min-width: 600px; /* Ancho mínimo para evitar que la tabla se comprima demasiado */
+    margin: 15px 0;
+    font-size: 16px; /* Tamaño de fuente más pequeño en móviles */
+    text-align: left;
 }
 
-table thead {
+table thead tr {
     background-color: #009879;
     color: white;
     text-align: left;
     font-weight: bold;
 }
 
-table thead th {
-    padding: 11px;
-    border-bottom: 2px solid #ddd;
-}
-
-table tbody tr {
+table th, table td {
+    padding: 10px; /* Padding reducido en móviles */
     border-bottom: 1px solid #ddd;
-}
-
-table tbody td {
-    padding: 10px;
 }
 
 table tbody tr:nth-of-type(even) {
@@ -125,22 +149,20 @@ table tbody tr:hover {
     cursor: pointer;
 }
 
-/* Button Styles */
-.btn-guardar {
-    padding: 10px 20px; /* Padding reducido en móviles */
-    font-size: 14px;
-    border-radius: 50px;
-    background-color: #27ae60;
-    color: rgb(255, 255, 255);
+/* Estilos para los enlaces */
+a {
     text-decoration: none;
-    display: block;
-    margin: 10px auto; /* Margen reducido en móviles */
-    text-align: center;
-    width: fit-content;
+    color: #ffffff;
 }
 
-.btn-guardar:hover {
-    background-color: #218c54;
+a:hover {
+    text-decoration: underline;
+}
+
+/* Estilos para el título */
+.titulo {
+    font-size: 20px; /* Tamaño de fuente más pequeño en móviles */
+    font-weight: bold;
 }
 
 /* Media Queries para tablets */
@@ -158,37 +180,31 @@ table tbody tr:hover {
         padding: 20px; /* Padding aumentado en tablets */
     }
 
-    table {
-        font-size: 16px; /* Tamaño de fuente aumentado en tablets */
+    .dashboard {
+        grid-template-columns: repeat(2, 1fr); /* 2 columnas en tablets */
     }
 
-    .btn-guardar {
-        padding: 10px 50px; /* Padding aumentado en tablets */
+    .card {
+        padding: 30px; /* Padding aumentado en tablets */
+        height: 200px; /* Altura fija en tablets */
+    }
+
+    .titulo {
+        font-size: 24px; /* Tamaño de fuente más grande en tablets */
     }
 }
 
 /* Media Queries para escritorios */
 @media (min-width: 1024px) {
-    .sidebar nav ul li a {
-        font-size: 18px; /* Tamaño de fuente aumentado en escritorios */
+    .dashboard {
+        grid-template-columns: repeat(2, 1fr); /* 2 columnas en escritorios */
     }
 
-    table {
-        font-size: 18px; /* Tamaño de fuente aumentado en escritorios */
+    .card {
+        padding: 33px; /* Padding aumentado en escritorios */
     }
 
-    .btn-guardar {
-        padding: 10px 100px; /* Padding aumentado en escritorios */
-    }
-}
-
-/* Media Queries para pantallas pequeñas */
-@media (max-width: 768px) {
-    .table-container {
-        max-height: 300px; /* Altura reducida para pantallas pequeñas */
-    }
-
-    table {
-        font-size: 12px; /* Tamaño de fuente reducido en móviles */
+    .titulo {
+        font-size: 28px; /* Tamaño de fuente más grande en escritorios */
     }
 }

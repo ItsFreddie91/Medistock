@@ -6,148 +6,114 @@
     <title>Panel de Administración - MediStock</title>
     <link rel="stylesheet" href="/venta.css">
 </head>
-    <body>
-        <div class="container">
-            <aside class="sidebar">
-                <div class="logo"></div>
-                <br>
-                <br>
-
-                    <nav>
-                    <ul>
-                        <li>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo"></div>
+            <nav>
+                <ul>
+                    <li>
+                        <a href="/menu_admin/inicio_admin">
                             <img width="40" height="40" src="/icons/icons2.png" alt="user" class="menu-icon"/>
-                            <a href="/menu_admin/inicio_admin">Inicio</a>
-                        </li>
-                        <li>
+                            Inicio
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/menu_admin/datos_medicamentos_admin">
                             <img width="40" height="40" src="/icons/icons3.png" alt="user" class="menu-icon"/>
-                            <a href="/menu_admin/datos_medicamentos_admin">Datos de Medicamentos</a>
-                        </li>
-                        <li>
+                            Datos de Medicamentos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/menu_admin/medicamentos_admin">
                             <img width="40" height="40" src="/icons/icons4.png" alt="user" class="menu-icon"/>
-                            <a href="/menu_admin/medicamentos_admin">Registro de Medicamentos</a>
-                        </li>
-                        <li>
+                            Registro de Medicamentos
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/menu_admin/clientes_admin">
                             <img width="40" height="40" src="/icons/iconusuario.png" alt="user" class="menu-icon"/>
-                            <a href="/menu_admin/clientes_admin">Clientes</a>
-                        </li>
-                        <li>
+                            Clientes
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/menu_admin/proveedores_admin">
                             <img width="40" height="40" src="/icons/icons5.png" alt="user" class="menu-icon"/>
-                            <a href="/menu_admin/proveedores_admin">Proveedores</a>
-                        </li>
-                        <li>
+                            Proveedores
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/menu_admin/administrar_usuarios">
                             <img width="40" height="40" src="/icons/iconadministra.png" alt="user" class="menu-icon"/>
-                            <a href="/menu_admin/administrar_usuarios">Administrar Usuarios</a>
-                        </li>
-                        <li>
+                            Administrar Usuarios
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/menu_admin/venta" class="active">
                             <img width="40" height="40" src="/icons/compra.png" alt="user" class="menu-icon"/>
-                            <a href="/menu_admin/venta">Venta</a>
-                        </li>
-                        <li>
+                            Venta
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/">
                             <img width="40" height="40" src="/icons/cerrar-sesion.png" alt="user" class="menu-icon"/>
-                            <a href="/">Cerrar Sesion</a>
-                        </li>  
-                    </ul>
-                </nav>
-            </aside>
-            <main class="content">
-                <section id="agregar-medicamentos" class="section">
-                        <h2>Venta de Medicamentos</h2>
-                        <form id="formVenta" method="POST">
-                            <label for="medicamento">Seleccionar Medicamento:</label>
-                            <select id="medicamento" name="medicamento" required>
-                                <% if (medicamentos && medicamentos.length > 0) { %>
-                                    <% medicamentos.forEach(medicamento => { %>
-                                        <option value="<%= medicamento.id_medicamentos %>" data-precio="<%= medicamento.precio %>">
-                                            <%= medicamento.nombre %> (Disponibles: <%= medicamento.cantidad %> - Precio: $<%= medicamento.precio %>)
-                                        </option>
-                                    <% }); %>
-                                <% } else { %>
-                                    <option disabled>No hay medicamentos disponibles</option>
-                                <% } %>
-                            </select>
-                            <br><br>
-                            <label for="cantidad">Cantidad a Vender:</label>
-                            <input type="number" id="cantidad" name="cantidad" min="1" required>
-                            <br><br>
-                            <button type="button" id="btnAgregar" class="btn-guardar">Agregar a la Venta</button>
-                        </form>
-                        
-                        <h3>Medicamentos Seleccionados:</h3>
-                        <ul id="listaMedicamentos"></ul>
-                        
-                        <p>Total a Pagar: $<span id="total">0.00</span></p>
-                        <br><br>
-                        <button type="button" id="btnRealizarVenta" class="btn-guardar">Realizar Venta</button>
-                </section>
-            </main>
-        </div>
-    </body>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const selectMedicamento = document.getElementById('medicamento');
-            const inputCantidad = document.getElementById('cantidad');
-            const btnAgregar = document.getElementById('btnAgregar');
-            const listaMedicamentos = document.getElementById('listaMedicamentos');
-            const totalElement = document.getElementById('total');
-            const btnRealizarVenta = document.getElementById('btnRealizarVenta');
-    
-            let medicamentosSeleccionados = [];
-            let total = 0;
-    
-            btnAgregar.addEventListener('click', function() {
-                const medicamentoId = selectMedicamento.value;
-                const nombreMedicamento = selectMedicamento.selectedOptions[0].textContent;
-                const precio = parseFloat(selectMedicamento.selectedOptions[0].getAttribute('data-precio'));
-                const cantidad = parseInt(inputCantidad.value, 10);
-    
-                if (!medicamentoId || cantidad < 1) {
-                    return; // Validar que se ha seleccionado un medicamento y una cantidad válida
-                }
-    
-                const medicamento = {
-                    id: medicamentoId,
-                    nombre: nombreMedicamento,
-                    precio: precio,
-                    cantidad: cantidad
-                };
-    
-                medicamentosSeleccionados.push(medicamento);
-                total += precio * cantidad;
-    
-                const listItem = document.createElement('li');
-                listItem.textContent = `${medicamento.nombre} - Cantidad: ${medicamento.cantidad} - Precio: $${(medicamento.precio * medicamento.cantidad).toFixed(2)}`;
-                listaMedicamentos.appendChild(listItem);
-    
-                totalElement.textContent = total.toFixed(2);
-    
-                // Resetear campos
-                selectMedicamento.selectedIndex = 0;
-                inputCantidad.value = 1;
-            });
-    
-            btnRealizarVenta.addEventListener('click', function() {
-                fetch('/menu_admin/venta', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ medicamentos: medicamentosSeleccionados })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Venta realizada con éxito.');
-                        location.reload(); // Recargar la página para limpiar la selección
-                    } else {
-                        alert('Ocurrió un error al realizar la venta.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Ocurrió un error al realizar la venta.');
-                });
-            });
-        });
-    </script>
-            </html>
+                            Cerrar Sesión
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="content">
+            <section id="agregar-medicamentos" class="section">
+                <h2>Venta de Medicamentos</h2>
+                <form id="formVenta" method="POST">
+                    <label for="cliente">Seleccionar Cliente:</label>
+                    <select id="cliente" name="cliente" required>
+                        <option value="" disabled selected>Selecciona un cliente</option>
+                        <% if (clientes && clientes.length > 0) { %>
+                            <% clientes.forEach(cliente => { %>
+                                <option value="<%= cliente.id_clientes %>">
+                                    <%= cliente.nombre %> <%= cliente.apellido_paterno %> <%= cliente.apellido_materno %>
+                                </option>
+                            <% }); %>
+                        <% } else { %>
+                            <option disabled>No hay clientes disponibles</option>
+                        <% } %>
+                    </select>
+
+                    <label for="medicamento">Seleccionar Medicamento:</label>
+                    <select id="medicamento" name="medicamento" required>
+                        <option value="" disabled selected>Selecciona un medicamento</option>
+                        <% if (medicamentos && medicamentos.length > 0) { %>
+                            <% medicamentos.forEach(medicamento => { %>
+                                <option value="<%= medicamento.id_medicamentos %>" data-precio="<%= medicamento.precio %>">
+                                    <%= medicamento.nombre %> (Disponibles: <%= medicamento.cantidad %> - Precio: $<%= medicamento.precio %>)
+                                </option>
+                            <% }); %>
+                        <% } else { %>
+                            <option disabled>No hay medicamentos disponibles</option>
+                        <% } %>
+                    </select>
+                    <br><br>
+                    <label for="cantidad">Cantidad a Vender:</label>
+                    <input type="number" id="cantidad" name="cantidad" min="1" required>
+                    <br><br>
+                    <button type="button" id="btnAgregar" class="btn-guardar">Agregar a la Venta</button>
+                </form>
+                
+                <h3>Medicamentos Seleccionados:</h3>
+                <ul id="listaMedicamentos"></ul>
+                
+                <p>Total a Pagar: $<span id="total">0.00</span></p>
+                <br><br>
+                <button type="button" id="btnRealizarVenta" class="btn-guardar">Realizar Venta</button>
+                <a href="/menu_admin/historial_ventas" class="btn-historial">
+                    Historial Ventas
+                </a>
+            </section>
+
+        </main>
+    </div>
+    <script src="/js/venta.js"></script>
+</body>
+</html>

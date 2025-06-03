@@ -50,15 +50,6 @@ body {
     padding-left: 15px;
 }
 
-.sidebar nav a.active {
-    background-color: #495c79; /* Color de fondo del seleccionado */
-    font-weight: bold;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
 .menu-icon {
     margin-right: 10px;
 }
@@ -170,7 +161,7 @@ table tbody tr:hover {
 /* Media Queries para escritorios */
 @media (min-width: 1024px) {
     .sidebar nav ul li a {
-        font-size: 18px; /* Tamaño de fuente aumentado en escritorios */
+        font-size: 20px; /* Tamaño de fuente aumentado en escritorios */
     }
 
     table {

@@ -10,63 +10,80 @@
         <div class="container">
             <aside class="sidebar">
                 <div class="logo"></div>
-                <br>
-                <br>
                 <nav>
                     <ul>
-                        <li>
-                            <img width="40" height="40" src="/icons/icons2.png" alt="user" class="menu-icon"/>
-                            <a href="/menu_admin/inicio_admin">Inicio</a>
-                        </li>
-                        <li>
-                            <img width="40" height="40" src="/icons/icons3.png" alt="user" class="menu-icon"/>
-                            <a href="/menu_admin/datos_medicamentos_admin">Datos de Medicamentos</a>
-                        </li>
-                        <li>
-                            <img width="40" height="40" src="/icons/icons4.png" alt="user" class="menu-icon"/>
-                            <a href="/menu_admin/medicamentos_admin">Registro de Medicamentos</a>
-                        </li>
-                        <li>
-                            <img width="40" height="40" src="/icons/iconusuario.png" alt="user" class="menu-icon"/>
-                            <a href="/menu_admin/clientes_admin">Clientes</a>
-                        </li>
-                        <li>
-                            <img width="40" height="40" src="/icons/icons5.png" alt="user" class="menu-icon"/>
-                            <a href="/menu_admin/proveedores_admin">Proveedores</a>
-                        </li>
-                        <li>
-                            <img width="40" height="40" src="/icons/iconadministra.png" alt="user" class="menu-icon"/>
-                            <a href="/menu_admin/administrar_usuarios">Administrar Usuarios</a>
-                        </li>
-                        <li>
-                            <img width="40" height="40" src="/icons/compra.png" alt="user" class="menu-icon"/>
-                            <a href="/menu_admin/venta">Venta</a>
-                        </li>
-                        <li>
-                            <img width="40" height="40" src="/icons/cerrar-sesion.png" alt="user" class="menu-icon"/>
-                            <a href="/">Cerrar Sesion</a>
-                        </li>
-                    </ul>
+                        <ul>
+                            <li>
+                                <a href="/menu_admin/inicio_admin" class="active">
+                                    <img width="40" height="40" src="/icons/icons2.png" alt="user" class="menu-icon"/>
+                                    Inicio
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/datos_medicamentos_admin" >
+                                    <img width="40" height="40" src="/icons/icons3.png" alt="user" class="menu-icon"/>
+                                    Datos de Medicamentos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/medicamentos_admin" >
+                                    <img width="40" height="40" src="/icons/icons4.png" alt="user" class="menu-icon"/>
+                                    Registro de Medicamentos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/clientes_admin" >
+                                    <img width="40" height="40" src="/icons/iconusuario.png" alt="user" class="menu-icon"/>
+                                    Clientes
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/proveedores_admin" >
+                                    <img width="40" height="40" src="/icons/icons5.png" alt="user" class="menu-icon"/>
+                                    Proveedores
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/administrar_usuarios" >
+                                    <img width="40" height="40" src="/icons/iconadministra.png" alt="user" class="menu-icon"/>
+                                    Administrar Usuarios
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/venta">
+                                    <img width="40" height="40" src="/icons/compra.png" alt="user" class="menu-icon"/>
+                                    Venta
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/">
+                                    <img width="40" height="40" src="/icons/cerrar-sesion.png" alt="user" class="menu-icon"/>
+                                    Cerrar Sesión
+                                </a>
+                            </li>
+                        </ul>                    </ul>
                 </nav>
             </aside>
 
             <main class="content">
                 <section class="dashboard">
-                    <a href="/menu_admin/clientes_admin" class="card blue">
-                        <p class="titulo">Historial</p>
+                    <a href="/menu_admin/tabla_clientes" class="card blue">
+                        <p class="titulo">Historial Clientes</p>
                     </a>
-                    <a href="/menu_admin/medicamentos_admin" class="card green">
-                        <p class="titulo">Datos de entrada de Medicamentos</p>
-                    </a>
-                    <a href="/menu_admin/datos_medicamentos_admin" class="card orange">
+                    <a href="/menu_admin/tabla_medicamentos" class="card green">
                         <p class="titulo">Stock Medicamentos</p>
                     </a>
-                    <a href="/menu_admin/proveedores_admin" class="card red">
+                    <a href="/menu_admin/datos_medicamentos_admin" class="card orange">
+                        <p class="titulo">Reporte Medicamentos</p>
+                    </a>
+                    <a href="/menu_admin/tabla_proveedores" class="card red">
                         <p class="titulo">Proveedores</p>
                     </a>
                 </section>
             </main>
         </div>
+
+
 
         <!-- Scripts para mostrar alertas -->
         <script>
@@ -90,10 +107,6 @@
                 }, 500); // Retraso de 500 ms (medio segundo)
             });
         </script>
-        
-        
-        
-
-        
+        <!-- <script>src="js/sombreado"</script> -->
     </body>
 </html>

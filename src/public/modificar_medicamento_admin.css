@@ -29,7 +29,7 @@ form label {
 
 form input,
 form select {
-    width: 100%;
+    width: 97%;
     padding: 10px;
     margin-top: 5px;
     border: 1px solid #cccccc;
@@ -45,7 +45,7 @@ form select:focus {
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 0px;
 }
 
 button {

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/tabla_clientes.css">
+    <title>Lista de Proveedores</title>
+</head>
+<body>
+    <div class="content">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Dirección</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (proveedores && proveedores.length > 0) { %>
+                        <% proveedores.forEach(proveedor => { %>
+                            <tr>
+                                <td><%= proveedor.nombre %></td>
+                                <td><%= proveedor.direccion %></td>
+                                <td><%= proveedor.telefono %></td>
+                                <td><%= proveedor.correo %></td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="5">No hay proveedores para mostrar</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+        <a href="/menu_admin/inicio_admin" class="btn-guardar" target="_blank">Regresar</a>
+    </div> 
+</body>
+</html>

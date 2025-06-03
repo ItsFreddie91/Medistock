@@ -24,16 +24,14 @@
 
             <label for="presentation_id">Presentación:</label>
             <select name="presentation_id" id="presentation_id" class="form-group select" required>
-                <% presentaciones.forEach(presentacion => { %>
-                    <option value="<%= presentacion.id_presentacion %>" 
-                        <%= presentacion.id_presentacion === medicamento.presentation_id ? 'selected' : '' %> >
-                        <%= presentacion.presentacion %>
-                    </option>
-                <% }) %>
+                <option value="" disabled selected>Selecciona una opción</option>
+                <option value="1">Caja</option>
+                <option value="2">Frasco</option>
             </select>
 
             <label for="controlado_id">Controlado:</label>
             <select name="controlado_id" id="controlado_id" required>
+                <option value="" disabled selected>Selecciona una Opcion</option>
                 <% controlados.forEach(controlado => { %>
                     <option value="<%= controlado.id_controlado %>" 
                         <%= controlado.id_controlado === medicamento.controlado_id ? 'selected' : '' %> >
@@ -44,6 +42,7 @@
 
             <label for="proveedores_id">Proveedores:</label>
             <select name="proveedores_id" id="proveedores_id" required>
+                <option value="" disabled selected>Selecciona una Opcion</option>
                 <% proveedores.forEach(proveedor => { %>
                     <option value="<%= proveedor.id_proveedor %>" 
                         <%= proveedor.id_proveedor === medicamento.proveedores_id ? 'selected' : '' %> >

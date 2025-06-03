@@ -151,11 +151,10 @@ table tbody tr:hover {
 
     .sidebar {
         width: 250px; /* Ancho fijo para la barra lateral */
-        height: 100vh; /* Altura completa */
     }
 
     .content {
-        padding: 20px; /* Padding aumentado en tablets */
+        padding: 4px; /* Padding aumentado en tablets */
     }
 
     table {
@@ -170,7 +169,7 @@ table tbody tr:hover {
 /* Media Queries para escritorios */
 @media (min-width: 1024px) {
     .sidebar nav ul li a {
-        font-size: 18px; /* Tamaño de fuente aumentado en escritorios */
+        font-size: 20px; /* Tamaño de fuente aumentado en escritorios */
     }
 
     table {

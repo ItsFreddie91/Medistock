@@ -12,9 +12,12 @@
         <thead>
             <tr>
                 <th>Nombre</th>
+                <th>Cantidad</th>
                 <th>Precio</th>
-                <th>Stock</th>
-                <th>Caducidad</th>
+                <th>Fecha de Caducidad</th>
+                <th>Presentación</th>
+                <th>Controlado</th>
+                <th>Proveedor</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -23,12 +26,15 @@
                 <% medicamentos.forEach(medicamento => { %>
                     <tr>
                         <td><%= medicamento.nombre %></td>
-                        <td><%= medicamento.precio %></td>
                         <td><%= medicamento.cantidad %></td>
-                        <td><%= medicamento.fecha_caducidad %></td>
+                        <td>$<%= medicamento.precio %></td>
+                        <td><%= medicamento.fecha_caducidad ? medicamento.fecha_caducidad : 'Sin fecha' %></td>
+                        <td><%= medicamento.nombre_presentacion || 'Sin presentación' %></td>
+                        <td><%= medicamento.nombre_controlado %></td>
+                        <td><%= medicamento.nombre_proveedor || 'Proveedor eliminado' %></td>
                         <td class="button-container">
-                            <a href="/menu/modificar_medicamento/<%= medicamento.id_medicamentos %>" class="edit-button">Editar</a>
-                            <form action="/menu/eliminar_medicamento/<%= medicamento.id_medicamentos %>?nombre=<%= nombreBuscado %>" method="post" style="display:inline;">
+                            <a href="/menu_admin/modificar_medicamento/<%= medicamento.id_medicamentos %>" class="edit-button">Editar</a>
+                            <form action="/menu_admin/eliminar_medicamento/<%= medicamento.id_medicamentos %>?nombre=<%= nombreBuscado %>" method="post" style="display:inline;">
                                 <button type="submit" class="delete-button">Eliminar</button>
                             </form>
                         </td>
@@ -36,7 +42,7 @@
                 <% }); %>
             <% } else { %>
                 <tr>
-                    <td colspan="6">No se encontraron medicamentos con ese criterio de búsqueda.</td>
+                    <td colspan="9">No se encontraron medicamentos con ese criterio de búsqueda.</td>
                 </tr>
             <% } %>
         </tbody>

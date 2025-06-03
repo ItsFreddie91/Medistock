@@ -1,30 +1,29 @@
+/* Estilos generales */
 body {
     font-family: Arial, sans-serif;
     background-color: #e3e1fc;
     margin: 0;
     padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .container {
     display: flex;
+    flex: 1;
+    flex-direction: column; /* Cambia a columna en móviles */
 }
 
-/* Sidebar Styles */
+/* Sidebar */
 .sidebar {
     background-color: #2c3e50;
     color: #ecf0f1;
-    width: 250px;
-    height: 100vh;
-    padding: 0px;
+    width: 100%; /* Ocupa todo el ancho en móviles */
+    height: auto; /* Altura automática en móviles */
+    padding: 10px;
     box-sizing: border-box;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-}
-
-.logo h2 {
-    color: #ecf0f1;
-    text-align: center;
-    margin-bottom: 50px;
 }
 
 .sidebar nav ul {
@@ -33,15 +32,16 @@ body {
 }
 
 .sidebar nav ul li {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .sidebar nav ul li a {
     color: #ecf0f1;
     text-decoration: none;
-    font-size: 18px;
-    display: block;
-    padding: 12px 15px;
+    font-size: 18px; /* Tamaño de fuente reducido en móviles */
+    display: flex;
+    align-items: center;
+    padding: 9px;
     border-radius: 100px;
     transition: background-color 0.3s, padding-left 0.3s;
 }
@@ -51,523 +51,208 @@ body {
     padding-left: 15px;
 }
 
-.sidebar nav ul li a.active {
-    background-color: #2980b9;
-    padding-left: 15px;
+.sidebar nav a.active {
+    background-color: #495c79; /* Color de fondo del seleccionado */
+    font-weight: bold;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-/* Content Styles */
+.menu-icon {
+    margin-right: 10px;
+}
+
+/* Content */
 .content {
     flex: 1;
-    padding: 0px;
+    padding: 0px; /* Añadido padding para móviles */
 }
 
-/* Dashboard Styles */
-.dashboard {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 columnas */
-    gap: 25px;
-    margin-top: 2px;
-}
-
-.card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: white;
-    border-radius: 10px;
-    padding: 35px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
-    text-align: center;
-    height: 200px;
-}
-
-.card h3, .card p {
-    color: white;
-}
-
-.card.blue {
-    background-color: #2980b9;
-}
-
-.card.green {
-    background-color: #27ae60;
-}
-
-.card.orange {
-    background-color: #e67e22;
-}
-
-.card.red {
-    background-color: #c0392b;
-}
-
-.card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 300px rgba(0, 0, 0, 0.2);
-}
-
-/* Form Styles */
-    form {
-        background-color: #ffffffa0;
-        justify-content: center; /* Centra horizontalmente */
-        align-items: center;  
-        padding: 20px;
-        border-radius: 20px;
-        box-shadow: 19px 10px 10px rgba(0, 0, 0, 0.13);
-        margin: 0px;
-        max-width: none; /* Eliminar la restricción de ancho máximo */
-        width: 204%; /* Ocupa todo el ancho disponible */
-        box-sizing: border-box; /* Asegura que el padding y el border no superen el ancho del contenedor */
-    }
-
-    form label {
-        display: block;
-        margin-bottom: 8px;
-        color: #000000;
-        font-weight: bold;
-    }
-
-    form input[type="text"],
-    form select {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 20px;
-        border-radius: 500px;
-        border: 2px solid  #2c3e50;
-        box-sizing: border-box;
-        
-    }
-
-    form input[type="number"],
-    form select {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 20px;
-        border-radius: 500px;
-        border: 2px solid  #2c3e50;
-        box-sizing: border-box;
-        
-    }
-
-    form input[type="date"],
-    form select {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 20px;
-        border-radius: 500px;
-        border: 2px solid  #2c3e50;
-        box-sizing: border-box;
-        
-    }
-
-    .form-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 20px; /* Espacio entre los botones */
-        margin-top: 2px; /* Espacio arriba de los botones */
-    }
-
-    .form-buttons button {
-        color: rgb(0, 0, 0);
-        padding: 10px 50px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .form-buttons button:hover {
-        background-color: #2020be;
-    }
-
-    .centrar_form {
-        padding: 19px;
-        border-radius: 20px;
-        margin: 12px;
-        max-width: none; /* Eliminar la restricción de ancho máximo */
-        width: 60%; /* Ocupa todo el ancho disponible */
-        box-sizing: border-box; 
-        margin-left: 270px;
-    }
-
-    .form-group {
-        display: flex;
-        align-items: center; /* Alinea verticalmente al centro */
-        margin-bottom: 1px;
-    }
-
-    .btn-guardar {
-        padding: 5px 10px;
-        font-size: 14px;
-        border-radius: 5px;
-        background-color: #27ae60;
-        color: rgb(255, 255, 255);
-        border: none;
-    }
-
-    .btn-cancelar {
-        padding: 5px 10px;
-        font-size: 14px;
-        border-radius: 5px;
-        background-color: #ae2727;
-        color: rgb(255, 255, 255);
-        border: none;
-    }
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Estilos para la barra superior */
+/* Barra de búsqueda */
 .layout-superior-derecha {
-    background-color: #4f4e5a; /* Color de fondo */
+    background-color: #4f4e5a;
     color: white;
-    padding: 5px; /* Menos padding para que sea más compacto */
-    font-size: 16px; /* Tamaño de fuente reducido */
+    padding: 5px;
+    font-size: 16px;
     font-weight: bold;
     text-align: center;
-    max-width: 99%; /* Limita el ancho máximo para que no ocupe todo el espacio */
-    border-radius: 0px; /* Bordes redondeados para un aspecto más elegante */
+    max-width: 100%; /* Ancho completo en móviles */
+    border-radius: 0px;
 }
 
-/* Contenedor del formulario y etiqueta */
 .MediStock-a_la_derecha {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Alinea horizontalmente y distribuye el espacio */
-    gap: 8px; /* Espacio entre elementos reducido */
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en móviles */
 }
 
-/* Estilos específicos para el label */
-.medistock-label {
-    font-size: 16px; /* Ajusta el tamaño de fuente del label */
-    color: white; /* Mantén el texto blanco para la visibilidad */
-    margin-right: 10px; /* Añade espacio a la derecha del label */
-}
-
-/* Estilos para el formulario de búsqueda */
 .buscar-cliente-form {
     background-color: #4f4e5a;
     box-shadow: 1px 1px 1px rgba(78, 78, 87, 0.829);
     display: flex;
     align-items: center;
     margin-bottom: 0px;
-    gap: 15px; /* Espacio reducido entre el icono, input y botón */
+    gap: 10px; /* Espacio reducido en móviles */
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en móviles */
 }
 
-/* Estilos específicos para el icono del formulario de búsqueda */
+.medistock-label {
+    font-size: 16px;
+    color: white;
+    margin-right: 10px;
+}
+
 .buscar-cliente-icon {
-    width: 30px; /* Tamaño del icono más pequeño */
+    width: 30px;
     height: 30px;
 }
 
-/* Estilos específicos para el campo de entrada */
 .buscar-cliente-input {
-    padding: 5px; /* Reducción del padding interno */
-    font-size: 14px; /* Tamaño de fuente más pequeño */
-    border-radius: 5px; /* Bordes redondeados */
-    border: 1px solid #000000; /* Añadir un borde para resaltar el input */
-}
-
-/* Estilos específicos para el botón de búsqueda */
-.buscar-cliente-button {
-    padding: 5px 10px; /* Reduce el tamaño del botón */
-    font-size: 14px; /* Tamaño de fuente más pequeño */
-    border-radius: 5px; /* Bordes redondeados */
-    background-color: #27ae60; /* Color de fondo del botón */
-    color: rgb(255, 255, 255); /* Color del texto del botón */
-    border: none; /* Sin borde en el botón */
-}
-
-/* Estilo para el botón al pasar el cursor */
-.buscar-cliente-button:hover {
-    background-color: #5a6268; /* Color al pasar el cursor */
-}
-
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-    .boton-azul {
-        display: inline-block;
-        padding: 10px 20px;        /* Espacio interno */
-        color: #ffffff;            /* Color del texto en blanco */
-        background-color: #007bff; /* Color de fondo azul */
-        text-decoration: none;     /* Quitar subrayado */
-        border-radius: 5px;        /* Bordes redondeados */
-        font-size: 16px;           /* Tamaño de fuente */
-        transition: background-color 0.3s; /* Transición para el hover */
-    }
-    
-    /* Efecto hover */
-    .boton-azul:hover {
-        background-color: #0056b3; /* Color azul más oscuro al pasar el cursor */
-    }
-
-    .boton-guardar {
-        padding: 10px 20px;           /* Espacio interno */
-        color: #ffffff;               /* Color del texto en blanco */
-        background-color: #10b80a;    /* Color de fondo azul */
-        border: none;                 /* Sin borde */
-        border-radius: 5px;           /* Bordes redondeados */
-        font-size: 16px;              /* Tamaño de fuente */
-        cursor: pointer;              /* Cursor en forma de mano */
-        transition: background-color 0.3s; /* Transición suave en el hover */
-    }
-    
-    /* Efecto hover */
-    .boton-guardar:hover {
-        background-color: #10b618; /* Azul más oscuro al pasar el cursor */
-    }
-    
-    
-
-.centered-text {
-    text-align: center;
-    font-size: 36px; /* Ajusta el tamaño según lo necesites */
-    font-weight: bold;
-    font-family: "Helvetica", "Arial", sans-serif;
-}
-
-.titulo {
-    font-size: 24px; /* Aumenta el tamaño de la fuente */
-    font-weight: bold; /* Aplica negritas */
-}
-
-.center-text {
-    text-align: center;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Estilos para la tabla */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-    font-size: 18px;
-    text-align: left;
-}
-
-/* Estilo para los encabezados de la tabla */
-table thead tr {
-    background-color: #009879;
-    color: white;
-    text-align: left;
-    font-weight: bold;
-}
-
-table th, table td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #ddd;
-}
-
-/* Estilo para las filas alternas (zebra stripes) */
-table tbody tr:nth-of-type(even) {
-    background-color: #f3f3f3;
-}
-
-table tbody tr:nth-of-type(odd) {
-    background-color: #e9e9e9;
-}
-
-/* Estilo al pasar el mouse por encima de una fila */
-table tbody tr:hover {
-    background-color: #f1f1f1;
-    cursor: pointer;
-}
-
-/* Estilo para los enlaces de editar y eliminar */
-a {
-    text-decoration: none;
-    color: #009879;
-    font-weight: bold;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-/* CSS para el desplazamiento suave */
-html {
-    scroll-behavior: smooth;
-}
-
-/* Animación para la tabla */
-/* CSS para el cuadro fijo */
-.table-container {
-    max-height: 400px; /* Ajusta la altura según lo necesario */
-    overflow-y: auto; /* Permite el desplazamiento vertical */
-    border: 1px solid #ccc;
-    padding: 10px;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    margin-top: 20px;
-}
-
-/* Opcional: Estilo de la tabla */
-/* CSS para el cuadro fijo con menor altura */
-.table-container {
-    max-height: 310px; /* Altura reducida para el contenedor */
-    overflow-y: auto; /* Permite el desplazamiento vertical */
-    border: 1px solid #ccc;
-    padding: 10px;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    margin-top: 20px;
-}
-
-/* Estilos de la tabla */
-.table-container table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.table-container th,
-.table-container td {
     padding: 5px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+    border-radius: 12px;
+    border: 1px solid #000000;
+    flex: 1; /* Ocupa el espacio disponible */
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-ul {
-    list-style-type: none; /* Elimina los puntos de la lista */
-    padding: 20px; /* Elimina el padding de la lista */
+.btn-guardar {
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    background-color: #27ae60;
+    color: rgb(255, 255, 255);
+    border: none;
 }
 
-li {
-    display: flex; /* Hace que los elementos se alineen horizontalmente */
-    align-items: center; /* Centra verticalmente los elementos */
-    margin-bottom: 200px; /* Espacio entre los elementos de la lista */
+.buscar-cliente-button {
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    background-color: #27ae60;
+    color: rgb(255, 255, 255);
+    border: none;
 }
 
-.menu-icon {
-    margin-left: 20px; /* Espacio entre el enlace y el icono */
+.btn-guardar:hover {
+    background-color: #5a6268;
 }
 
-
-
-
-
-
-
-
-h1 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 20px;
+/* Formulario de registro */
+.form-container {
+    padding: 15px; /* Padding reducido en móviles */
+    border-radius: 20px;
+    margin: 10px; /* Margen reducido en móviles */
+    max-width: none;
+    width: 90%; /* Ancho reducido en móviles */
+    box-sizing: border-box;
+    margin-left: auto; /* Centrado en móviles */
+    margin-right: auto;
 }
 
-.table-responsive {
-    overflow-x: auto;
+.form-registro {
+    background-color: #ffffffa0;
+    padding: 20px; /* Padding reducido en móviles */
+    border-radius: 20px;
+    box-shadow: 19px 10px 10px rgba(0, 0, 0, 0.13);
+    width: 100%; /* Ocupa todo el ancho en móviles */
+    box-sizing: border-box;
 }
 
-table {
-    width: 100%;
-    max-width: 1200px;
-    margin: auto;
-    border-collapse: collapse;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    border-radius: 8px;
+.col {
+    display: flex;
+    flex-direction: column; /* Cambia a columna en móviles */
+    gap: 15px; /* Espacio entre columnas */
 }
 
-thead th {
-    background-color: #4CAF50;
-    color: #fff;
-    padding: 10px; /* Reduce el padding */
-    text-align: center;
+.col1, .col2 {
+    width: 100%; /* Ocupa todo el ancho en móviles */
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column; /* Cambia a columna en móviles */
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    color: #000000;
     font-weight: bold;
 }
 
-tbody td {
-    padding: 8px; /* Reduce el padding */
-    text-align: center;
-    border-bottom: 1px solid #ddd;
-    max-width: 150px;
-    word-wrap: break-word;
-    vertical-align: middle;
-    height: 50px; /* Ajusta la altura de las filas */
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 500px;
+    border: 2px solid #2c3e50;
+    box-sizing: border-box;
 }
 
-tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
+.form-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Espacio reducido entre botones en móviles */
+    margin-top: 2px;
 }
 
-tbody tr:hover {
-    background-color: #f1f1f1;
+.form-buttons button {
+    padding: 10px 20px; /* Padding reducido en móviles */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.form-buttons button:hover {
+    background-color: #2020be;
+}
+
+/* Media Queries para tablets */
+@media (min-width: 768px) {
+    .container {
+        flex-direction: row; /* Vuelve a la disposición horizontal en tablets */
+    }
+
+    .sidebar {
+        width: 250px; /* Ancho fijo para la barra lateral */
+        height: 100vh; /* Altura completa */
+    }
+
+    .content {
+        margin-left: 0px; /* Margen izquierdo para alinear con el sidebar */
+        padding: 0px; /* Padding aumentado en tablets */
+    }
+
+    .col {
+        flex-direction: row; /* Vuelve a la disposición horizontal en tablets */
+        gap: 20px; /* Espacio entre columnas */
+    }
+
+    .col1, .col2 {
+        width: 50%; /* Ancho reducido en tablets */
+    }
+
+    .form-registro {
+        padding: 30px; /* Padding aumentado en tablets */
+    }
+}
+
+/* Media Queries para escritorios */
+@media (min-width: 1024px) {
+    .form-container {
+        width: 70%; /* Ancho aumentado en escritorios */
+    }
+
+    .form-registro {
+        padding: 50px; /* Padding aumentado en escritorios */
+    }
+
+    .sidebar nav ul li a {
+        font-size: 18px; /* Tamaño de fuente aumentado en escritorios */
+    }
 }

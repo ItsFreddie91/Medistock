@@ -10,60 +10,76 @@
     <div class="container">
         <aside class="sidebar">
             <div class="logo"></div>
-            <br>
-            <br>
-
             <nav>
                 <ul>
                     <li>
-                        <img width="40" height="40" src="/icons/icons2.png" alt="user" class="menu-icon"/>
-                        <a href="/menu_admin/inicio_admin">Inicio</a>
+                        <a href="/menu_admin/inicio_admin">
+                            <img width="40" height="40" src="/icons/icons2.png" alt="user" class="menu-icon"/>
+                            Inicio
+                        </a>
                     </li>
                     <li>
-                        <img width="40" height="40" src="/icons/icons3.png" alt="user" class="menu-icon"/>
-                        <a href="/menu_admin/datos_medicamentos_admin">Datos de Medicamentos</a>
+                        <a href="/menu_admin/datos_medicamentos_admin">
+                            <img width="40" height="40" src="/icons/icons3.png" alt="user" class="menu-icon"/>
+                            Datos de Medicamentos
+                        </a>
                     </li>
                     <li>
-                        <img width="40" height="40" src="/icons/icons4.png" alt="user" class="menu-icon"/>
-                        <a href="/menu_admin/medicamentos_admin">Registro de Medicamentos</a>
+                        <a href="/menu_admin/medicamentos_admin" class="active">
+                            <img width="40" height="40" src="/icons/icons4.png" alt="user" class="menu-icon"/>
+                            Registro de Medicamentos
+                        </a>
                     </li>
                     <li>
-                        <img width="40" height="40" src="/icons/iconusuario.png" alt="user" class="menu-icon"/>
-                        <a href="/menu_admin/clientes_admin">Clientes</a>
+                        <a href="/menu_admin/clientes_admin">
+                            <img width="40" height="40" src="/icons/iconusuario.png" alt="user" class="menu-icon"/>
+                            Clientes
+                        </a>
                     </li>
                     <li>
-                        <img width="40" height="40" src="/icons/icons5.png" alt="user" class="menu-icon"/>
-                        <a href="/menu_admin/proveedores_admin">Proveedores</a>
+                        <a href="/menu_admin/proveedores_admin">
+                            <img width="40" height="40" src="/icons/icons5.png" alt="user" class="menu-icon"/>
+                            Proveedores
+                        </a>
                     </li>
                     <li>
-                        <img width="40" height="40" src="/icons/iconadministra.png" alt="user" class="menu-icon"/>
-                        <a href="/menu_admin/administrar_usuarios">Administrar Usuarios</a>
+                        <a href="/menu_admin/administrar_usuarios">
+                            <img width="40" height="40" src="/icons/iconadministra.png" alt="user" class="menu-icon"/>
+                            Administrar Usuarios
+                        </a>
                     </li>
                     <li>
-                        <img width="40" height="40" src="/icons/compra.png" alt="user" class="menu-icon"/>
-                        <a href="/menu_admin/venta">Venta</a>
+                        <a href="/menu_admin/venta">
+                            <img width="40" height="40" src="/icons/compra.png" alt="user" class="menu-icon"/>
+                            Venta
+                        </a>
                     </li>
                     <li>
-                        <img width="40" height="40" src="/icons/cerrar-sesion.png" alt="user" class="menu-icon"/>
-                        <a href="/">Cerrar Sesion</a>
+                        <a href="/">
+                            <img width="40" height="40" src="/icons/cerrar-sesion.png" alt="user" class="menu-icon"/>
+                            Cerrar Sesión
+                        </a>
                     </li>
                 </ul>
             </nav>
         </aside>
 
-            <main class="content">
-                <div class="layout-superior-derecha">
-                    <div class="MediStock-a_la_derecha">
-                        <label class="medistock-label">MediStock - Administrador</label>
-                        <form action="/menu_admin/buscar-medicamento" method="get" class="buscar-cliente-form">
-                            <img width="30" height="30" src="/icons/lupa.png" alt="user" class="menu-icon buscar-cliente-icon"/>
-                            <input type="text" name="nombre" placeholder="Buscar Medicamentos" class="buscar-cliente-input"/>
-                            <button type="submit" class="buscar-cliente-button">Buscar</button>
-                        </form>
-                    </div>
+        <main class="content">
+            <!-- Barra de búsqueda -->
+            <div class="layout-superior-derecha">
+                <div class="MediStock-a_la_derecha">
+                    <label class="medistock-label"> </label>
+                    <form action="/menu_admin/buscar-medicamento" method="get" class="buscar-cliente-form">
+                        <img width="30" height="30" src="/icons/lupa.png" alt="user" class="menu-icon buscar-cliente-icon"/>
+                        <input type="text" name="nombre" placeholder="Buscar un Medicamento" class="buscar-cliente-input"/>
+                        <button type="submit" class="buscar-cliente-button">Buscar</button>
+                    </form>
                 </div>
-            <section class="dashboard">
-                <form id="formulario-medicamento" action="/menu_admin/medicamentos_admin" method="POST">
+            </div>
+
+            <!-- Formulario de registro -->
+            <div class="form-container">
+                <form id="formulario-medicamento" action="/menu_admin/medicamentos_admin" method="POST" class="form-registro">
                     <h2 class="center-text">Agregar Medicamentos: </h2>
                     <div class="col">
                         <div class="col1">                     
@@ -77,7 +93,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Precio de Venta:</label>
-                                <input type="number" name="precio" required class="form-input">
+                                <input type="number" name="precio" required class="form-input" step="0.01">
                             </div>
                             <div class="form-group">
                                 <label>Fecha de Caducidad:</label>
@@ -116,39 +132,36 @@
                         </div>
                     </div>
                 </form>
-            </section>
+            </div>
         </main>
     </div>
     <script>
-        // Capturar el evento submit del formulario
-        document.getElementById('formulario-medicamento').addEventListener('submit', async (event) => {
-            event.preventDefault(); // Evita la recarga de la página
-            // Obtener los datos del formulario
-            const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData);
-            try {
-                // Enviar los datos al servidor
-                const response = await fetch('/menu_admin/medicamentos_admin', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                });
-                // Verificar si la respuesta fue exitosa
-                if (response.ok) {
-                    // Mostrar el mensaje de alerta
-                    alert('Medicamento registrado exitosamente!');
-                    // Limpiar el formulario
-                    event.target.reset();
-                } else {
-                    alert('Hubo un error al registrar el medicamento.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('No se pudo conectar con el servidor.');
-            }
+        
+document.getElementById('formulario-medicamento').addEventListener('submit', async (event) => {
+    event.preventDefault(); // Esto previene que el formulario se envíe dos veces
+
+    const formData = new FormData(event.target);
+    const data = Object.fromEntries(formData);
+    try {
+        const response = await fetch('/menu_admin/medicamentos_admin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
         });
+        if (response.ok) {
+            alert('Medicamento registrado exitosamente!');
+            event.target.reset();
+        } else {
+            alert('Hubo un error al registrar el medicamento.');
+        }
+    } catch (error) {
+        alert('Error al conectar con el servidor.');
+        console.error(error);
+    }
+});
+
     </script>
 </body>
 </html>

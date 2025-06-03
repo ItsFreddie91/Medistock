@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Ventas - MediStock</title>
+    <link rel="stylesheet" href="/css/historial.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            margin: 2px;
+        }
+
+        .content {
+            margin-left: 27px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #343a40;
+        }
+
+        /* Contenedor responsivo */
+        .tabla-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .tabla-ventas {
+            width: 100%;
+            min-width: 800px;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .tabla-ventas th, .tabla-ventas td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .tabla-ventas th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        .tabla-ventas tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .tabla-ventas tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .btn-regreso {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-regreso:hover {
+            background-color: #218838;
+        }
+
+        .btn-regreso:active {
+            background-color: #1e7e34;
+        }
+
+        .delete-button {
+            padding: 8px 12px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+
+        .delete-button:active {
+            background-color: #bd2130;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <main class="content">
+            <h2>Historial de Ventas</h2>
+
+            <% if (ventas && ventas.length > 0) { %>
+                <div class="tabla-responsive">
+                    <table class="tabla-ventas">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Medicamento</th>
+                                <th>Cantidad</th>
+                                <th>Precio Unitario</th>
+                                <th>Total</th>
+                                <th>Vendedor</th>
+                                <th>Cliente</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% ventas.forEach(venta => { %>
+                                <tr>
+                                    <td><%= new Date(venta.fecha_venta).toLocaleString() %></td>
+                                    <td><%= venta.medicamento %></td>
+                                    <td><%= venta.cantidad %></td>
+                                    <td>$<%= venta.precio_unitario.toFixed(2) %></td>
+                                    <td>$<%= venta.total.toFixed(2) %></td>
+                                    <td><%= venta.vendedor %></td>
+                                    <td><%= venta.cliente %></td>
+                                    <td>
+                                        <form action="historial_ventas/eliminar/<%= venta.id_venta %>" method="post" style="display:inline;">
+                                            <button type="submit" class="delete-button">Eliminar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <p>No hay registros de ventas</p>
+            <% } %>
+
+            <a href="/menu/venta" class="btn-regreso">Regresar</a>
+        </main>
+    </div>
+</body>
+</html>

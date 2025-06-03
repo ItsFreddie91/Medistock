@@ -11,7 +11,6 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Nombre</th>
                     <th>Dirección</th>
                     <th>Teléfono</th>
@@ -23,7 +22,6 @@
                 <% if (proveedores.length > 0) { %>
                     <% proveedores.forEach(proveedor => { %>
                         <tr>
-                            <td><%= proveedor.id_proveedores %></td>
                             <td><%= proveedor.nombre %></td>
                             <td><%= proveedor.direccion %></td>
                             <td><%= proveedor.telefono %></td>
