@@ -205,7 +205,7 @@ table tbody tr:hover {
 
     .sidebar {
         width: 250px;
-        height: 100vh;
+        height: 111vh;
         position: sticky;
         top: 0;
         order: 1;

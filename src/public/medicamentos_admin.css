@@ -220,7 +220,6 @@ body {
 
     .sidebar {
         width: 250px; /* Ancho fijo para la barra lateral */
-        height: 100vh; /* Altura completa */
     }
 
     .content {

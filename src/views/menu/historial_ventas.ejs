@@ -140,9 +140,9 @@
                                     <td><%= venta.vendedor %></td>
                                     <td><%= venta.cliente %></td>
                                     <td>
-                                        <form action="historial_ventas/eliminar/<%= venta.id_venta %>" method="post" style="display:inline;">
-                                            <button type="submit" class="delete-button">Eliminar</button>
-                                        </form>
+                                    <form action="/menu/historial_ventas/eliminar/<%= venta.id_venta %>" method="post" style="display:inline;">
+                                        <button type="submit" class="delete-button">Eliminar</button>
+                                    </form>
                                     </td>
                                 </tr>
                             <% }); %>

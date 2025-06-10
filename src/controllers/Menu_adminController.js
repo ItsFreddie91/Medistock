@@ -1323,61 +1323,6 @@ function actualizarMedicamento(req, res) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    // Controlador para mostrar el historial de ventas
-    function historialVentas(req, res) {
-        const query = `
-            SELECT v.id_venta, v.fecha_venta, 
-                   IFNULL(m.nombre, 'Medicamento eliminado') AS medicamento,
-                   v.cantidad, v.precio_unitario, v.total,
-                   IFNULL(u.nombre, 'Sin vendedor') AS vendedor,
-                   IFNULL(c.nombre, 'Sin cliente') AS cliente
-            FROM ventas v
-            LEFT JOIN medicamentos m ON v.id_medicamento = m.id_medicamentos
-            LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
-            LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
-            ORDER BY v.fecha_venta DESC
-        `;
-        
-        conexion.query(query, function(err, ventas) {
-            if (err) {
-                console.error('Error en historialVentas:', err);
-                return res.status(500).render('error', { 
-                    error: 'Error al cargar el historial' 
-                });
-            }
-            
-            res.render('menu_admin/historial_ventas', { 
-                ventas: ventas,
-                titulo: 'Historial de Ventas'
-            });
-        });
-    }
-    
-
-
 // Controlador para buscar ventas
 function buscarVentas(req, res) {
     const { fecha, cliente } = req.query;
@@ -1440,26 +1385,43 @@ function eliminarVenta(req, res) {
             console.error('Error al eliminar la venta:', err);
             return res.status(500).send('Error al eliminar la venta');
         }
-        
-        // Obtener las ventas actualizadas después de eliminar
-        conexion.query('SELECT * FROM ventas ORDER BY fecha_venta DESC', (err, ventas) => {
-            if (err) {
-                console.error('Error al cargar ventas:', err);
-                return res.status(500).send('Error al cargar el historial');
-            }
 
-            // Renderizar con los datos actualizados
-            res.render('menu_admin/historial_ventas', { 
-                ventas: ventas.map(v => ({
-                    ...v,
-                    // Asegurar formato de números (por si acaso)
-                    precio_unitario: parseFloat(v.precio_unitario),
-                    total: parseFloat(v.total)
-                }))
+        // 🔁 Redirige a la vista historial de ventas (donde se cargan bien los datos)
+        res.redirect('/menu_admin/historial_ventas');
+    });
+}
+
+
+    // Controlador para mostrar el historial de ventas
+function historialVentas(req, res) {
+    const query = `
+        SELECT v.id_venta, v.fecha_venta, 
+               IFNULL(m.nombre, 'Medicamento eliminado') AS medicamento,
+               v.cantidad, v.precio_unitario, v.total,
+               IFNULL(u.nombre, 'Sin vendedor') AS vendedor,
+               IFNULL(c.nombre, 'Sin cliente') AS cliente
+        FROM ventas v
+        LEFT JOIN medicamentos m ON v.id_medicamento = m.id_medicamentos
+        LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
+        LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
+        ORDER BY v.fecha_venta DESC
+    `;
+
+    conexion.query(query, function(err, ventas) {
+        if (err) {
+            console.error('Error en historialVentas:', err);
+            return res.status(500).render('error', { 
+                error: 'Error al cargar el historial' 
             });
+        }
+
+        res.render('menu_admin/historial_ventas', { 
+            ventas: ventas,
+            titulo: 'Historial de Ventas'
         });
     });
 }
+
 
 
 module.exports = {
