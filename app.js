@@ -4,9 +4,9 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const flash = require('connect-flash');
-const loginRoutes = require('./routes/login');
-const Menu_adminController = require('./routes/menu_admin'); 
-const Menu_Controller = require('./routes/menu'); 
+const loginRoutes = require('./src/routes/login');
+const Menu_adminController = require('./src/routes/menu_admin'); 
+const Menu_Controller = require('./src/routes/menu'); 
 const events = require('events');
 
 const app = express();
@@ -17,7 +17,7 @@ app.set('port', process.env.PORT || 5000);
 
 // Motor de plantillas EJS
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'src', 'views'));  // Corregido
 
 // Middleware
 app.use(session({
@@ -30,7 +30,7 @@ app.use(session({
 app.use(flash());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'src', 'public'))); // ✅
 
 // Rutas
 app.use('/login', loginRoutes);
