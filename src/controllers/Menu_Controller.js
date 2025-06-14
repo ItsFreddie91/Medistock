@@ -263,13 +263,13 @@ function vista_datos_medicamentos(req, res) {
              c.controlado AS nombre_controlado,
              IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
            FROM 
-             Medicamentos m
+             medicamentos m
            JOIN 
-             Presentacion p ON m.presentation_id = p.id_presentacion
+             presentacion p ON m.presentation_id = p.id_presentacion
            JOIN 
-             Controlado c ON m.controlado_id = c.id_controlado
+             controlado c ON m.controlado_id = c.id_controlado
            LEFT JOIN 
-             Proveedores pr ON m.proveedores_id = pr.id_proveedores
+             proveedores pr ON m.proveedores_id = pr.id_proveedores
            ORDER BY 
              m.id_medicamentos DESC
            LIMIT ?`
@@ -283,13 +283,13 @@ function vista_datos_medicamentos(req, res) {
              c.controlado AS nombre_controlado,
              IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
            FROM 
-             Medicamentos m
+             medicamentos m
            JOIN 
-             Presentacion p ON m.presentation_id = p.id_presentacion
+             presentacion p ON m.presentation_id = p.id_presentacion
            JOIN 
-             Controlado c ON m.controlado_id = c.id_controlado
+             controlado c ON m.controlado_id = c.id_controlado
            LEFT JOIN 
-             Proveedores pr ON m.proveedores_id = pr.id_proveedores
+             proveedores pr ON m.proveedores_id = pr.id_proveedores
            ORDER BY 
              m.id_medicamentos DESC`;
 
@@ -322,13 +322,13 @@ function post_datos_medicamentos(req, res) {
              c.controlado AS nombre_controlado,
              IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
            FROM 
-             Medicamentos m
+             medicamentos m
            JOIN 
-             Presentacion p ON m.presentation_id = p.id_presentacion
+             presentacion p ON m.presentation_id = p.id_presentacion
            JOIN 
-             Controlado c ON m.controlado_id = c.id_controlado
+             controlado c ON m.controlado_id = c.id_controlado
            LEFT JOIN 
-             Proveedores pr ON m.proveedores_id = pr.id_proveedores
+             proveedores pr ON m.proveedores_id = pr.id_proveedores
            ORDER BY 
              m.id_medicamentos DESC
            LIMIT ?`
@@ -342,13 +342,13 @@ function post_datos_medicamentos(req, res) {
              c.controlado AS nombre_controlado,
              IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
            FROM 
-             Medicamentos m
+             medicamentos m
            JOIN 
-             Presentacion p ON m.presentation_id = p.id_presentacion
+             presentacion p ON m.presentation_id = p.id_presentacion
            JOIN 
-             Controlado c ON m.controlado_id = c.id_controlado
+             controlado c ON m.controlado_id = c.id_controlado
            LEFT JOIN 
-             Proveedores pr ON m.proveedores_id = pr.id_proveedores`;
+             proveedores pr ON m.proveedores_id = pr.id_proveedores`;
 
     // Ejecutar la consulta SQL
     conexion.query(query, cantidad ? [cantidad] : [], (err, results) => {
@@ -385,13 +385,13 @@ function generarReportePDF(req, res) {
             c.controlado AS nombre_controlado,
             IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
         FROM 
-            Medicamentos m
+            medicamentos m
         LEFT JOIN 
-            Presentacion p ON m.presentation_id = p.id_presentacion
+            presentacion p ON m.presentation_id = p.id_presentacion
         LEFT JOIN 
-            Controlado c ON m.controlado_id = c.id_controlado
+            controlado c ON m.controlado_id = c.id_controlado
         LEFT JOIN 
-            Proveedores pr ON m.proveedores_id = pr.id_proveedores
+            proveedores pr ON m.proveedores_id = pr.id_proveedores
         ORDER BY 
             m.id_medicamentos DESC
         LIMIT 20;`;
@@ -978,13 +978,13 @@ function tabla_medicamentos(req, res) {
       c.controlado AS nombre_controlado,
       pr.nombre AS nombre_proveedor
     FROM 
-      Medicamentos m
+      medicamentos m
     LEFT JOIN 
-      Presentacion p ON m.presentation_id = p.id_presentacion
+      presentacion p ON m.presentation_id = p.id_presentacion
     LEFT JOIN 
-      Controlado c ON m.controlado_id = c.id_controlado
+      controlado c ON m.controlado_id = c.id_controlado
     LEFT JOIN 
-      Proveedores pr ON m.proveedores_id = pr.id_proveedores
+      proveedores pr ON m.proveedores_id = pr.id_proveedores
     ORDER BY 
       m.id_medicamentos DESC;
   `;
@@ -1009,7 +1009,7 @@ function tabla_clientes(req, res) {
       apellido_paterno,
       apellido_materno
     FROM 
-      Clientes
+      clientes
     ORDER BY 
       id_clientes DESC;
     `;
@@ -1032,7 +1032,7 @@ function tabla_proveedores(req, res) {
       telefono,
       correo
     FROM 
-      Proveedores
+      proveedores
     ORDER BY 
       id_proveedores DESC;
     `;
