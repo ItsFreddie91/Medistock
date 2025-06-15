@@ -1,20 +1,23 @@
-const mysql = require('mysql2'); // <--- usa mysql2
-require('dotenv').config();
+function handleDisconnect() {
+  conexion = mysql.createConnection(db_config);
 
-const conexion = mysql.createConnection({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-});
-
-conexion.connect((err) => {
+  conexion.connect(function (err) {
     if (err) {
-        console.error('❌ Error conectando a la base de datos:', err.stack);
-        return;
+      console.error('Error al reconectar con la base de datos:', err);
+      setTimeout(handleDisconnect, 2000); // Intenta de nuevo en 2s
+    } else {
+      console.log('Reconectado a la base de datos');
     }
-    console.log('✅ BASE DE DATOS CONECTADA');
-});
+  });
 
-module.exports = conexion;
+  conexion.on('error', function (err) {
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+      console.warn('Conexión perdida, reconectando...');
+      handleDisconnect(); // Reintenta conexión
+    } else {
+      throw err;
+    }
+  });
+}
+
+handleDisconnect(); // Llama esto al arrancar tu app
