@@ -1090,8 +1090,15 @@ function historialVentas(req, res) {
             });
         }
 
+        // ✅ Asegurar que precio_unitario y total sean números válidos
+        const ventasFormateadas = ventas.map(v => ({
+            ...v,
+            precio_unitario: parseFloat(v.precio_unitario) || 0,
+            total: parseFloat(v.total) || 0
+        }));
+
         res.render('menu/historial_ventas', { 
-            ventas: ventas,
+            ventas: ventasFormateadas,
             titulo: 'Historial de Ventas'
         });
     });
