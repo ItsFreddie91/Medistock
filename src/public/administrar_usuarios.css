@@ -185,7 +185,7 @@ body {
 }
 
 .section {
-    max-height: 535px; /* Ajusta la altura máxima según necesidad */
+    max-height: 598px; /* Ajusta la altura máxima según necesidad */
     overflow-y: auto; /* Habilita el scroll vertical */
 }
  

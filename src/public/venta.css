@@ -182,7 +182,9 @@ table tbody tr:hover {
 
 /* Secciones */
 .section {
-    margin-bottom: 30px;
+    max-height: 598px; /* Ajusta la altura máxima según necesidad */
+    overflow-y: auto; /* Habilita el scroll vertical */
+
 }
 
 /* Lista de medicamentos */
@@ -205,10 +207,6 @@ table tbody tr:hover {
 
     .sidebar {
         width: 250px;
-        height: 111vh;
-        position: sticky;
-        top: 0;
-        order: 1;
     }
 
     .content {
