@@ -21,9 +21,9 @@
 
             <label class="form-label">Tipo de Receta:</label>
             <select name="receta" class="select" required>
-                <option value="" disabled selected>Selecciona una opción</option>
-                <option value="Ordinaria">Ordinaria</option>
-                <option value="Especial">Especial</option>
+                <option value="" disabled <%= !cliente.receta ? 'selected' : '' %>>Selecciona una opción</option>
+                <option value="Ordinaria" <%= cliente.receta === 'Ordinaria' ? 'selected' : '' %>>Ordinaria</option>
+                <option value="Especial" <%= cliente.receta === 'Especial' ? 'selected' : '' %>>Especial</option>
             </select>
 
             <button type="submit">Actualizar</button>
