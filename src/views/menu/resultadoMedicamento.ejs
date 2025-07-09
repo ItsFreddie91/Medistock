@@ -34,7 +34,7 @@
                         <td><%= medicamento.nombre_proveedor || 'Proveedor eliminado' %></td>
                         <td class="button-container">
                             <a href="/menu/modificar_medicamento/<%= medicamento.id_medicamentos %>" class="edit-button">Editar</a>
-                            <form action="/menu/eliminar_medicamento/<%= medicamento.id_medicamentos %>?nombre=<%= nombreBuscado %>" method="post" style="display:inline;">
+                            <form action="/menu/eliminar_medicamento/<%= medicamento.id_medicamentos %>?nombre=<%= nombreBuscado %>" method="post" style="display:inline;" onsubmit="return confirmarEliminarMedicamento()">
                                 <button type="submit" class="delete-button">Eliminar</button>
                             </form>
                         </td>
@@ -50,5 +50,12 @@
     <div class="button-container">
         <a href="/menu/medicamentos" class="edit-button">Regresar</a>
     </div>
+
+    <!-- SCRIPT DE CONFIRMACIÓN -->
+    <script>
+        function confirmarEliminarMedicamento() {
+            return confirm('¿Estás seguro de que deseas eliminar este medicamento?');
+        }
+    </script>
 </body>
 </html>

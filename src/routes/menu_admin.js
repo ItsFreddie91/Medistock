@@ -66,4 +66,12 @@ router.get('/buscar-medicamento', Menu_adminController.buscarMedicamento);
 
 router.post('/historial_ventas/eliminar/:id_venta', Menu_adminController.eliminarVenta);
 
+
+
+///////////////////////DPF VENTAS//////////////////////////////
+
+router.get('/pdf', Menu_adminController.exportarVentasPDF);
+
+
+
 module.exports = router;

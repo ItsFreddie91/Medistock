@@ -75,4 +75,14 @@ router.get('/tabla_clientes', Menu_Controller.tabla_clientes);
 router.get('/tabla_proveedores', Menu_Controller.tabla_proveedores);
 
 
+///////////////////////DPF VENTAS//////////////////////////////
+
+router.get('/pdf', Menu_Controller.exportarVentasPDF);
+
+
+
+
+
+
+
 module.exports = router;

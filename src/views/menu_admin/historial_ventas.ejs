@@ -14,26 +14,51 @@
         }
 
         .container {
-            display: flex;
-            flex-direction: column;
-            margin: 2px;
+            padding: 20px;
         }
 
         .content {
-            margin-left: 27px;
-            padding: 20px;
             background-color: white;
+            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         h2 {
             text-align: center;
-            margin-bottom: 20px;
             color: #343a40;
+            margin-bottom: 30px;
         }
 
-        /* Contenedor responsivo */
+        .acciones {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .btn-regreso,
+        .btn-exportar {
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+            color: white;
+            margin: 5px 0;
+        }
+
+        .btn-regreso {
+            background-color: #28a745;
+        }
+
+        .btn-exportar {
+            background-color: #007bff;
+        }
+
+        .btn-exportar.excel {
+            background-color: #17a2b8;
+        }
+
         .tabla-responsive {
             width: 100%;
             overflow-x: auto;
@@ -43,9 +68,6 @@
             width: 100%;
             min-width: 800px;
             border-collapse: collapse;
-            margin-top: 20px;
-            background-color: #ffffff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .tabla-ventas th, .tabla-ventas td {
@@ -70,34 +92,13 @@
             background-color: #f1f1f1;
         }
 
-        .btn-regreso {
-            display: inline-block;
-            padding: 10px 20px;
-            margin-top: 20px;
-            background-color: #28a745;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-
-        .btn-regreso:hover {
-            background-color: #218838;
-        }
-
-        .btn-regreso:active {
-            background-color: #1e7e34;
-        }
-
         .delete-button {
-            padding: 8px 12px;
+            padding: 6px 12px;
             background-color: #dc3545;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
 
         .delete-button:hover {
@@ -113,6 +114,13 @@
     <div class="container">
         <main class="content">
             <h2>Historial de Ventas</h2>
+
+            <div class="acciones">
+                <a href="/menu_admin/venta" class="btn-regreso">Regresar</a>
+                <div>
+                    <a href="/menu_admin/pdf" class="btn-exportar">Exportar PDF</a>
+                </div>
+            </div>
 
             <% if (ventas && ventas.length > 0) { %>
                 <div class="tabla-responsive">
@@ -132,7 +140,13 @@
                         <tbody>
                             <% ventas.forEach(venta => { %>
                                 <tr>
-                                    <td><%= new Date(venta.fecha_venta).toLocaleString() %></td>
+                                    <td><%= new Date(venta.fecha_venta).toLocaleDateString('es-MX', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    }) %></td>
                                     <td><%= venta.medicamento %></td>
                                     <td><%= venta.cantidad %></td>
                                     <td>$<%= venta.precio_unitario.toFixed(2) %></td>
@@ -140,9 +154,9 @@
                                     <td><%= venta.vendedor %></td>
                                     <td><%= venta.cliente %></td>
                                     <td>
-                                    <form action="/menu_admin/historial_ventas/eliminar/<%= venta.id_venta %>" method="post" style="display:inline;">
-                                        <button type="submit" class="delete-button">Eliminar</button>
-                                    </form>
+                                        <form action="/menu_admin/historial_ventas/eliminar/<%= venta.id_venta %>" method="post" onsubmit="return confirm('¿Estás seguro de eliminar esta venta?');">
+                                            <button type="submit" class="delete-button">Eliminar</button>
+                                        </form>
                                     </td>
                                 </tr>
                             <% }); %>
@@ -150,10 +164,8 @@
                     </table>
                 </div>
             <% } else { %>
-                <p>No hay registros de ventas</p>
+                <p>No hay registros de ventas.</p>
             <% } %>
-
-            <a href="/menu_admin/venta" class="btn-regreso">Regresar</a>
         </main>
     </div>
 </body>

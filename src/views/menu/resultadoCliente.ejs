@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/resultado_cliente.css">
     <title>Resultados de Búsqueda de Cliente</title>
-    <style>
-
-    </style>
 </head>
 <body>
     <h1>Resultados de Búsqueda de Cliente</h1>
@@ -31,11 +28,9 @@
                         <td><%= cliente.receta %></td>
                         <td class="button-container">
                             <a href="/menu/editarcliente_buscar/<%= cliente.id_clientes %>" class="edit-button">Editar</a>
-                                <!-- Ajusta el formulario para enviar también el nombre del cliente -->
-                            <form action="/menu/eliminar_cliente/<%= cliente.id_clientes %>?nombre=<%= nombreBuscado %>" method="post" style="display:inline;">
+                            <form action="/menu/eliminar_cliente/<%= cliente.id_clientes %>?nombre=<%= nombreBuscado %>" method="post" style="display:inline;" onsubmit="return confirmarEliminarCliente()">
                                 <button type="submit" class="delete-button">Eliminar</button>
                             </form>
-
                         </td>
                     </tr>
                 <% }); %>
@@ -50,5 +45,11 @@
         <a href="/menu/clientes" class="edit-button">Regresar</a>
     </div>
 
+    <!-- SCRIPT DE CONFIRMACIÓN -->
+    <script>
+        function confirmarEliminarCliente() {
+            return confirm('¿Estás seguro de que deseas eliminar este cliente?');
+        }
+    </script>
 </body>
 </html>

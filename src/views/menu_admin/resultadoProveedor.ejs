@@ -6,45 +6,49 @@
     <link rel="stylesheet" href="/resultado_proveedor.css">
     <title>Resultados de Búsqueda de Proveedores</title>
 </head>
-    <body>
-        <h1>Resultados de Búsqueda de Proveedores</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Dirección</th>
-                    <th>Teléfono</th>
-                    <th>Correo</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% if (proveedores.length > 0) { %>
-                    <% proveedores.forEach(proveedor => { %>
-                        <tr>
-                            <td><%= proveedor.nombre %></td>
-                            <td><%= proveedor.direccion %></td>
-                            <td><%= proveedor.telefono %></td>
-                            <td><%= proveedor.correo %></td>
-                            <td class="button-container">
-                                <a href="/menu_admin/administrar_proveedores/modificar_proveedor/<%= proveedor.id_proveedores %>" class="edit-button">Editar</a>
-                                
-                                <form action="/menu_admin/eliminar_proveedor/<%= proveedor.id_proveedores %>?nombre=<%= nombreBuscado %>" method="post" style="display:inline;">
-                                    <button type="submit" class="delete-button">Eliminar</button>
-                                </form>
-
-                            </td>
-                        </tr>
-                    <% }); %>
-                <% } else { %>
+<body>
+    <h1>Resultados de Búsqueda de Proveedores</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Dirección</th>
+                <th>Teléfono</th>
+                <th>Correo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (proveedores.length > 0) { %>
+                <% proveedores.forEach(proveedor => { %>
                     <tr>
-                        <td colspan="6">No se encontraron proveedores con ese criterio de búsqueda.</td>
+                        <td><%= proveedor.nombre %></td>
+                        <td><%= proveedor.direccion %></td>
+                        <td><%= proveedor.telefono %></td>
+                        <td><%= proveedor.correo %></td>
+                        <td class="button-container">
+                            <a href="/menu_admin/administrar_proveedores/modificar_proveedor/<%= proveedor.id_proveedores %>" class="edit-button">Editar</a>
+                            <form action="/menu_admin/eliminar_proveedor/<%= proveedor.id_proveedores %>?nombre=<%= nombreBuscado %>" method="post" style="display:inline;" onsubmit="return confirmarEliminar()">
+                                <button type="submit" class="delete-button">Eliminar</button>
+                            </form>
+                        </td>
                     </tr>
-                <% } %>
-            </tbody>
-        </table>
-        <div class="button-container">
-            <a href="/menu_admin/proveedores_admin" class="edit-button">Regresar</a>
-        </div>
-    </body>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="6">No se encontraron proveedores con ese criterio de búsqueda.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+    <div class="button-container">
+        <a href="/menu_admin/proveedores_admin" class="edit-button">Regresar</a>
+    </div>
+
+    <script>
+        function confirmarEliminar() {
+            return confirm('¿Estás seguro de que quieres eliminar este proveedor?');
+        }
+    </script>
+</body>
 </html>

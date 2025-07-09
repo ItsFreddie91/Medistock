@@ -10,9 +10,8 @@ function inicio_admin(req, res) {
     `;
     
     const queryMedicamentosAgotarse = `
-        SELECT nombre, cantidad 
-        FROM medicamentos 
-        WHERE cantidad < 10
+        SELECT * FROM medicamentos WHERE cantidad > 0 AND cantidad <= 5;
+
     `;
 
     conexion.query(queryMedicamentosProximos, (err, medicamentosProximos) => {
@@ -963,7 +962,7 @@ function buscarMedicamento(req, res) {
         LEFT JOIN presentacion p ON m.presentation_id = p.id_presentacion
         LEFT JOIN controlado c ON m.controlado_id = c.id_controlado
         LEFT JOIN proveedores pr ON m.proveedores_id = pr.id_proveedores
-        WHERE m.nombre LIKE ?
+        WHERE m.nombre LIKE ? AND m.cantidad > 0
     `;
 
     conexion.query(query, [`%${nombreBuscado}%`], (err, resultados) => {
@@ -972,10 +971,10 @@ function buscarMedicamento(req, res) {
             return res.status(500).send('Error al buscar medicamentos');
         }
 
-        // Formatear las fechas al formato YYYY-MM-DD para el input type="date"
+        // Formatear la fecha de caducidad
         const medicamentosFormateados = resultados.map(medicamento => {
             const fecha = new Date(medicamento.fecha_caducidad);
-            const fechaISO = fecha.toISOString().split('T')[0]; // <-- este es el cambio
+            const fechaISO = fecha.toISOString().split('T')[0];
 
             return {
                 ...medicamento,
@@ -989,6 +988,7 @@ function buscarMedicamento(req, res) {
         });
     });
 }
+
 
     function eliminarMedicamento(req, res) {
         const id_medicamentos = req.params.id_medicamentos; 
@@ -1195,103 +1195,88 @@ function actualizarMedicamento(req, res) {
 
 
     
-    function venta_medicamentos_vista(req, res) { 
-        console.log("Datos recibidos del frontend:", req.body);  // Verifica los datos recibidos del frontend
-        
-        const { medicamentos, total } = req.body;  // Recibe los datos de la venta
-        console.log("Medicamentos y total:", medicamentos, total);  // Muestra los datos específicos de los medicamentos
-    
-        // Verificación de si se han seleccionado medicamentos
-        if (!Array.isArray(medicamentos) || medicamentos.length === 0) {
-            req.flash('error', 'No se seleccionaron medicamentos.');
-            return res.json({ success: false, message: 'No se seleccionaron medicamentos.' });
-        }
-    
-        const id_usuario = req.session.usuarioId;
-        console.log("id_usuario desde la sesión:", id_usuario);  // Verifica el id_usuario
-    
-        // Verificación de que se ha seleccionado un cliente
-        const id_cliente = req.body.id_clientes || null;
-        console.log("ID cliente recibido:", id_cliente);  // Asegúrate de que el id_cliente se recibe correctamente
-    
-        if (!id_cliente) {
-            req.flash('error', 'Por favor, selecciona un cliente.');
-            return res.json({ success: false, message: 'Por favor, selecciona un cliente.' });
-        }
-    
-        let errores = [];
-    
-        // Procesar cada medicamento
-        let actualizaciones = medicamentos.map(medicamento => {
-            return new Promise((resolve, reject) => {
-                conexion.query('SELECT cantidad, precio FROM medicamentos WHERE id_medicamentos = ?', [medicamento.id], (error, results) => {
-                    if (error) {
-                        errores.push(`Error al consultar el medicamento ${medicamento.nombre}: ${error.message}`);
-                        return reject(error);
-                    }
-    
-                    if (results.length === 0) {
-                        errores.push(`El medicamento ${medicamento.nombre} no existe.`);
-                        return reject(new Error('Medicamento no existe'));
-                    }
-    
-                    const disponible = results[0].cantidad;
-                    const precio_unitario = results[0].precio;
-                    const cantidad_vendida = medicamento.cantidad;
-                    const total_venta = precio_unitario * cantidad_vendida;
-    
-                    // Verificar disponibilidad de inventario
-                    if (cantidad_vendida > disponible) {
-                        errores.push(`Cantidad insuficiente en inventario para ${medicamento.nombre}.`);
-                        return reject(new Error('Cantidad insuficiente'));
-                    }
-    
-                    // Actualizar inventario
-                    conexion.query(
-                        'UPDATE medicamentos SET cantidad = cantidad - ? WHERE id_medicamentos = ?',
-                        [cantidad_vendida, medicamento.id],
-                        (error) => {
-                            if (error) {
-                                errores.push(`Error al actualizar el inventario de ${medicamento.nombre}: ${error.message}`);
-                                return reject(error);
-                            }
-    
-                            // Insertar venta
-                            conexion.query(
-                                'INSERT INTO ventas (cantidad, precio_unitario, total, id_usuario, id_medicamento, id_cliente) VALUES (?, ?, ?, ?, ?, ?)',
-                                [cantidad_vendida, precio_unitario, total_venta, id_usuario, medicamento.id, id_cliente],
-                                (error) => {
-                                    if (error) {
-                                        errores.push(`Error al registrar la venta de ${medicamento.nombre}: ${error.message}`);
-                                        return reject(error);
-                                    }
-    
-                                    resolve();  // Venta registrada exitosamente
-                                }
-                            );
+function venta_medicamentos_vista(req, res) {
+    const { medicamentos, total, id_clientes } = req.body;
+    const id_usuario = req.session.usuarioId;
+
+    if (!Array.isArray(medicamentos) || medicamentos.length === 0) {
+        req.flash('error', 'No se seleccionaron medicamentos.');
+        return res.json({ success: false, message: 'No se seleccionaron medicamentos.' });
+    }
+
+    if (!id_clientes) {
+        req.flash('error', 'Por favor, selecciona un cliente.');
+        return res.json({ success: false, message: 'Por favor, selecciona un cliente.' });
+    }
+
+    let errores = [];
+
+    const actualizaciones = medicamentos.map(medicamento => {
+        return new Promise((resolve, reject) => {
+            conexion.query('SELECT cantidad, precio, nombre FROM medicamentos WHERE id_medicamentos = ?', [medicamento.id], (error, results) => {
+                if (error || results.length === 0) {
+                    errores.push(`Error con el medicamento ID ${medicamento.id}`);
+                    return reject(error || new Error('No encontrado'));
+                }
+
+                const disponible = results[0].cantidad;
+                const precio_unitario = results[0].precio;
+                const nombre_medicamento = results[0].nombre;
+                const cantidad_vendida = medicamento.cantidad;
+                const total_venta = precio_unitario * cantidad_vendida;
+
+                if (cantidad_vendida > disponible) {
+                    errores.push(`Cantidad insuficiente para ${nombre_medicamento}.`);
+                    return reject(new Error('Inventario insuficiente'));
+                }
+
+                // Actualizar inventario
+                conexion.query(
+                    'UPDATE medicamentos SET cantidad = cantidad - ? WHERE id_medicamentos = ?',
+                    [cantidad_vendida, medicamento.id],
+                    (error) => {
+                        if (error) {
+                            errores.push(`Error al actualizar inventario de ${nombre_medicamento}`);
+                            return reject(error);
                         }
-                    );
-                });
+
+                        // Insertar venta con nombre_medicamento
+                        conexion.query(
+                            `INSERT INTO ventas 
+                             (cantidad, precio_unitario, total, id_usuario, id_medicamento, nombre_medicamento, id_cliente) 
+                             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                            [cantidad_vendida, precio_unitario, total_venta, id_usuario, medicamento.id, nombre_medicamento, id_clientes],
+                            (error) => {
+                                if (error) {
+                                    errores.push(`Error al registrar la venta de ${nombre_medicamento}`);
+                                    return reject(error);
+                                }
+
+                                resolve();
+                            }
+                        );
+                    }
+                );
             });
         });
-    
-        // Ejecutar todas las actualizaciones de ventas
-        Promise.all(actualizaciones)
-            .then(() => {
-                if (errores.length > 0) {
-                    req.flash('error', errores.join(' '));
-                    return res.json({ success: false, message: errores.join(' ') });
-                } else {
-                    req.flash('success', 'Venta realizada con éxito.');
-                    res.json({ success: true });
-                }
-            })
-            .catch(err => {
-                console.error('Error al procesar la venta:', err);
-                req.flash('error', 'Ocurrió un error al realizar la venta.');
-                res.json({ success: false, message: 'Ocurrió un error al procesar la venta.' });
-            });
-    }
+    });
+
+    Promise.all(actualizaciones)
+        .then(() => {
+            if (errores.length > 0) {
+                req.flash('error', errores.join(' '));
+                return res.json({ success: false, message: errores.join(' ') });
+            } else {
+                req.flash('success', 'Venta realizada con éxito.');
+                res.json({ success: true });
+            }
+        })
+        .catch(err => {
+            console.error('Error al procesar la venta:', err);
+            req.flash('error', 'Ocurrió un error al realizar la venta.');
+            res.json({ success: false, message: 'Error al procesar la venta.' });
+        });
+}
     
                 
         
@@ -1327,12 +1312,11 @@ function actualizarMedicamento(req, res) {
 function historialVentas(req, res) {
     const query = `
         SELECT v.id_venta, v.fecha_venta, 
-               IFNULL(m.nombre, 'Medicamento eliminado') AS medicamento,
+               v.nombre_medicamento AS medicamento,
                v.cantidad, v.precio_unitario, v.total,
                IFNULL(u.nombre, 'Sin vendedor') AS vendedor,
                IFNULL(c.nombre, 'Sin cliente') AS cliente
         FROM ventas v
-        LEFT JOIN medicamentos m ON v.id_medicamento = m.id_medicamentos
         LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
         LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
         ORDER BY v.fecha_venta DESC
@@ -1341,12 +1325,9 @@ function historialVentas(req, res) {
     conexion.query(query, function(err, ventas) {
         if (err) {
             console.error('Error en historialVentas:', err);
-            return res.status(500).render('error', { 
-                error: 'Error al cargar el historial' 
-            });
+            return res.status(500).render('error', { error: 'Error al cargar el historial' });
         }
 
-        // ✅ Aseguramos que precio_unitario y total sean numéricos
         const ventasFormateadas = ventas.map(v => ({
             ...v,
             precio_unitario: parseFloat(v.precio_unitario) || 0,
@@ -1367,12 +1348,11 @@ function buscarVentas(req, res) {
     const { fecha, cliente } = req.query;
     let query = `
         SELECT v.id_venta, v.fecha_venta, 
-               IFNULL(m.nombre, 'Medicamento eliminado') AS medicamento, 
+               v.nombre_medicamento AS medicamento, 
                v.cantidad, v.precio_unitario, v.total,
                IFNULL(u.nombre, 'Sin vendedor') AS vendedor,
                IFNULL(c.nombre, 'Sin cliente') AS cliente
         FROM ventas v
-        LEFT JOIN medicamentos m ON v.id_medicamento = m.id_medicamentos
         LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
         LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
         WHERE 1=1`;
@@ -1394,13 +1374,11 @@ function buscarVentas(req, res) {
     conexion.query(query, params, function(err, ventas) {
         if (err) {
             console.error('Error en buscarVentas:', err);
-            return res.status(500).render('error', { 
-                error: 'Error en la búsqueda' 
-            });
+            return res.status(500).render('error', { error: 'Error en la búsqueda' });
         }
 
         res.render('menu_admin/historial_ventas', { 
-            ventas: ventas,
+            ventas,
             titulo: 'Resultados de Búsqueda',
             criterios: { fecha, cliente }
         });
@@ -1430,6 +1408,69 @@ function eliminarVenta(req, res) {
     });
 }
 
+
+
+
+
+///////////////////////////////////////////PDF VENTAS-//////////////////////////////
+
+const fs = require('fs');
+const path = require('path');
+
+function exportarVentasPDF(req, res) {
+    const query = `
+        SELECT 
+            v.fecha_venta, 
+            v.nombre_medicamento AS medicamento, 
+            v.cantidad, 
+            v.precio_unitario, 
+            v.total,
+            IFNULL(u.nombre, 'Sin vendedor') AS vendedor,
+            IFNULL(c.nombre, 'Sin cliente') AS cliente
+        FROM ventas v
+        LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
+        LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
+        ORDER BY v.fecha_venta DESC
+    `;
+
+    conexion.query(query, (err, ventas) => {
+        if (err) {
+            return res.status(500).send('Error al obtener datos de ventas');
+        }
+
+        const PDFDocument = require('pdfkit');
+        const doc = new PDFDocument({ margin: 30, size: 'A4' });
+
+        res.setHeader('Content-Disposition', 'attachment; filename=historial_ventas.pdf');
+        res.setHeader('Content-Type', 'application/pdf');
+
+        doc.pipe(res);
+
+        // Título
+        doc.fontSize(16).text('Historial de Ventas - MediStock', { align: 'center' });
+        doc.moveDown(1);
+
+        // Estilo de texto normal
+        doc.fontSize(10).font('Helvetica');
+
+        ventas.forEach((v, index) => {
+            doc.text(`Venta #${index + 1}`, { underline: true });
+            doc.text(`Fecha: ${new Date(v.fecha_venta).toLocaleString('es-MX')}`);
+            doc.text(`Medicamento: ${v.medicamento}`);
+            doc.text(`Cantidad: ${v.cantidad}`);
+            doc.text(`Precio Unitario: $${parseFloat(v.precio_unitario).toFixed(2)}`);
+            doc.text(`Total: $${parseFloat(v.total).toFixed(2)}`);
+            doc.text(`Vendedor: ${v.vendedor}`);
+            doc.text(`Cliente: ${v.cliente}`);
+            doc.moveDown(1); // Espacio entre ventas
+
+            // Si llega al final de la página, salta a la siguiente
+            if (doc.y > 700) doc.addPage();
+        });
+
+        doc.end();
+    });
+}
 
 
 
@@ -1483,5 +1524,6 @@ module.exports = {
     tabla_proveedores,
     formulario,
 
-    eliminarVenta
+    eliminarVenta,
+    exportarVentasPDF
 };

@@ -56,7 +56,7 @@
                                         <td><%= usuario.usuario %></td>
                                         <td>
                                             <a href="/menu_admin/administrar_usuarios/modificar_usuarios/<%= usuario.id_usuario %>" class="btn-edit">Editar</a><br>
-                                            <form action="/menu_admin/administrar_usuarios/<%= usuario.id_usuario %>" method="POST" style="display:inline;">
+                                            <form action="/menu_admin/administrar_usuarios/<%= usuario.id_usuario %>" method="POST" style="display:inline;" onsubmit="return confirmarEliminarUsuario()">
                                                 <button type="submit" class="btn-delete">Eliminar</button>
                                             </form>
                                         </td>
@@ -138,6 +138,13 @@
                 toggleBtn.textContent = 'Registrar nuevo usuario';
             }
         });
+    </script>
+
+    <!-- Confirmación al eliminar usuario -->
+    <script>
+        function confirmarEliminarUsuario() {
+            return confirm('¿Estás seguro de que quieres eliminar este usuario?');
+        }
     </script>
 </body>
 </html>
