@@ -169,7 +169,6 @@ table tbody tr:hover {
 /* Media Queries para escritorios */
 @media (min-width: 1024px) {
     .sidebar nav ul li a {
-        font-size: 20px; /* Tamaño de fuente aumentado en escritorios */
     }
 
     table {
