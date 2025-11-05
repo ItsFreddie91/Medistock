@@ -42,14 +42,6 @@ function inicio_admin(req, res) {
     });
 }
 
-
-
-
-
-
-
-
-
 function vista_medicamentos(req, res) {
     // Obtener proveedores
     const queryProveedores = 'SELECT id_proveedores, nombre FROM proveedores';
@@ -237,13 +229,6 @@ function buscarProveedor(req, res) {
         });
     });
 }
-
-
-
-
-
-
-
 
 //PARA REGISTRA CLIENTES
 function vista_clientes(req, res) {
@@ -525,40 +510,6 @@ function tabla_proveedores(req, res) {
     });
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function post_datos_medicamentos(req, res) {
     const cantidad = parseInt(req.body.cantidad, 10); // Captura la cantidad ingresada
 
@@ -617,15 +568,16 @@ function post_datos_medicamentos(req, res) {
     });
 }
 
-
-
-
-
-
 function generarReportePDF(req, res) {
     const PDFDocument = require('pdfkit');
+    const doc = new PDFDocument({ margin: 40, size: 'A4' });
 
-    // Consulta para obtener los últimos 20 medicamentos con JOIN
+    // Configurar cabeceras HTTP
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="reporte_medicamentos.pdf"');
+    doc.pipe(res);
+
+    // Consulta SQL con JOIN
     const query = `
         SELECT 
             m.id_medicamentos,
@@ -646,51 +598,126 @@ function generarReportePDF(req, res) {
             proveedores pr ON m.proveedores_id = pr.id_proveedores
         ORDER BY 
             m.id_medicamentos DESC
-        LIMIT 20;`;
+        LIMIT 20;
+    `;
 
-    // Realiza la consulta a la base de datos
     conexion.query(query, (err, medicamentos) => {
         if (err) {
             console.error('Error al consultar medicamentos:', err);
             return res.status(500).send('Error al generar reporte');
         }
 
-        // Verifica si se encontraron medicamentos
         if (medicamentos.length === 0) {
             return res.status(404).send('No se encontraron medicamentos disponibles');
         }
 
-        // Si se encontraron medicamentos, crea el PDF
-        const doc = new PDFDocument();
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename="reporte_medicamentos.pdf"');
-        doc.pipe(res);
+        // ==============================
+        // ENCABEZADO DEL DOCUMENTO
+        // ==============================
+        doc.fontSize(18).text('Centro de Salud de Teoloyucan', { align: 'center' });
+        doc.moveDown(0.5);
+        doc.fontSize(14).text('Reporte de Medicamentos', { align: 'center' });
+        doc.moveDown(0.5);
+        doc.fontSize(10).text(`Fecha de generación: ${new Date().toLocaleDateString()}`, { align: 'right' });
+        doc.moveDown(1);
 
-        // Título del PDF
-        doc.fontSize(16).text('Reporte de Medicamentos', { align: 'center' });
-        doc.moveDown();
+        // ==============================
+        // CONFIGURACIÓN DE COLUMNAS
+        // ==============================
+        const columnas = [
+            { header: 'Nombre', width: 120 },
+            { header: 'Cantidad', width: 65 },
+            { header: 'Precio', width: 60 },
+            { header: 'Caducidad', width: 80 },
+            { header: 'Presentación', width: 85 },
+            { header: 'Controlado', width: 75 },
+            { header: 'Proveedor', width: 100 }
+        ];
 
-        // Imprimir la lista de medicamentos
-        medicamentos.forEach(medicamento => {
-            doc.fontSize(12)
-                .text(`Nombre: ${medicamento.nombre}`)
-                .text(`Cantidad: ${medicamento.cantidad}`)
-                .text(`Precio: ${medicamento.precio} $`)
-                .text(`Fecha de Caducidad: ${new Date(medicamento.fecha_caducidad).toLocaleDateString()}`)
-                .text(`Presentación: ${medicamento.nombre_presentacion || 'No disponible'}`)  // Muestra 'No disponible' si es NULL
-                .text(`Controlado: ${medicamento.nombre_controlado || 'No disponible'}`)  // Muestra 'No disponible' si es NULL
-                .text(`Proveedor: ${medicamento.nombre_proveedor || 'No disponible'}`)  // Muestra 'No disponible' si es NULL
-                .moveDown();
+        // calcular ancho total de la tabla
+        const tableWidth = columnas.reduce((sum, c) => sum + c.width, 0);
+
+        // función para calcular startX centrado según la página actual
+        const computeStartX = () => {
+            const pageWidth = doc.page.width;
+            // pdfkit guarda márgenes en doc.page.margins {left, right, top, bottom}
+            const marginLeft = (doc.page.margins && doc.page.margins.left) ? doc.page.margins.left : 40;
+            const marginRight = (doc.page.margins && doc.page.margins.right) ? doc.page.margins.right : 40;
+            const usableWidth = pageWidth - marginLeft - marginRight;
+            // centrar: margen + (usableWidth - tableWidth)/2
+            const offset = Math.max(0, (usableWidth - tableWidth) / 2);
+            return marginLeft + offset;
+        };
+
+        // calcular startX y endX para la primer página
+        let startX = computeStartX();
+        let endX = startX + tableWidth;
+
+        // punto inicial vertical
+        let y = doc.y;
+
+        // ==============================
+        // DIBUJAR ENCABEZADOS
+        // ==============================
+        doc.font('Helvetica-Bold').fontSize(10);
+        let x = startX;
+        columnas.forEach(col => {
+            doc.text(col.header, x, y, { width: col.width, align: 'left' });
+            x += col.width;
         });
-        
 
-        // Finalizar el documento PDF
+        y += 18;
+        doc.moveTo(startX, y - 5).lineTo(endX, y - 5).strokeColor('#000000').stroke();
+        doc.font('Helvetica').fontSize(9);
+
+        // ==============================
+        // IMPRIMIR FILAS DE DATOS
+        // ==============================
+        medicamentos.forEach((med) => {
+            // Si nos acercamos al final, agregar nueva página y recalcular posiciones
+            if (y > 750) {
+                doc.addPage();
+                // recalculamos startX/endX ahora que doc.page cambió
+                startX = computeStartX();
+                endX = startX + tableWidth;
+
+                // resetear y y volver a dibujar encabezado
+                y = 50;
+                x = startX;
+                doc.font('Helvetica-Bold').fontSize(10);
+                columnas.forEach(col => {
+                    doc.text(col.header, x, y, { width: col.width, align: 'center' });
+                    x += col.width;
+                });
+                y += 18;
+                doc.moveTo(startX, y - 5).lineTo(endX, y - 5).strokeColor('#000000').stroke();
+                doc.font('Helvetica').fontSize(9);
+            }
+
+            const datos = [
+                med.nombre,
+                med.cantidad.toString(),
+                `$${Number(med.precio).toFixed(2)}`,
+                new Date(med.fecha_caducidad).toLocaleDateString(),
+                med.nombre_presentacion || 'No disponible',
+                med.nombre_controlado || 'No disponible',
+                med.nombre_proveedor || 'No disponible'
+            ];
+
+            x = startX;
+            datos.forEach((dato, i) => {
+                doc.text(dato, x, y, { width: columnas[i].width, align: 'left' });
+                x += columnas[i].width;
+            });
+
+            y += 16;
+            doc.moveTo(startX, y - 3).lineTo(endX, y - 3).strokeColor('#dddddd').stroke();
+        });
+
+        // Finalizar documento
         doc.end();
     });
 }
-
-
-
 
 
 // Función para obtener y mostrar todos los usuarios
@@ -818,48 +845,6 @@ function formulario(req, res) {
         });
     });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Función para mostrar el formulario de edición de usuario
 function editarUsuario(req, res) {
@@ -1107,25 +1092,6 @@ function actualizarMedicamento(req, res) {
         });
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     function venta_medicamentos(req, res) {
         // Consultar los medicamentos disponibles
         conexion.query('SELECT * FROM medicamentos WHERE cantidad > 0', (err, medicamentos) => {
@@ -1149,52 +1115,7 @@ function actualizarMedicamento(req, res) {
         });
     }
     
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
+      
 function venta_medicamentos_vista(req, res) {
     const { medicamentos, total, id_clientes } = req.body;
     const id_usuario = req.session.usuarioId;
@@ -1281,33 +1202,6 @@ function venta_medicamentos_vista(req, res) {
                 
         
         
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // Controlador para mostrar el historial de ventas
 function historialVentas(req, res) {
     const query = `
@@ -1418,6 +1312,15 @@ const fs = require('fs');
 const path = require('path');
 
 function exportarVentasPDF(req, res) {
+    const PDFDocument = require('pdfkit');
+    const doc = new PDFDocument({ margin: 40, size: 'A4' });
+
+    // Configurar cabeceras HTTP
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="historial_ventas.pdf"');
+    doc.pipe(res);
+
+    // Consulta SQL
     const query = `
         SELECT 
             v.fecha_venta, 
@@ -1430,48 +1333,119 @@ function exportarVentasPDF(req, res) {
         FROM ventas v
         LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
         LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
-        ORDER BY v.fecha_venta DESC
+        ORDER BY v.fecha_venta DESC;
     `;
 
     conexion.query(query, (err, ventas) => {
         if (err) {
-            return res.status(500).send('Error al obtener datos de ventas');
+            console.error('Error al obtener datos de ventas:', err);
+            return res.status(500).send('Error al generar reporte');
         }
 
-        const PDFDocument = require('pdfkit');
-        const doc = new PDFDocument({ margin: 30, size: 'A4' });
+        if (ventas.length === 0) {
+            return res.status(404).send('No se encontraron ventas registradas');
+        }
 
-        res.setHeader('Content-Disposition', 'attachment; filename=historial_ventas.pdf');
-        res.setHeader('Content-Type', 'application/pdf');
-
-        doc.pipe(res);
-
-        // Título
-        doc.fontSize(16).text('Historial de Ventas - MediStock', { align: 'center' });
+        // ==============================
+        // ENCABEZADO DEL DOCUMENTO
+        // ==============================
+        doc.fontSize(18).text('Centro de Salud de Teoloyucan', { align: 'center' });
+        doc.moveDown(0.5);
+        doc.fontSize(14).text('Historial de Ventas - MediStock', { align: 'center' });
+        doc.moveDown(0.5);
+        doc.fontSize(10).text(`Fecha de generación: ${new Date().toLocaleDateString('es-MX')}`, { align: 'right' });
         doc.moveDown(1);
 
-        // Estilo de texto normal
-        doc.fontSize(10).font('Helvetica');
+        // ==============================
+        // CONFIGURACIÓN DE COLUMNAS
+        // ==============================
+        const columnas = [
+            { header: 'Fecha de Venta', width: 90 },
+            { header: 'Medicamento', width: 100 },
+            { header: 'Cantidad', width: 60 },
+            { header: 'Precio Unitario', width: 80 },
+            { header: 'Total', width: 70 },
+            { header: 'Vendedor', width: 80 },
+            { header: 'Cliente', width: 90 }
+        ];
 
-        ventas.forEach((v, index) => {
-            doc.text(`Venta #${index + 1}`, { underline: true });
-            doc.text(`Fecha: ${new Date(v.fecha_venta).toLocaleString('es-MX')}`);
-            doc.text(`Medicamento: ${v.medicamento}`);
-            doc.text(`Cantidad: ${v.cantidad}`);
-            doc.text(`Precio Unitario: $${parseFloat(v.precio_unitario).toFixed(2)}`);
-            doc.text(`Total: $${parseFloat(v.total).toFixed(2)}`);
-            doc.text(`Vendedor: ${v.vendedor}`);
-            doc.text(`Cliente: ${v.cliente}`);
-            doc.moveDown(1); // Espacio entre ventas
+        const tableWidth = columnas.reduce((sum, c) => sum + c.width, 0);
 
-            // Si llega al final de la página, salta a la siguiente
-            if (doc.y > 700) doc.addPage();
+        const computeStartX = () => {
+            const pageWidth = doc.page.width;
+            const marginLeft = doc.page.margins.left || 40;
+            const marginRight = doc.page.margins.right || 40;
+            const usableWidth = pageWidth - marginLeft - marginRight;
+            const offset = Math.max(0, (usableWidth - tableWidth) / 2);
+            return marginLeft + offset;
+        };
+
+        let startX = computeStartX();
+        let endX = startX + tableWidth;
+        let y = doc.y;
+
+        // ==============================
+        // ENCABEZADOS DE TABLA
+        // ==============================
+        doc.font('Helvetica-Bold').fontSize(10);
+        let x = startX;
+        columnas.forEach(col => {
+            doc.text(col.header, x, y, { width: col.width, align: 'left' });
+            x += col.width;
         });
 
+        y += 18;
+        doc.moveTo(startX, y - 5).lineTo(endX, y - 5).strokeColor('#000000').stroke();
+        doc.font('Helvetica').fontSize(9);
+
+        // ==============================
+        // FILAS DE DATOS
+        // ==============================
+        ventas.forEach(v => {
+            if (y > 750) {
+                doc.addPage();
+                startX = computeStartX();
+                endX = startX + tableWidth;
+                y = 50;
+
+                // Redibujar encabezados en nueva página
+                x = startX;
+                doc.font('Helvetica-Bold').fontSize(10);
+                columnas.forEach(col => {
+                    doc.text(col.header, x, y, { width: col.width, align: 'center' });
+                    x += col.width;
+                });
+                y += 180;
+                doc.moveTo(startX, y - 5).lineTo(endX, y - 5).strokeColor('#000000').stroke();
+                doc.font('Helvetica').fontSize(9);
+            }
+
+            const datos = [
+                new Date(v.fecha_venta).toLocaleDateString('es-MX'),
+                v.medicamento,
+                v.cantidad.toString(),
+                `$${Number(v.precio_unitario).toFixed(2)}`,
+                `$${Number(v.total).toFixed(2)}`,
+                v.vendedor,
+                v.cliente
+            ];
+
+            x = startX;
+            datos.forEach((dato, i) => {
+                doc.text(dato, x, y, { width: columnas[i].width, align: 'left' });
+                x += columnas[i].width;
+            });
+
+            y += 16;
+            doc.moveTo(startX, y - 3).lineTo(endX, y - 3).strokeColor('#dddddd').stroke();
+        });
+
+        // ==============================
+        // FINALIZAR DOCUMENTO
+        // ==============================
         doc.end();
     });
 }
-
 
 
 
