@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listado de Proveedores</title>
+    <link rel="stylesheet" href="/administrar_proveedores.css">
+</head>
+    <body>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Dirección</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (proveedores.length > 0) { %>
+                    <% proveedores.forEach(function(proveedor) { %>
+                        <tr>
+                            <td><%= proveedor.id_proveedores %></td>
+                            <td><%= proveedor.nombre %></td>
+                            <td><%= proveedor.direccion %></td>
+                            <td><%= proveedor.telefono %></td>
+                            <td><%= proveedor.correo %></td>
+                            <td>
+                                <a href="/administrar_proveedores/modificar_proveedor/<%= proveedor.id_proveedores %>" class="btn btn-edit">Editar</a>
+                                <a href="/administrar_proveedores/eliminar_proveedor/<%= proveedor.id_proveedores %>" class="btn btn-delete">Eliminar</a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="6">No hay proveedores disponibles</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </body>
+</html>

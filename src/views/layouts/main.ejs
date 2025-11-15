@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Salud</title>
+    <link rel="stylesheet" href="/bootstrap.css">
+</head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                    <div class="navbar-nav">
+                        <% if (typeof name !== 'undefined' && name) { %>
+                            <a href="/" class="nav-link font-weight-bold hover:bg-green-700 py-3 px-4 rounded-md"></a>
+                            <a href="/login/registro" class="nav-link font-weight-bold hover:bg-green-700 py-3 px-4 rounded-md"></a>
+                        <% } else { %>
+                            <a href="/" class="nav-link font-weight-bold hover:bg-green-700 py-3 px-4 rounded-md"></a>
+                            <a href="/login/registro" class="nav-link font-weight-bold hover:bg-green-700 py-3 px-4 rounded-md"></a>
+                        <% } %>
+                        
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </body>
+</html>

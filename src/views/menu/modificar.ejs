@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Proveedor</title>
+    <link rel="stylesheet" href=""> 
+</head>
+<body>
+    <h1>Editar Proveedor</h1>
+    <form action="/menu/clientes" method="POST">
+        <h2 class="center-text">Agregar Nuevo Cliente:</h2>
+    
+        <label for="nombre">Nombre:</label>
+        <input type="text" name="nombre" required>
+    
+        <label for="apellido_paterno">Apellido Paterno:</label>
+        <input type="text" name="apellido_paterno" required>
+    
+        <label for="apellido_materno">Apellido Materno:</label>
+        <input type="text" name="apellido_materno" required>
+
+        <label for="receta">Tipo de Receta:</label>
+        <select name="receta" required>
+            <option value="" disabled selected>Selecciona una opción</option>
+            <option value="Ordinaria">Ordinaria</option>
+            <option value="Especial">Especial</option>
+        </select>
+        <div class="form-buttons">
+            <button type="submit">Guardar</button>
+            <button type="button">Cancelar</button>
+        </div>
+            <% if (message) { %>
+                <div class="alert alert-success">
+                    <%= message %>
+                </div>
+            <% } %>
+    </form>
+</body>
+</html>

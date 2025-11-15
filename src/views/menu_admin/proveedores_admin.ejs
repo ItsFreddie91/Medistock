@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - MediStock</title>
+    <link rel="stylesheet" href="/proveedor_admi.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo"></div>
+            <nav>
+                <ul>
+                    <ul>
+                            <li>
+                                <a href="/menu_admin/inicio_admin">
+                                    <img width="40" height="40" src="/icons/icons2.png" alt="user" class="menu-icon"/>
+                                    Menu Inicio
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/datos_medicamentos_admin" >
+                                    <img width="40" height="40" src="/icons/icons3.png" alt="user" class="menu-icon"/>
+                                    Generar PDF Medicamentos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/medicamentos_admin" >
+                                    <img width="40" height="40" src="/icons/icons4.png" alt="user" class="menu-icon"/>
+                                    Ingresar Medicamentos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/clientes_admin" >
+                                    <img width="40" height="40" src="/icons/iconusuario.png" alt="user" class="menu-icon"/>
+                                    Gestionar Clientes
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/proveedores_admin" class="active">
+                                    <img width="40" height="40" src="/icons/icons5.png" alt="user" class="menu-icon"/>
+                                    Gestionar Proveedores
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/administrar_usuarios" >
+                                    <img width="40" height="40" src="/icons/iconadministra.png" alt="user" class="menu-icon"/>
+                                    Administrar Usuarios
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/venta">
+                                    <img width="40" height="40" src="/icons/compra.png" alt="user" class="menu-icon"/>
+                                    Realizar Venta
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/">
+                                    <img width="40" height="40" src="/icons/cerrar-sesion.png" alt="user" class="menu-icon"/>
+                                    Cerrar Sesión
+                                </a>
+                            </li>
+                    </ul>                    </ul>
+            </nav>
+        </aside>
+        <main class="content">
+            <div class="layout-superior-derecha">
+                <div class="MediStock-a_la_derecha">
+                    <label class="medistock-label"> </label>
+                    <form action="/menu_admin/buscar-proveedor" method="get" class="buscar-cliente-form">
+                        <img width="30" height="30" src="/icons/lupa.png" alt="user" class="menu-icon buscar-cliente-icon"/>
+                        <input type="text" name="nombre" placeholder="Buscar un Proveedor" class="buscar-cliente-input"/>
+                        <button type="submit" class="buscar-cliente-button">Buscar</button>
+                        <img width="30" height="30" src="/icons/proveedor.png" alt="user" class="menu-icon buscar-cliente-icon"/>
+
+                    </form>
+                </div>
+            </div>
+            <div class="centrar_form">
+                <section id="agregar-medicamentos" class="section">
+                    <form id="formulario-proveedor" action="/menu_admin/proveedores_admin" method="POST">
+                        <h2 class="center-text">Agregar Proveedor: </h2>
+                        <div class="form-group">
+                            <label for="nombre">Nombre:</label>
+                            <input type="text" name="nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cantidad">Direccion:</label>
+                            <input type="text" name="direccion" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="precio-venta">Telefono:</label>
+                            <input type="number" name="telefono" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="presentacion">Correo:</label>
+                            <input type="text" name="correo" required>
+                        </div>
+                        <div class="form-buttons">
+                            <button type="submit" class="btn-guardar">Guardar</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+    <script>
+        // Capturar el evento submit del formulario
+        document.getElementById('formulario-proveedor').addEventListener('submit', async (event) => {
+            event.preventDefault(); // Evita la recarga de la página
+            // Obtener los datos del formulario
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+            try {
+                // Enviar los datos al servidor
+                const response = await fetch('/menu_admin/proveedores_admin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+                // Verificar si la respuesta fue exitosa
+                if (response.ok) {
+                    // Mostrar el mensaje de alerta
+                    alert('Proveedor registrado exitosamente!');
+                    // Limpiar el formulario
+                    event.target.reset();
+                } else {
+                    alert('Hubo un error al registrar el proveedor.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('No se pudo conectar con el servidor.');
+            }
+        });
+    </script>
+</body>
+</html>

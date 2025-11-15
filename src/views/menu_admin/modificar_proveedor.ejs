@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/modificar_proveedor.css">
+    <title>Editar Proveedor</title>
+</head>
+    <body>
+        <div class="container">
+            <h1>Editar Proveedor</h1>
+            <form action="/menu_admin/administrar_proveedores/modificar_proveedor/<%= proveedor.id_proveedores %>" method="POST">
+                <label for="nombre">Nombre:</label>
+                <input type="text"  name="nombre" value="<%= proveedor.nombre %>" required>
+            
+                <label for="direccion">Dirección:</label>
+                <input type="text"  name="direccion" value="<%= proveedor.direccion %>" required>
+            
+                <label for="telefono">Teléfono:</label>
+                <input type="text" name="telefono" value="<%= proveedor.telefono %>" required>
+            
+                <label for="email">Email:</label>
+                <input type="email" name="correo" value="<%= proveedor.correo %>" required>
+            
+                <button type="submit">Guardar Cambios</button>
+                <a href="javascript:history.back()" class="back-button">Regresar</a>
+            </form>
+        </div>
+    </body>
+</html>

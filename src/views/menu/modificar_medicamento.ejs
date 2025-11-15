@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/modificar_medicamento_admin.css">
+    <title>Editar Medicamento</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Editar Medicamento</h1>
+<form action="/menu/modificar_medicamento/<%= medicamento.id_medicamentos %>" method="POST">
+    <label for="nombre">Nombre:</label>
+    <input type="text" name="nombre" id="nombre" value="<%= medicamento.nombre %>" required>
+
+    <label for="precio">Precio:</label>
+    <input type="number" step="0.01" name="precio" id="precio" value="<%= medicamento.precio %>" required>
+    
+    <label for="cantidad">Stock:</label>
+    <input type="number" name="cantidad" id="cantidad" value="<%= medicamento.cantidad %>" required>
+
+    <label for="fecha_caducidad">Fecha de Caducidad:</label>
+    <input type="date" name="fecha_caducidad" id="fecha_caducidad" value="<%= medicamento.fecha_caducidad.toISOString().split('T')[0] %>" required>
+
+    <label for="presentation_id">Presentación:</label>
+    <select name="presentation_id" id="presentation_id" required>
+        <option value="1" <%= medicamento.presentation_id === 1 ? 'selected' : '' %>>Caja</option>
+        <option value="2" <%= medicamento.presentation_id === 2 ? 'selected' : '' %>>Frasco</option>
+    </select>
+
+    <label for="controlado_id">Controlado:</label>
+    <select name="controlado_id" id="controlado_id" required>
+        <% controlados.forEach(controlado => { %>
+            <option value="<%= controlado.id_controlado %>" 
+                <%= Number(controlado.id_controlado) === Number(medicamento.controlado_id) ? 'selected' : '' %> >
+                <%= controlado.controlado %>
+            </option>
+        <% }) %>
+    </select>
+
+    <label for="proveedor_id">Proveedor:</label>
+    <select name="proveedor_id" id="proveedor_id" required>
+        <option value="" disabled <%= !medicamento.proveedores_id ? 'selected' : '' %>>Selecciona un proveedor</option>
+        <% proveedores.forEach(proveedor => { %>
+            <option value="<%= proveedor.id_proveedores %>" 
+                <%= Number(proveedor.id_proveedor) === Number(medicamento.proveedores_id) ? 'selected' : '' %> >
+                <%= proveedor.nombre %>
+            </option>
+        <% }) %>
+    </select>
+
+    <button type="submit">Guardar Cambios</button>
+    <a href="javascript:history.back()" class="back-button">Regresar</a>
+</form>
+    </div>
+</body>
+</html>

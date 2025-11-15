@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/modificar_usuarios.css">
+    <title>Editar Usuario</title>
+</head>
+    <body>
+        <div class="container">
+            <h1>Editar Usuario</h1>
+            <form action="/menu_admin/administrar_usuarios/modificar_usuarios/<%= usuario.id_usuario %>" method="POST">
+                <label for="nombre">Nombre:</label>
+                <input type="text" name="nombre" value="<%= usuario.nombre %>" required>
+                
+                <label for="apellido_paterno">Apellido Paterno:</label>
+                <input type="text" name="apellido_paterno" value="<%= usuario.apellido_paterno %>" required>
+                
+                <label for="apellido_materno">Apellido Materno:</label>
+                <input type="text" name="apellido_materno" value="<%= usuario.apellido_materno %>" required>
+                
+                <label for="usuario">Usuario:</label>
+                <input type="text" name="usuario" value="<%= usuario.usuario %>" required>
+                
+                <label for="contrasena">Contraseña:</label>
+                <input type="password" name="contrasena" placeholder="Ingrese nueva contraseña si desea cambiarla">
+                
+                <button type="submit">Guardar Cambios</button>
+                <a href="javascript:history.back()" class="back-button">Regresar</a>
+            </form>
+        </div>
+    </body>
+</html>

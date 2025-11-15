@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - MediStock</title>
+    <link rel="stylesheet" href="/menu.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo"></div>
+            <nav>
+                <ul>
+                            <li>
+                                <a href="/menu/inicio" >
+                                    <img width="40" height="40" src="/icons/icons2.png" alt="user" class="menu-icon"/>
+                                    Menu Inicio
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu/datos_medicamentos">
+                                    <img width="40" height="40" src="/icons/icons3.png" alt="user" class="menu-icon"/>
+                                    Generar PDF Medicamentos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu/medicamentos">
+                                    <img width="40" height="40" src="/icons/icons4.png" alt="user" class="menu-icon"/>
+                                    Ingresar Medicamentos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu/clientes" class="active">
+                                    <img width="40" height="40" src="/icons/iconusuario.png" alt="user" class="menu-icon"/>
+                                    Gestionar Clientes
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu/venta">
+                                    <img width="40" height="40" src="/icons/compra.png" alt="user" class="menu-icon"/>
+                                    Realizar Venta
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/">
+                                    <img width="40" height="40" src="/icons/cerrar-sesion.png" alt="user" class="menu-icon"/>
+                                    Cerrar Sesión
+                                </a>
+                            </li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="content">
+            <div class="layout-superior-derecha">
+                <div class="MediStock-a_la_derecha">
+                    <label class="medistock-label"> </label>
+                    <form action="/menu/buscar-cliente" method="get" class="buscar-cliente-form">
+                        <img width="30" height="30" src="/icons/lupa.png" alt="user" class="menu-icon buscar-cliente-icon"/>
+                        <input type="text" name="nombre" placeholder="Buscar un Cliente" class="buscar-cliente-input"/>
+                        <button type="submit" class="buscar-cliente-button">Buscar</button>
+                        <img width="30" height="30" src="/icons/cliente.png" alt="user" class="menu-icon buscar-cliente-icon"/>
+
+                    </form>
+                </div>
+            </div>
+            
+            <div class="centrar_form">
+                <section id="agregar-medicamentos" class="section">
+                    <div>
+                        <form id="formulario-cliente" action="/menu/clientes" method="POST" class="formulario-cliente">
+                            <h2 class="center-text">Agregar Nuevo Cliente:</h2>
+                        
+                            <div class="form-group">
+                                <label for="nombre" class="form-label">Nombre:</label>
+                                <input type="text" name="nombre" class="form-input" required>
+                            </div>
+                        
+                            <div class="form-group">
+                                <label for="apellido_paterno" class="form-label">Apellido Paterno:</label>
+                                <input type="text" name="apellido_paterno" class="form-input" required>
+                            </div>
+                        
+                            <div class="form-group">
+                                <label for="apellido_materno" class="form-label">Apellido Materno:</label>
+                                <input type="text" name="apellido_materno" class="form-input" required>
+                            </div>
+                        
+                            <div class="form-group">
+                                <label for="receta" class="form-label">Tipo de Receta:</label>
+                                <select name="receta" class="form-select" required>
+                                    <option value="" disabled selected>Selecciona una opción</option>
+                                    <option value="Ordinaria">Ordinaria</option>
+                                    <option value="Especial">Especial</option>
+                                </select>
+                            </div>
+                        
+                            <button type="submit" class="btn-guardar">Guardar</button>
+                            <div id="mensaje-alerta" style="display: none;">Cliente agregado exitosamente!</div> <!-- Contenedor de alerta -->
+                        </form>
+                    </div>                  
+                </section>
+            </div>
+        </main>
+    </div>
+    <script src="/js/clientes.js"></script>
+</body>
+</html>

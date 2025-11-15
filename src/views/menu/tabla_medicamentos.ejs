@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/tabla_medicamentos.css">
+    <title>Document</title>
+</head>
+<body>
+    <div class="content">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Cantidad</th>
+                        <th>Precio de Venta</th>
+                        <th>Fecha de Caducidad</th>
+                        <th>Presentación</th>
+                        <th>Controlado</th>
+                        <th>Proveedor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (medicamentos && medicamentos.length > 0) { %>
+                        <% medicamentos.forEach(medicamento => { %>
+                            <tr>
+                                <td><%= medicamento.nombre %></td>
+                                <td><%= medicamento.cantidad %></td>
+                                <td><%= medicamento.precio %></td>
+                                <td><%= medicamento.fecha_caducidad.toISOString().split('T')[0] %></td>
+                                <td><%= medicamento.nombre_presentacion %></td>
+                                <td><%= medicamento.nombre_controlado %></td>
+                                <td><%= medicamento.nombre_proveedor %></td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="7">No hay medicamentos para mostrar</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+            
+        </div>
+        <a href="/menu/inicio" class="btn-guardar">Regresar</a>
+
+    </div> 
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - MediStock</title>
+    <link rel="stylesheet" href="/datos_admin.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo"></div>
+            <nav>
+                <ul>
+                    <ul>
+                            <li>
+                                <a href="/menu_admin/inicio_admin">
+                                    <img width="40" height="40" src="/icons/icons2.png" alt="user" class="menu-icon"/>
+                                    Menu Inicio
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/datos_medicamentos_admin" class="active" >
+                                    <img width="40" height="40" src="/icons/icons3.png" alt="user" class="menu-icon"/>
+                                    Generar PDF Medicamentos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/medicamentos_admin" >
+                                    <img width="40" height="40" src="/icons/icons4.png" alt="user" class="menu-icon"/>
+                                    Ingresar Medicamentos
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/clientes_admin" >
+                                    <img width="40" height="40" src="/icons/iconusuario.png" alt="user" class="menu-icon"/>
+                                    Gestionar Clientes
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/proveedores_admin" >
+                                    <img width="40" height="40" src="/icons/icons5.png" alt="user" class="menu-icon"/>
+                                    Gestionar Proveedores
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/administrar_usuarios" >
+                                    <img width="40" height="40" src="/icons/iconadministra.png" alt="user" class="menu-icon"/>
+                                    Administrar Usuarios
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/menu_admin/venta">
+                                    <img width="40" height="40" src="/icons/compra.png" alt="user" class="menu-icon"/>
+                                    Realizar Venta
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/">
+                                    <img width="40" height="40" src="/icons/cerrar-sesion.png" alt="user" class="menu-icon"/>
+                                    Cerrar Sesión
+                                </a>
+                            </li>
+
+                    </ul>                    </ul>
+            </nav>
+        </aside>
+        <div class="content">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Cantidad</th>
+                            <th>Precio de Venta</th>
+                            <th>Fecha de Caducidad</th>
+                            <th>Presentación</th>
+                            <th>Controlado</th>
+                            <th>Proveedor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (medicamentos && medicamentos.length > 0) { %>
+                            <% medicamentos.forEach(medicamento => { %>
+                                <tr>
+                                    <td><%= medicamento.nombre %></td>
+                                    <td><%= medicamento.cantidad %></td>
+                                    <td><%= medicamento.precio %></td>
+                                    <td><%= medicamento.fecha_caducidad.toISOString().split('T')[0] %></td>
+                                    <td><%= medicamento.nombre_presentacion %></td>
+                                    <td><%= medicamento.nombre_controlado %></td>
+                                    <td><%= medicamento.nombre_proveedor %></td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="7">No hay medicamentos para mostrar</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+            <a href="/menu_admin/reporte_medicamentos" class="btn-guardar" target="_blank">Generar Reporte en PDF</a>
+        </div>
+    </div>
+</body>
+</html>
