@@ -8,6 +8,7 @@ const db_config = {
     port: parseInt(process.env.DB_PORT),
 };
 
+
 let conexion;
 
 function handleDisconnect() {

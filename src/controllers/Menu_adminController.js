@@ -1306,12 +1306,28 @@ function eliminarVenta(req, res) {
 
 
 
+<<<<<<< HEAD
+function exportarVentasPDF(req, res) {
+    const PDFDocument = require('pdfkit');
+
+    // Consulta SQL primero
+=======
 ///////////////////////////////////////////PDF VENTAS-//////////////////////////////
 
 function exportarVentasPDF(req, res) {
     const PDFDocument = require('pdfkit');
 
+<<<<<<< HEAD
     // Consulta SQL primero
+=======
+    // Configurar cabeceras HTTP
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="historial_ventas.pdf"');
+    doc.pipe(res);
+
+    // Consulta SQL
+>>>>>>> a1b1ad181f033a293d549c0c672d6ad9e64ad677
+>>>>>>> cc0a27b37eb56d91700b68480df1ced81576d9d1
     const query = `
         SELECT 
             v.fecha_venta, 
@@ -1333,6 +1349,10 @@ function exportarVentasPDF(req, res) {
             return res.status(500).send('Error al generar reporte');
         }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> cc0a27b37eb56d91700b68480df1ced81576d9d1
         // Crear el PDF SIN enviar nada todavía
         const PDFDocument = require('pdfkit');
         const doc = new PDFDocument({ margin: 40, size: 'A4' });
@@ -1341,15 +1361,33 @@ function exportarVentasPDF(req, res) {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename="historial_ventas.pdf"');
         doc.pipe(res);
+<<<<<<< HEAD
 
         // ==============================
         // ENCABEZADO GENERAL
+=======
+
+        // ==============================
+        // ENCABEZADO GENERAL
+=======
+        if (ventas.length === 0) {
+            return res.status(404).send('No se encontraron ventas registradas');
+        }
+
+        // ==============================
+        // ENCABEZADO DEL DOCUMENTO
+>>>>>>> a1b1ad181f033a293d549c0c672d6ad9e64ad677
+>>>>>>> cc0a27b37eb56d91700b68480df1ced81576d9d1
         // ==============================
         doc.fontSize(18).text('Centro de Salud de Teoloyucan', { align: 'center' });
         doc.moveDown(0.5);
         doc.fontSize(14).text('Historial de Ventas - MediStock', { align: 'center' });
         doc.moveDown(0.5);
         doc.fontSize(10).text(`Fecha de generación: ${new Date().toLocaleDateString('es-MX')}`, { align: 'right' });
+<<<<<<< HEAD
+        doc.moveDown(2);
+=======
+<<<<<<< HEAD
         doc.moveDown(2);
 
         // ==============================
@@ -1368,6 +1406,30 @@ function exportarVentasPDF(req, res) {
         // CASO 2: SI HAY VENTAS → TABLA
         // ==============================
 
+=======
+        doc.moveDown(1);
+>>>>>>> cc0a27b37eb56d91700b68480df1ced81576d9d1
+
+        // ==============================
+        // CASO 1: NO HAY VENTAS
+        // ==============================
+<<<<<<< HEAD
+        if (ventas.length === 0) {
+            doc.fontSize(14).text('No se encontraron ventas registradas.', {
+                align: 'center'
+            });
+
+            doc.end();
+            return;
+        }
+
+        // ==============================
+        // CASO 2: SI HAY VENTAS → TABLA
+        // ==============================
+
+=======
+>>>>>>> a1b1ad181f033a293d549c0c672d6ad9e64ad677
+>>>>>>> cc0a27b37eb56d91700b68480df1ced81576d9d1
         const columnas = [
             { header: 'Fecha de Venta', width: 90 },
             { header: 'Medicamento', width: 100 },
@@ -1393,7 +1455,17 @@ function exportarVentasPDF(req, res) {
         let endX = startX + tableWidth;
         let y = doc.y;
 
+<<<<<<< HEAD
         // ENCABEZADOS
+=======
+<<<<<<< HEAD
+        // ENCABEZADOS
+=======
+        // ==============================
+        // ENCABEZADOS DE TABLA
+        // ==============================
+>>>>>>> a1b1ad181f033a293d549c0c672d6ad9e64ad677
+>>>>>>> cc0a27b37eb56d91700b68480df1ced81576d9d1
         doc.font('Helvetica-Bold').fontSize(10);
         let x = startX;
         columnas.forEach(col => {
@@ -1402,10 +1474,26 @@ function exportarVentasPDF(req, res) {
         });
 
         y += 18;
+<<<<<<< HEAD
         doc.moveTo(startX, y - 5).lineTo(endX, y - 5).stroke();
         doc.font('Helvetica').fontSize(9);
 
         // FILAS
+=======
+<<<<<<< HEAD
+        doc.moveTo(startX, y - 5).lineTo(endX, y - 5).stroke();
+        doc.font('Helvetica').fontSize(9);
+
+        // FILAS
+=======
+        doc.moveTo(startX, y - 5).lineTo(endX, y - 5).strokeColor('#000000').stroke();
+        doc.font('Helvetica').fontSize(9);
+
+        // ==============================
+        // FILAS DE DATOS
+        // ==============================
+>>>>>>> a1b1ad181f033a293d549c0c672d6ad9e64ad677
+>>>>>>> cc0a27b37eb56d91700b68480df1ced81576d9d1
         ventas.forEach(v => {
             if (y > 750) {
                 doc.addPage();
@@ -1413,6 +1501,9 @@ function exportarVentasPDF(req, res) {
                 endX = startX + tableWidth;
                 y = 50;
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
                 x = startX;
                 doc.font('Helvetica-Bold').fontSize(10);
                 columnas.forEach(col => {
@@ -1422,6 +1513,24 @@ function exportarVentasPDF(req, res) {
 
                 y += 18;
                 doc.moveTo(startX, y - 5).lineTo(endX, y - 5).stroke();
+=======
+                // Redibujar encabezados en nueva página
+>>>>>>> cc0a27b37eb56d91700b68480df1ced81576d9d1
+                x = startX;
+                doc.font('Helvetica-Bold').fontSize(10);
+                columnas.forEach(col => {
+                    doc.text(col.header, x, y, { width: col.width });
+                    x += col.width;
+                });
+<<<<<<< HEAD
+
+                y += 18;
+                doc.moveTo(startX, y - 5).lineTo(endX, y - 5).stroke();
+=======
+                y += 180;
+                doc.moveTo(startX, y - 5).lineTo(endX, y - 5).strokeColor('#000000').stroke();
+>>>>>>> a1b1ad181f033a293d549c0c672d6ad9e64ad677
+>>>>>>> cc0a27b37eb56d91700b68480df1ced81576d9d1
                 doc.font('Helvetica').fontSize(9);
             }
 
@@ -1445,14 +1554,31 @@ function exportarVentasPDF(req, res) {
             doc.moveTo(startX, y - 3).lineTo(endX, y - 3).strokeColor('#dddddd').stroke();
         });
 
+<<<<<<< HEAD
         // Finalizar
+=======
+<<<<<<< HEAD
+        // Finalizar
+=======
+        // ==============================
+        // FINALIZAR DOCUMENTO
+        // ==============================
+>>>>>>> a1b1ad181f033a293d549c0c672d6ad9e64ad677
+>>>>>>> cc0a27b37eb56d91700b68480df1ced81576d9d1
         doc.end();
     });
 }
 
 
 
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> a1b1ad181f033a293d549c0c672d6ad9e64ad677
+>>>>>>> cc0a27b37eb56d91700b68480df1ced81576d9d1
 module.exports = {
     inicio_admin,
 
