@@ -1076,20 +1076,10 @@ function eliminarVenta(req, res) {
 
 
 
-const fs = require('fs');
-const path = require('path');
-const PDFDocument = require('pdfkit');
-
 function exportarVentasPDF(req, res) {
     const PDFDocument = require('pdfkit');
-    const doc = new PDFDocument({ margin: 40, size: 'A4' });
 
-    // Configurar cabeceras HTTP
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename="historial_ventas.pdf"');
-    doc.pipe(res);
-
-    // Consulta SQL
+    // Consulta SQL primero
     const query = `
         SELECT 
             v.fecha_venta, 
@@ -1111,23 +1101,41 @@ function exportarVentasPDF(req, res) {
             return res.status(500).send('Error al generar reporte');
         }
 
-        if (ventas.length === 0) {
-            return res.status(404).send('No se encontraron ventas registradas');
-        }
+        // Crear el PDF SIN enviar nada todavía
+        const PDFDocument = require('pdfkit');
+        const doc = new PDFDocument({ margin: 40, size: 'A4' });
+
+        // Configurar cabeceras
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename="historial_ventas.pdf"');
+        doc.pipe(res);
 
         // ==============================
-        // ENCABEZADO DEL DOCUMENTO
+        // ENCABEZADO GENERAL
         // ==============================
         doc.fontSize(18).text('Centro de Salud de Teoloyucan', { align: 'center' });
         doc.moveDown(0.5);
         doc.fontSize(14).text('Historial de Ventas - MediStock', { align: 'center' });
         doc.moveDown(0.5);
         doc.fontSize(10).text(`Fecha de generación: ${new Date().toLocaleDateString('es-MX')}`, { align: 'right' });
-        doc.moveDown(1);
+        doc.moveDown(2);
 
         // ==============================
-        // CONFIGURACIÓN DE COLUMNAS
+        // CASO 1: NO HAY VENTAS
         // ==============================
+        if (ventas.length === 0) {
+            doc.fontSize(14).text('No se encontraron ventas registradas.', {
+                align: 'center'
+            });
+
+            doc.end();
+            return;
+        }
+
+        // ==============================
+        // CASO 2: SI HAY VENTAS → TABLA
+        // ==============================
+
         const columnas = [
             { header: 'Fecha de Venta', width: 90 },
             { header: 'Medicamento', width: 100 },
@@ -1153,9 +1161,7 @@ function exportarVentasPDF(req, res) {
         let endX = startX + tableWidth;
         let y = doc.y;
 
-        // ==============================
-        // ENCABEZADOS DE TABLA
-        // ==============================
+        // ENCABEZADOS
         doc.font('Helvetica-Bold').fontSize(10);
         let x = startX;
         columnas.forEach(col => {
@@ -1164,12 +1170,10 @@ function exportarVentasPDF(req, res) {
         });
 
         y += 18;
-        doc.moveTo(startX, y - 5).lineTo(endX, y - 5).strokeColor('#000000').stroke();
+        doc.moveTo(startX, y - 5).lineTo(endX, y - 5).stroke();
         doc.font('Helvetica').fontSize(9);
 
-        // ==============================
-        // FILAS DE DATOS
-        // ==============================
+        // FILAS
         ventas.forEach(v => {
             if (y > 750) {
                 doc.addPage();
@@ -1177,15 +1181,15 @@ function exportarVentasPDF(req, res) {
                 endX = startX + tableWidth;
                 y = 50;
 
-                // Redibujar encabezados en nueva página
                 x = startX;
                 doc.font('Helvetica-Bold').fontSize(10);
                 columnas.forEach(col => {
-                    doc.text(col.header, x, y, { width: col.width, align: 'center' });
+                    doc.text(col.header, x, y, { width: col.width });
                     x += col.width;
                 });
-                y += 180;
-                doc.moveTo(startX, y - 5).lineTo(endX, y - 5).strokeColor('#000000').stroke();
+
+                y += 18;
+                doc.moveTo(startX, y - 5).lineTo(endX, y - 5).stroke();
                 doc.font('Helvetica').fontSize(9);
             }
 
@@ -1209,12 +1213,11 @@ function exportarVentasPDF(req, res) {
             doc.moveTo(startX, y - 3).lineTo(endX, y - 3).strokeColor('#dddddd').stroke();
         });
 
-        // ==============================
-        // FINALIZAR DOCUMENTO
-        // ==============================
+        // Finalizar
         doc.end();
     });
 }
+
 
 
 
