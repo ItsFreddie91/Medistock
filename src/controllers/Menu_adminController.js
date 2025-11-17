@@ -162,35 +162,46 @@ function administrar_proveedores (req, res){//1
 function editarProveedor(req, res) {
     const id = req.params.id_proveedores;
     const query = 'SELECT * FROM proveedores WHERE id_proveedores = ?';
-    
+
     conexion.query(query, [id], (err, results) => {
         if (err) {
             console.error('Error al obtener proveedor:', err);
             res.status(500).send('Error al obtener proveedor');
         } else {
-            res.render('menu_admin/modificar_proveedor', { proveedor: results[0] });
+            res.render('menu_admin/modificar_proveedor', { 
+                proveedor: results[0]
+            });
         }
     });
 }
 
+
 // Actualizar proveedor en la base de datos
 function actualizarProveedor(req, res) {
     const id = req.params.id_proveedores;
-    console.log("ID del proveedor a actualizar:", id); // Línea de depuración
-  
     const { nombre, direccion, telefono, correo } = req.body;
-    const query = 'UPDATE proveedores SET nombre = ?, direccion = ?, telefono = ?, correo = ? WHERE id_proveedores = ?';
-  
+
+    const query = `
+        UPDATE proveedores 
+        SET nombre = ?, direccion = ?, telefono = ?, correo = ?
+        WHERE id_proveedores = ?
+    `;
+
     conexion.query(query, [nombre, direccion, telefono, correo, id], (err) => {
         if (err) {
             console.error('Error al actualizar proveedor:', err);
-            res.status(500).send('Error al actualizar proveedor');
-        } else {
-            // Después de actualizar, redirigir a la página de resultados con el nombre del proveedor
-            res.redirect(`/menu_admin/buscar-proveedor?nombre=${encodeURIComponent(nombre)}`);
+            req.flash("error", "Error al actualizar el proveedor.");
+            return res.redirect("back");
         }
+
+        // ⭐ MENSAJE DE ÉXITO ⭐
+        req.flash("success", "Proveedor actualizado correctamente.");
+
+        // ⭐ REGRESAR A LA BÚSQUEDA ⭐
+        res.redirect(`/menu_admin/buscar-proveedor?nombre=${encodeURIComponent(nombre)}`);
     });
-  }
+}
+
   
 
 // Eliminar proveedor
@@ -213,7 +224,7 @@ function eliminarProveedor(req, res) {
 
 
 function buscarProveedor(req, res) {
-    const nombreBuscado = req.query.nombre; // Captura el nombre buscado desde la consulta en la URL
+    const nombreBuscado = req.query.nombre;
     const query = 'SELECT * FROM proveedores WHERE nombre LIKE ?';
 
     conexion.query(query, [`%${nombreBuscado}%`], (err, resultados) => {
@@ -222,13 +233,13 @@ function buscarProveedor(req, res) {
             return res.status(500).send('Error al buscar proveedores');
         }
 
-        // Renderiza la vista pasando los resultados y el nombre buscado
         res.render('menu_admin/resultadoProveedor', {
             proveedores: resultados,
-            nombreBuscado // Pasa el nombre buscado a la vista
+            nombreBuscado
         });
     });
 }
+
 
 //PARA REGISTRA CLIENTES
 function vista_clientes(req, res) {
@@ -310,18 +321,28 @@ function mostrarFormularioEdicion(req, res) {
 function actualizarCliente(req, res) {
     const idCliente = req.params.id_clientes;
     const { nombre, apellido_paterno, apellido_materno, receta } = req.body;
-    const query = 'UPDATE clientes SET nombre = ?, apellido_paterno = ?, apellido_materno = ?, receta = ? WHERE id_clientes = ?';
+
+    const query = `
+        UPDATE clientes 
+        SET nombre = ?, apellido_paterno = ?, apellido_materno = ?, receta = ?
+        WHERE id_clientes = ?
+    `;
 
     conexion.query(query, [nombre, apellido_paterno, apellido_materno, receta, idCliente], (err) => {
         if (err) {
-            console.error('Error al actualizar el cliente:', err);
-            return res.status(500).send('Error al actualizar el cliente');
+            console.error('Error al actualizar cliente:', err);
+            req.flash("error", "Error al actualizar cliente");
+            return res.redirect("back");
         }
 
-        // Redirige a la página de resultados con los datos del cliente actualizado
-        res.redirect(`/menu_admin/resultadoCliente/${idCliente}`);
+        // ⭐ MENSAJE FLASH ⭐
+        req.flash("success", "Cliente actualizado correctamente");
+
+        // ⭐ REDIRIGE A LA BÚSQUEDA CON EL NOMBRE ⭐
+        res.redirect(`/menu_admin/buscar-cliente?nombre=${encodeURIComponent(nombre)}`);
     });
 }
+
 
 // Mostrar cliente actualizado
 function mostrarClienteActualizado(req, res) {
@@ -370,51 +391,61 @@ function eliminarCliente(req, res) {
 
 //MUESRA LA TABLA DE MEDICAMENTOS
 function vista_datos_medicamentos(req, res) {
-    const cantidad = parseInt(req.query.cantidad, 10); // Captura la cantidad desde la URL
+    const cantidad = parseInt(req.query.cantidad, 10);
 
-    // Construir la consulta con o sin límite dependiendo de si se especificó una cantidad válida
-    const query = cantidad
-        ? `SELECT 
-             m.id_medicamentos,
-             m.nombre,
-             m.cantidad,
-             m.precio,
-             m.fecha_caducidad,
-             p.presentacion AS nombre_presentacion,
-             c.controlado AS nombre_controlado,
-             IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
-           FROM 
-             Medicamentos m
-           JOIN 
-             presentacion p ON m.presentation_id = p.id_presentacion
-           JOIN 
-             controlado c ON m.controlado_id = c.id_controlado
-           LEFT JOIN 
-             proveedores pr ON m.proveedores_id = pr.id_proveedores
-           ORDER BY 
-             m.id_medicamentos DESC
-           LIMIT ?`
-        : `SELECT 
-             m.id_medicamentos,
-             m.nombre,
-             m.cantidad,
-             m.precio,
-             m.fecha_caducidad,
-             p.presentacion AS nombre_presentacion,
-             c.controlado AS nombre_controlado,
-             IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
-           FROM 
-             medicamentos m
-           JOIN 
-             presentacion p ON m.presentation_id = p.id_presentacion
-           JOIN 
-             controlado c ON m.controlado_id = c.id_controlado
-           LEFT JOIN 
-             proveedores pr ON m.proveedores_id = pr.id_proveedores
-           ORDER BY 
-             m.id_medicamentos DESC`;
+    // Consulta con límite
+    const queryConLimite = `
+        SELECT 
+            m.id_medicamentos,
+            m.nombre,
+            m.cantidad,
+            m.precio,
+            m.fecha_caducidad,
+            p.presentacion AS nombre_presentacion,
+            c.controlado AS nombre_controlado,
+            IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
+        FROM 
+            medicamentos m
+        JOIN 
+            presentacion p ON m.presentation_id = p.id_presentacion
+        JOIN 
+            controlado c ON m.controlado_id = c.id_controlado
+        LEFT JOIN 
+            proveedores pr ON m.proveedores_id = pr.id_proveedores
+        WHERE 
+            m.cantidad > 0
+        ORDER BY 
+            m.id_medicamentos DESC
+        LIMIT ?
+    `;
 
-    // Ejecutar consulta con o sin parámetros
+    // Consulta sin límite
+    const querySinLimite = `
+        SELECT 
+            m.id_medicamentos,
+            m.nombre,
+            m.cantidad,
+            m.precio,
+            m.fecha_caducidad,
+            p.presentacion AS nombre_presentacion,
+            c.controlado AS nombre_controlado,
+            IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
+        FROM 
+            medicamentos m
+        JOIN 
+            presentacion p ON m.presentation_id = p.id_presentacion
+        JOIN 
+            controlado c ON m.controlado_id = c.id_controlado
+        LEFT JOIN 
+            proveedores pr ON m.proveedores_id = pr.id_proveedores
+        WHERE 
+            m.cantidad > 0
+        ORDER BY 
+            m.id_medicamentos DESC
+    `;
+
+    const query = cantidad ? queryConLimite : querySinLimite;
+
     conexion.query(query, cantidad ? [cantidad] : [], (err, results) => {
         if (err) {
             console.error('Error al consultar medicamentos:', err);
@@ -423,10 +454,11 @@ function vista_datos_medicamentos(req, res) {
 
         res.render('menu_admin/datos_medicamentos_admin', { 
             medicamentos: results,
-            cantidad // por si deseas mostrar la cantidad actual en la vista
+            cantidad
         });
     });
 }
+
 
 
 
@@ -449,10 +481,11 @@ function tabla_medicamentos(req, res) {
       controlado c ON m.controlado_id = c.id_controlado
     LEFT JOIN 
       proveedores pr ON m.proveedores_id = pr.id_proveedores
+    WHERE 
+      m.cantidad > 0
     ORDER BY 
       m.id_medicamentos DESC;
   `;
-  
 
     conexion.query(query, (err, results) => {
         if (err) {
@@ -462,6 +495,7 @@ function tabla_medicamentos(req, res) {
         res.render('menu_admin/tabla_medicamentos', { medicamentos: results });
     });
 }
+
 
 function tabla_clientes(req, res) {
     const query = `
@@ -600,7 +634,7 @@ function generarReportePDF(req, res) {
                 m.cantidad > 0
             ORDER BY 
                 m.id_medicamentos DESC
-            LIMIT 20;
+            LIMIT 50;
     `;
 
     conexion.query(query, (err, medicamentos) => {
@@ -873,44 +907,61 @@ function editarUsuario(req, res) {
 // Función para actualizar un usuario en la base de datos
 function actualizarUsuario(req, res) {
     const id = parseInt(req.params.id_usuarios, 10);
-    
-    // Impide modificar al administrador del sistema
+
+    // Evitar editar al ADMIN principal
     if (id === 1) {
-        return res.redirect('/menu_admin/administrar_usuarios?alerta=No%20se%20puede%20modificar%20al%20Administrador%20del%20sistema');
+        req.flash("error", "No se puede modificar al Administrador del sistema");
+        return res.redirect('/menu_admin/administrar_usuarios');
     }
 
     const { nombre, apellido_paterno, apellido_materno, usuario, contrasena } = req.body;
 
-    if (contrasena) {
+    // Si viene contraseña → encriptar
+    if (contrasena && contrasena.trim() !== "") {
         bcrypt.hash(contrasena, 12, (err, hashedPassword) => {
             if (err) {
                 console.error('Error al encriptar la contraseña:', err);
-                res.status(500).send('Error al encriptar la contraseña');
-                return;
+                req.flash("error", "Error al actualizar el usuario");
+                return res.redirect('/menu_admin/administrar_usuarios');
             }
 
-            const query = 'UPDATE usuarios SET nombre = ?, apellido_paterno = ?, apellido_materno = ?, usuario = ?, contrasena = ? WHERE id_usuario = ?';
-            conexion.query(query, [nombre, apellido_paterno, apellido_materno, usuario, hashedPassword, id], (err) => {
+            const sql = `
+                UPDATE usuarios 
+                SET nombre=?, apellido_paterno=?, apellido_materno=?, usuario=?, contrasena=? 
+                WHERE id_usuario=?
+            `;
+
+            conexion.query(sql, [nombre, apellido_paterno, apellido_materno, usuario, hashedPassword, id], (err) => {
                 if (err) {
                     console.error('Error al actualizar usuario:', err);
-                    res.status(500).send('Error al actualizar usuario');
+                    req.flash("error", "Error al actualizar usuario");
                 } else {
-                    res.redirect('/menu_admin/administrar_usuarios');
+                    req.flash("success", "Usuario actualizado correctamente");
                 }
+                return res.redirect('/menu_admin/administrar_usuarios');
             });
         });
+
     } else {
-        const query = 'UPDATE usuarios SET nombre = ?, apellido_paterno = ?, apellido_materno = ?, usuario = ? WHERE id_usuario = ?';
-        conexion.query(query, [nombre, apellido_paterno, apellido_materno, usuario, id], (err) => {
+        // Sin contraseña
+        const sql = `
+            UPDATE usuarios 
+            SET nombre=?, apellido_paterno=?, apellido_materno=?, usuario=? 
+            WHERE id_usuario=?
+        `;
+
+        conexion.query(sql, [nombre, apellido_paterno, apellido_materno, usuario, id], (err) => {
             if (err) {
                 console.error('Error al actualizar usuario:', err);
-                res.status(500).send('Error al actualizar usuario');
+                req.flash("error", "Error al actualizar usuario");
             } else {
-                res.redirect('/menu_admin/administrar_usuarios');
+                req.flash("success", "Usuario actualizado correctamente");
             }
+            return res.redirect('/menu_admin/administrar_usuarios');
         });
     }
 }
+
   
 
 function eliminarUsuario(req, res) {
@@ -971,7 +1022,8 @@ function buscarMedicamento(req, res) {
 
         res.render('menu_admin/resultadoMedicamento_admin', {
             medicamentos: medicamentosFormateados,
-            nombreBuscado 
+            nombreBuscado
+
         });
     });
 }
@@ -998,43 +1050,45 @@ function actualizarMedicamento(req, res) {
     const idMedicamento = req.params.id_medicamentos;
     const { nombre, precio, cantidad, fecha_caducidad, presentation_id, controlado_id, proveedor_id } = req.body;
 
+    // Validación
     if (!nombre || !precio || !cantidad || !fecha_caducidad || !presentation_id || !controlado_id) {
-        return res.status(400).send('Todos los campos son obligatorios.');
+        req.flash("error", "Todos los campos son obligatorios.");
+        return res.redirect("back");
     }
 
-    // Si no hay proveedor asignado (el anterior fue eliminado), asignar un proveedor nuevo
-    const proveedorIdFinal = proveedor_id && proveedor_id !== '' ? proveedor_id : null;
-    const presentacionIdFinal = presentation_id && presentation_id !== '' ? presentation_id : null;
+    const proveedorIdFinal = proveedor_id || null;
+    const presentacionIdFinal = presentation_id || null;
 
     const query = `
         UPDATE medicamentos 
-        SET 
-            nombre = ?, 
-            precio = ?, 
-            cantidad = ?, 
-            fecha_caducidad = ?, 
-            presentation_id = ?, 
-            controlado_id = ?, 
-            proveedores_id = ?
+        SET nombre = ?, precio = ?, cantidad = ?, fecha_caducidad = ?, 
+            presentation_id = ?, controlado_id = ?, proveedores_id = ?
         WHERE id_medicamentos = ?
     `;
 
-    const values = [nombre, precio, cantidad, fecha_caducidad, presentacionIdFinal, controlado_id, proveedorIdFinal, idMedicamento];
+    const values = [
+        nombre, precio, cantidad, fecha_caducidad,
+        presentacionIdFinal, controlado_id, proveedorIdFinal,
+        idMedicamento
+    ];
 
-    conexion.query(query, values, (err, result) => {
+    conexion.query(query, values, (err) => {
         if (err) {
             console.error("Error al actualizar medicamento:", err);
-            return res.status(500).send("Error al actualizar medicamento");
+            req.flash("error", "Error al actualizar el medicamento.");
+            return res.redirect("back");
         }
 
-        // Redirigir después de la actualización
-        res.redirect(`/menu_admin/buscar-medicamento?nombre=${encodeURIComponent(nombre)}`);
+        // 🔹 Guarda mensaje de éxito
+        req.flash("success", "El medicamento se actualizó correctamente.");
+
+        // 🔹 Vuelve a la vista anterior
+         res.redirect(`/menu_admin/buscar-medicamento?nombre=${encodeURIComponent(nombre)}`);
+
     });
 }
-    
-    
-    
-    
+
+
 
     function editarMedicamento(req, res) {
         const id = req.params.id_medicamentos;
@@ -1078,12 +1132,16 @@ function actualizarMedicamento(req, res) {
                                         res.status(500).send('Error al obtener los proveedores');
                                     } else {
                                         // Renderizar la vista con todos los datos
-                                        res.render('menu_admin/modificar_medicamento_admin', {
-                                            medicamento: medicamentoResults[0],
-                                            presentaciones: presentacionesResults,
-                                            controlados: controladosResults,
-                                            proveedores: proveedoresResults // Agregar proveedores aquí
-                                        });
+                                      res.render('menu_admin/modificar_medicamento_admin', {
+                                        medicamento: medicamentoResults[0],
+                                        presentaciones: presentacionesResults,
+                                        controlados: controladosResults,
+                                        proveedores: proveedoresResults,
+                                        success: req.flash("success"),
+                                        error: req.flash("error")
+                                    });
+
+
                                     }
                                 });
                             }

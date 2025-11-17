@@ -1,57 +1,122 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/modificar_medicamento_admin.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/modificar_medicamento_admin.css" />
     <title>Editar Medicamento</title>
+
+    <style>
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-left: 5px solid #28a745;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-left: 5px solid #dc3545;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .form-row { margin-bottom: 10px; }
+        label { display:block; margin-bottom:4px; }
+        input, select { width:100%; padding:8px; box-sizing:border-box; }
+        .actions { margin-top:14px; display:flex; gap:10px; align-items:center; }
+        .back-button { text-decoration:none; padding:8px 12px; background:#6c757d; color:#fff; border-radius:4px; }
+        button[type="submit"] { padding:8px 12px; background:#007bff; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Editar Medicamento</h1>
-<form action="/menu_admin/modificar_medicamento/<%= medicamento.id_medicamentos %>" method="POST">
-    <label for="nombre">Nombre:</label>
-    <input type="text" name="nombre" id="nombre" value="<%= medicamento.nombre %>" required>
 
-    <label for="precio">Precio:</label>
-    <input type="number" step="0.01" name="precio" id="precio" value="<%= medicamento.precio %>" required>
-    
-    <label for="cantidad">Stock:</label>
-    <input type="number" name="cantidad" id="cantidad" value="<%= medicamento.cantidad %>" required>
+        <!-- Mensajes Flash -->
+<% if (success && success.length > 0) { %>
+    <script>
+        alert("<%= success[0] %>");
+    </script>
+<% } %>
 
-    <label for="fecha_caducidad">Fecha de Caducidad:</label>
-    <input type="date" name="fecha_caducidad" id="fecha_caducidad" value="<%= medicamento.fecha_caducidad.toISOString().split('T')[0] %>" required>
+<% if (error && error.length > 0) { %>
+    <script>
+        alert("<%= error[0] %>");
+    </script>
+<% } %>
 
-    <label for="presentation_id">Presentación:</label>
-    <select name="presentation_id" id="presentation_id" required>
-        <option value="1" <%= medicamento.presentation_id === 1 ? 'selected' : '' %>>Caja</option>
-        <option value="2" <%= medicamento.presentation_id === 2 ? 'selected' : '' %>>Frasco</option>
-    </select>
 
-    <label for="controlado_id">Controlado:</label>
-    <select name="controlado_id" id="controlado_id" required>
-        <% controlados.forEach(controlado => { %>
-            <option value="<%= controlado.id_controlado %>" 
-                <%= Number(controlado.id_controlado) === Number(medicamento.controlado_id) ? 'selected' : '' %> >
-                <%= controlado.controlado %>
-            </option>
-        <% }) %>
-    </select>
 
-    <label for="proveedor_id">Proveedor:</label>
-    <select name="proveedor_id" id="proveedor_id" required>
-        <option value="" disabled <%= !medicamento.proveedores_id ? 'selected' : '' %>>Selecciona un proveedor</option>
-        <% proveedores.forEach(proveedor => { %>
-            <option value="<%= proveedor.id_proveedores %>" 
-                <%= Number(proveedor.id_proveedor) === Number(medicamento.proveedores_id) ? 'selected' : '' %> >
-                <%= proveedor.nombre %>
-            </option>
-        <% }) %>
-    </select>
-    <br><br>
-    <button type="submit">Guardar Cambios</button>
-    <a href="javascript:history.back()" class="back-button">Regresar</a>
-</form>
+        <form action="/menu_admin/modificar_medicamento/<%= medicamento.id_medicamentos %>" method="POST">
+            <div class="form-row">
+                <label for="nombre">Nombre:</label>
+                <input type="text" name="nombre" id="nombre" value="<%= medicamento.nombre %>" required />
+            </div>
+
+            <div class="form-row">
+                <label for="precio">Precio:</label>
+                <input type="number" step="0.01" name="precio" id="precio" value="<%= medicamento.precio %>" required />
+            </div>
+
+            <div class="form-row">
+                <label for="cantidad">Stock:</label>
+                <input type="number" name="cantidad" id="cantidad" value="<%= medicamento.cantidad %>" required />
+            </div>
+
+            <div class="form-row">
+                <label for="fecha_caducidad">Fecha de Caducidad:</label>
+                <input type="date" name="fecha_caducidad" id="fecha_caducidad"
+                    value="<%= medicamento.fecha_caducidad ? medicamento.fecha_caducidad.toISOString().split('T')[0] : '' %>"
+                    required />
+            </div>
+
+            <div class="form-row">
+                <label for="presentation_id">Presentación:</label>
+                <select name="presentation_id" id="presentation_id" required>
+                    <% presentaciones.forEach(function(p) { %>
+                        <option value="<%= p.id_presentacion %>"
+                            <%= Number(p.id_presentacion) === Number(medicamento.presentation_id) ? "selected" : "" %>>
+                            <%= p.presentacion %>
+                        </option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="controlado_id">Controlado:</label>
+                <select name="controlado_id" id="controlado_id" required>
+                    <% controlados.forEach(function(c) { %>
+                        <option value="<%= c.id_controlado %>"
+                            <%= Number(c.id_controlado) === Number(medicamento.controlado_id) ? "selected" : "" %>>
+                            <%= c.controlado %>
+                        </option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="proveedor_id">Proveedor:</label>
+                <select name="proveedor_id" id="proveedor_id">
+                    <option value="" disabled <%= !medicamento.proveedores_id ? "selected" : "" %>>Selecciona un proveedor</option>
+                    <% proveedores.forEach(function(proveedor) { %>
+                        <option value="<%= proveedor.id_proveedores %>"
+                            <%= Number(proveedor.id_proveedores) === Number(medicamento.proveedores_id) ? "selected" : "" %>>
+                            <%= proveedor.nombre %>
+                        </option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <div class="actions">
+                <button type="submit">Guardar Cambios</button>
+                <a href="javascript:history.back()" class="back-button">Regresar</a>
+            </div>
+        </form>
     </div>
 </body>
 </html>

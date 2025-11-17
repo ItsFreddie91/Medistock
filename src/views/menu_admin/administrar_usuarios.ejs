@@ -7,6 +7,18 @@
     <link rel="stylesheet" href="/administrar_usuarios.css">
 </head>
 <body>
+    <% if (success && success.length > 0) { %>
+<script>
+    alert("<%= success[0] %>");
+</script>
+<% } %>
+
+<% if (error && error.length > 0) { %>
+<script>
+    alert("<%= error[0] %>");
+</script>
+<% } %>
+
     <div class="container">
         <aside class="sidebar">
             <div class="logo"></div>

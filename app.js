@@ -17,7 +17,7 @@ app.set('port', process.env.PORT || 5000);
 
 // Motor de plantillas EJS
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'src', 'views'));  // Corregido
+app.set('views', path.join(__dirname, 'src', 'views'));  
 
 // Middleware
 app.use(session({
@@ -28,9 +28,18 @@ app.use(session({
 }));
 
 app.use(flash());
+
+// ⭐⭐⭐ AGREGAR ESTE MIDDLEWARE PARA ENVIAR MENSAJES FLASH A TODAS LAS VISTAS ⭐⭐⭐
+app.use((req, res, next) => {
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    next();
+});
+// ⭐⭐⭐ FIN DEL MIDDLEWARE ⭐⭐⭐
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, 'src', 'public'))); // ✅
+app.use(express.static(path.join(__dirname, 'src', 'public')));
 
 // Rutas
 app.use('/login', loginRoutes);
