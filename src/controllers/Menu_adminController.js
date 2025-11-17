@@ -588,17 +588,19 @@ function generarReportePDF(req, res) {
             p.presentacion AS nombre_presentacion,
             c.controlado AS nombre_controlado,
             IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
-        FROM 
-            medicamentos m
-        LEFT JOIN 
-            presentacion p ON m.presentation_id = p.id_presentacion
-        LEFT JOIN 
-            controlado c ON m.controlado_id = c.id_controlado
-        LEFT JOIN 
-            proveedores pr ON m.proveedores_id = pr.id_proveedores
-        ORDER BY 
-            m.id_medicamentos DESC
-        LIMIT 20;
+            FROM 
+                medicamentos m
+            LEFT JOIN 
+                presentacion p ON m.presentation_id = p.id_presentacion
+            LEFT JOIN 
+                controlado c ON m.controlado_id = c.id_controlado
+            LEFT JOIN 
+                proveedores pr ON m.proveedores_id = pr.id_proveedores
+            WHERE 
+                m.cantidad > 0
+            ORDER BY 
+                m.id_medicamentos DESC
+            LIMIT 20;
     `;
 
     conexion.query(query, (err, medicamentos) => {
