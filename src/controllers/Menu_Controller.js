@@ -629,6 +629,12 @@ function venta_medicamentos_vista(req, res) {
                     return reject(new Error('Inventario insuficiente'));
                 }
 
+                // ⏰ FECHA CORRECTA DE MÉXICO
+               const fechaMexico = new Date().toLocaleString("sv-SE", {
+                    timeZone: "America/Mexico_City"
+                }).replace(" ", "T");
+
+
                 // Actualizar inventario
                 conexion.query(
                     'UPDATE medicamentos SET cantidad = cantidad - ? WHERE id_medicamentos = ?',
@@ -639,21 +645,30 @@ function venta_medicamentos_vista(req, res) {
                             return reject(error);
                         }
 
-                        // Insertar venta con nombre_medicamento
-                        conexion.query(
-                            `INSERT INTO ventas 
-                             (cantidad, precio_unitario, total, id_usuario, id_medicamento, nombre_medicamento, id_cliente) 
-                             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                            [cantidad_vendida, precio_unitario, total_venta, id_usuario, medicamento.id, nombre_medicamento, id_clientes],
-                            (error) => {
-                                if (error) {
-                                    errores.push(`Error al registrar la venta de ${nombre_medicamento}`);
-                                    return reject(error);
-                                }
+                        // Insertar venta con nombre_medicamento y fecha
+conexion.query(
+    `INSERT INTO ventas 
+     (cantidad, precio_unitario, total, id_usuario, id_medicamento, nombre_medicamento, id_cliente, fecha_venta)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+        cantidad_vendida, 
+        precio_unitario, 
+        total_venta, 
+        id_usuario, 
+        medicamento.id, 
+        nombre_medicamento, 
+        id_clientes,
+        fechaMexico
+    ],
+    (error) => {
+        if (error) {
+            errores.push(`Error al registrar la venta de ${nombre_medicamento}`);
+            return reject(error);
+        }
+        resolve();
+    }
+);
 
-                                resolve();
-                            }
-                        );
                     }
                 );
             });
