@@ -160,7 +160,7 @@ function buscarCliente(req, res) {
             return res.status(500).send('Error en la búsqueda del cliente');
         }
 
-        res.render('menu_admin/resultadoCliente', {
+        res.render('menu/resultadoCliente', {
             clientes: resultados,
             nombreBuscado: busqueda
         });
