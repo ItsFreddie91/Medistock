@@ -44,8 +44,8 @@
                         <td><%= medicamento.nombre_controlado %></td>
                         <td><%= medicamento.nombre_proveedor || 'Proveedor eliminado' %></td>
                         <td class="button-container">
-                            <a href="/menu/modificar_medicamento/<%= medicamento.id_medicamentos %>" class="edit-button">Editar</a>
-                            <form action="/menu/eliminar_medicamento/<%= medicamento.id_medicamentos %>?nombre=<%= nombreBuscado %>" method="post" style="display:inline;" onsubmit="return confirmarEliminarMedicamento()">
+                            <a href="/menu_admin/modificar_medicamento/<%= medicamento.id_medicamentos %>" class="edit-button">Editar</a>
+                            <form action="/menu_admin/eliminar_medicamento/<%= medicamento.id_medicamentos %>?nombre=<%= nombreBuscado %>" method="post" style="display:inline;" onsubmit="return confirmarEliminarMedicamento()">
                                 <button type="submit" class="delete-button">Eliminar</button>
                             </form>
                         </td>
