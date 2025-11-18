@@ -388,12 +388,12 @@ function generarReportePDF(req, res) {
     const PDFDocument = require('pdfkit');
     const doc = new PDFDocument({ margin: 40, size: 'A4' });
 
-    // Configurar cabeceras HTTP
+    // SIEMPRE enviamos cabeceras del PDF
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="reporte_medicamentos.pdf"');
     doc.pipe(res);
 
-    // Consulta SQL con JOIN
+    // Consulta SQL
     const query = `
         SELECT 
             m.id_medicamentos,
@@ -404,33 +404,27 @@ function generarReportePDF(req, res) {
             p.presentacion AS nombre_presentacion,
             c.controlado AS nombre_controlado,
             IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
-            FROM 
-                medicamentos m
-            LEFT JOIN 
-                presentacion p ON m.presentation_id = p.id_presentacion
-            LEFT JOIN 
-                controlado c ON m.controlado_id = c.id_controlado
-            LEFT JOIN 
-                proveedores pr ON m.proveedores_id = pr.id_proveedores
-            WHERE 
-                m.cantidad > 0
-            ORDER BY 
-                m.id_medicamentos DESC
-            LIMIT 50;
+        FROM medicamentos m
+        LEFT JOIN presentacion p ON m.presentation_id = p.id_presentacion
+        LEFT JOIN controlado c ON m.controlado_id = c.id_controlado
+        LEFT JOIN proveedores pr ON m.proveedores_id = pr.id_proveedores
+        WHERE m.cantidad > 0               -- ← AQUÍ SE FILTRA EL STOCK
+        ORDER BY m.id_medicamentos DESC
+        LIMIT 50;
     `;
 
+
     conexion.query(query, (err, medicamentos) => {
+
         if (err) {
             console.error('Error al consultar medicamentos:', err);
-            return res.status(500).send('Error al generar reporte');
-        }
-
-        if (medicamentos.length === 0) {
-            return res.status(404).send('No se encontraron medicamentos disponibles');
+            doc.fontSize(14).fillColor('red').text('Error al generar el reporte', { align: 'center' });
+            doc.end();
+            return;
         }
 
         // ==============================
-        // ENCABEZADO DEL DOCUMENTO
+        // ENCABEZADO PDF
         // ==============================
         doc.fontSize(18).text('Centro de Salud de Teoloyucan', { align: 'center' });
         doc.moveDown(0.5);
@@ -440,8 +434,34 @@ function generarReportePDF(req, res) {
         doc.moveDown(1);
 
         // ==============================
-        // CONFIGURACIÓN DE COLUMNAS
+        // NO HAY MEDICAMENTOS
         // ==============================
+        if (medicamentos.length === 0) {
+
+            doc.moveDown(4);
+            doc.font('Helvetica-Bold')
+               .fontSize(16)
+               .fillColor('#444444')
+               .text('No hay medicamentos registrados en el inventario.', {
+                    align: 'center'
+               });
+
+            doc.moveDown(1);
+            doc.font('Helvetica')
+               .fontSize(12)
+               .fillColor('#666666')
+               .text('Por favor registre productos para generar un reporte con datos.', {
+                    align: 'center'
+               });
+
+            doc.end();
+            return;
+        }
+
+        // ==============================
+        // TIENE MEDICAMENTOS → IMPRIMIR TABLA
+        // ==============================
+
         const columnas = [
             { header: 'Nombre', width: 120 },
             { header: 'Cantidad', width: 65 },
@@ -452,31 +472,21 @@ function generarReportePDF(req, res) {
             { header: 'Proveedor', width: 100 }
         ];
 
-        // calcular ancho total de la tabla
         const tableWidth = columnas.reduce((sum, c) => sum + c.width, 0);
 
-        // función para calcular startX centrado según la página actual
         const computeStartX = () => {
             const pageWidth = doc.page.width;
-            // pdfkit guarda márgenes en doc.page.margins {left, right, top, bottom}
-            const marginLeft = (doc.page.margins && doc.page.margins.left) ? doc.page.margins.left : 40;
-            const marginRight = (doc.page.margins && doc.page.margins.right) ? doc.page.margins.right : 40;
+            const marginLeft = doc.page.margins.left;
+            const marginRight = doc.page.margins.right;
             const usableWidth = pageWidth - marginLeft - marginRight;
-            // centrar: margen + (usableWidth - tableWidth)/2
-            const offset = Math.max(0, (usableWidth - tableWidth) / 2);
+            const offset = Math.max(0, (usableWidth - tableWidth) / 2);          
             return marginLeft + offset;
         };
 
-        // calcular startX y endX para la primer página
         let startX = computeStartX();
         let endX = startX + tableWidth;
-
-        // punto inicial vertical
         let y = doc.y;
 
-        // ==============================
-        // DIBUJAR ENCABEZADOS
-        // ==============================
         doc.font('Helvetica-Bold').fontSize(10);
         let x = startX;
         columnas.forEach(col => {
@@ -485,30 +495,25 @@ function generarReportePDF(req, res) {
         });
 
         y += 18;
-        doc.moveTo(startX, y - 5).lineTo(endX, y - 5).strokeColor('#000000').stroke();
+        doc.moveTo(startX, y - 5).lineTo(endX, y - 5).stroke();
+
         doc.font('Helvetica').fontSize(9);
 
-        // ==============================
-        // IMPRIMIR FILAS DE DATOS
-        // ==============================
         medicamentos.forEach((med) => {
-            // Si nos acercamos al final, agregar nueva página y recalcular posiciones
             if (y > 750) {
                 doc.addPage();
-                // recalculamos startX/endX ahora que doc.page cambió
                 startX = computeStartX();
                 endX = startX + tableWidth;
-
-                // resetear y y volver a dibujar encabezado
                 y = 50;
-                x = startX;
+
                 doc.font('Helvetica-Bold').fontSize(10);
+                x = startX;
                 columnas.forEach(col => {
-                    doc.text(col.header, x, y, { width: col.width, align: 'center' });
+                    doc.text(col.header, x, y, { width: col.width });
                     x += col.width;
                 });
                 y += 18;
-                doc.moveTo(startX, y - 5).lineTo(endX, y - 5).strokeColor('#000000').stroke();
+                doc.moveTo(startX, y - 5).lineTo(endX, y - 5).stroke();
                 doc.font('Helvetica').fontSize(9);
             }
 
@@ -524,7 +529,7 @@ function generarReportePDF(req, res) {
 
             x = startX;
             datos.forEach((dato, i) => {
-                doc.text(dato, x, y, { width: columnas[i].width, align: 'left' });
+                doc.text(dato, x, y, { width: columnas[i].width });
                 x += columnas[i].width;
             });
 
@@ -532,7 +537,6 @@ function generarReportePDF(req, res) {
             doc.moveTo(startX, y - 3).lineTo(endX, y - 3).strokeColor('#dddddd').stroke();
         });
 
-        // Finalizar documento
         doc.end();
     });
 }
