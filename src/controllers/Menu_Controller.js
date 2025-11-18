@@ -430,7 +430,7 @@ function generarReportePDF(req, res) {
         doc.moveDown(0.5);
         doc.fontSize(14).text('Reporte de Medicamentos', { align: 'center' });
         doc.moveDown(0.5);
-        doc.fontSize(10).text(`Fecha de generación: ${new Date().toLocaleDateString()}`, { align: 'right' });
+        doc.fontSize(10).text(`Fecha de generación: ${new Date().toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' })}`, { align: 'right' });
         doc.moveDown(1);
 
         // ==============================
