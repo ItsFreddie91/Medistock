@@ -142,9 +142,18 @@ function post_clientes(req, res) {
 }
 
 function buscarCliente(req, res) {
-    const nombre = req.query.nombre;
-    const query = 'SELECT * FROM clientes WHERE nombre LIKE ?';
-    const valores = [`%${nombre}%`];
+    const termino = req.query.nombre;  // Puede ser nombre o apellido
+    const valor = `%${termino}%`;
+
+    const query = `
+        SELECT * 
+        FROM clientes 
+        WHERE nombre LIKE ?
+        OR apellido_paterno LIKE ?
+        OR apellido_materno LIKE ?
+    `;
+
+    const valores = [valor, valor, valor];
 
     conexion.query(query, valores, (err, resultados) => {
         if (err) {
@@ -152,8 +161,10 @@ function buscarCliente(req, res) {
             return res.status(500).send('Error en la búsqueda del cliente');
         }
 
-        // Asegúrate de enviar el nombre buscado para que esté disponible en la plantilla
-        res.render('menu/resultadoCliente', { clientes: resultados, nombreBuscado: nombre });
+        res.render('menu/resultadoCliente', { 
+            clientes: resultados, 
+            nombreBuscado: termino 
+        });
     });
 }
 
