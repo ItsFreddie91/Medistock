@@ -281,7 +281,7 @@ function vista_datos_medicamentos(req, res) {
              m.fecha_caducidad,
              p.presentacion AS nombre_presentacion,
              c.controlado AS nombre_controlado,
-             IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
+             IF(m.proveedores_id IS NULL, 'Eliminado', pr.nombre) AS nombre_proveedor
            FROM 
              medicamentos m
            JOIN 
@@ -303,7 +303,7 @@ function vista_datos_medicamentos(req, res) {
              m.fecha_caducidad,
              p.presentacion AS nombre_presentacion,
              c.controlado AS nombre_controlado,
-             IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
+             IF(m.proveedores_id IS NULL, 'Eliminado', pr.nombre) AS nombre_proveedor
            FROM 
              medicamentos m
            JOIN 
@@ -414,7 +414,7 @@ function generarReportePDF(req, res) {
             m.fecha_caducidad,
             p.presentacion AS nombre_presentacion,
             c.controlado AS nombre_controlado,
-            IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
+            IF(m.proveedores_id IS NULL, 'Eliminado', pr.nombre) AS nombre_proveedor
         FROM medicamentos m
         LEFT JOIN presentacion p ON m.presentation_id = p.id_presentacion
         LEFT JOIN controlado c ON m.controlado_id = c.id_controlado
@@ -743,8 +743,8 @@ function historialVentas(req, res) {
         SELECT v.id_venta, v.fecha_venta, 
                v.nombre_medicamento AS medicamento,
                v.cantidad, v.precio_unitario, v.total,
-               IFNULL(u.nombre, 'Sin vendedor') AS vendedor,
-               IFNULL(c.nombre, 'Sin cliente') AS cliente
+               IFNULL(u.nombre, 'Usuario') AS vendedor,
+               IFNULL(c.nombre, 'Eliminado') AS cliente
         FROM ventas v
         LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
         LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
@@ -1033,7 +1033,7 @@ function tabla_medicamentos(req, res) {
       m.fecha_caducidad,
       p.presentacion AS nombre_presentacion,
       c.controlado AS nombre_controlado,
-      pr.nombre AS nombre_proveedor
+      IFNULL(pr.nombre, 'Eliminado') AS nombre_proveedor
     FROM 
       medicamentos m
     LEFT JOIN 
@@ -1056,6 +1056,7 @@ function tabla_medicamentos(req, res) {
         res.render('menu/tabla_medicamentos', { medicamentos: results });
     });
 }
+
 
 
 
@@ -1140,8 +1141,8 @@ function exportarVentasPDF(req, res) {
             v.cantidad, 
             v.precio_unitario, 
             v.total,
-            IFNULL(u.nombre, 'Sin vendedor') AS vendedor,
-            IFNULL(c.nombre, 'Sin cliente') AS cliente
+            IFNULL(u.nombre, 'Usuario') AS vendedor,
+            IFNULL(c.nombre, 'Eliminado') AS cliente
         FROM ventas v
         LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
         LEFT JOIN clientes c ON v.id_cliente = c.id_clientes

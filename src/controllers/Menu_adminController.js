@@ -224,10 +224,17 @@ function eliminarProveedor(req, res) {
 
 
 function buscarProveedor(req, res) {
-    const nombreBuscado = req.query.nombre;
-    const query = 'SELECT * FROM proveedores WHERE nombre LIKE ?';
+    const busqueda = req.query.nombre; // mismo input del formulario
 
-    conexion.query(query, [`%${nombreBuscado}%`], (err, resultados) => {
+    const query = `
+        SELECT * FROM proveedores 
+        WHERE nombre LIKE ?
+           OR direccion LIKE ?
+    `;
+
+    const valor = `%${busqueda}%`;
+
+    conexion.query(query, [valor, valor], (err, resultados) => {
         if (err) {
             console.error('Error al buscar proveedores:', err);
             return res.status(500).send('Error al buscar proveedores');
@@ -235,10 +242,11 @@ function buscarProveedor(req, res) {
 
         res.render('menu_admin/resultadoProveedor', {
             proveedores: resultados,
-            nombreBuscado
+            nombreBuscado: busqueda
         });
     });
 }
+
 
 
 //PARA REGISTRA CLIENTES
@@ -415,7 +423,7 @@ function vista_datos_medicamentos(req, res) {
             m.fecha_caducidad,
             p.presentacion AS nombre_presentacion,
             c.controlado AS nombre_controlado,
-            IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
+            IF(m.proveedores_id IS NULL, 'Eliminado', pr.nombre) AS nombre_proveedor
         FROM 
             medicamentos m
         JOIN 
@@ -441,7 +449,7 @@ function vista_datos_medicamentos(req, res) {
             m.fecha_caducidad,
             p.presentacion AS nombre_presentacion,
             c.controlado AS nombre_controlado,
-            IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
+            IF(m.proveedores_id IS NULL, 'Eliminado', pr.nombre) AS nombre_proveedor
         FROM 
             medicamentos m
         JOIN 
@@ -484,7 +492,7 @@ function tabla_medicamentos(req, res) {
       m.fecha_caducidad,
       p.presentacion AS nombre_presentacion,
       c.controlado AS nombre_controlado,
-      pr.nombre AS nombre_proveedor
+      IFNULL(pr.nombre, 'Eliminado') AS nombre_proveedor
     FROM 
       medicamentos m
     LEFT JOIN 
@@ -633,7 +641,7 @@ function generarReportePDF(req, res) {
             m.fecha_caducidad,
             p.presentacion AS nombre_presentacion,
             c.controlado AS nombre_controlado,
-            IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
+            IF(m.proveedores_id IS NULL, 'Eliminado', pr.nombre) AS nombre_proveedor
         FROM medicamentos m
         LEFT JOIN presentacion p ON m.presentation_id = p.id_presentacion
         LEFT JOIN controlado c ON m.controlado_id = c.id_controlado
@@ -798,103 +806,70 @@ function formulario(req, res) {
 
     // Validación básica
     if (!nombre || !usuario || !contrasena) {
-        return conexion.query('SELECT * FROM usuarios', (err, usuarios) => {
-            if (err) {
-                console.error('Error al obtener usuarios:', err);
-                return res.status(500).render('menu_admin/administrar_usuarios', {
-                    message: 'Error al validar datos',
-                    usuarios: []
-                });
-            }
-            res.render('menu_admin/administrar_usuarios', {
-                usuarios: usuarios,
-                message: 'Nombre, usuario y contraseña son obligatorios'
-            });
-        });
+        req.flash("error", "Nombre, usuario y contraseña son obligatorios");
+        return res.redirect("/menu_admin/administrar_usuarios");
     }
 
     conexion.beginTransaction(err => {
         if (err) {
             console.error("Error en transacción:", err);
-            return res.status(500).render('menu_admin/administrar_usuarios', {
-                message: 'Error al iniciar transacción',
-                usuarios: []
-            });
+            req.flash("error", "Error al iniciar transacción");
+            return res.redirect("/menu_admin/administrar_usuarios");
         }
 
         // Verificar si usuario existe
-        conexion.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario], (err, results) => {
+        conexion.query("SELECT * FROM usuarios WHERE usuario = ?", [usuario], (err, results) => {
             if (err) {
                 return conexion.rollback(() => {
                     console.error("Error al verificar usuario:", err);
-                    res.status(500).render('menu_admin/administrar_usuarios', {
-                        message: 'Error al verificar usuario',
-                        usuarios: []
-                    });
+                    req.flash("error", "Error al verificar usuario");
+                    res.redirect("/menu_admin/administrar_usuarios");
                 });
             }
 
             if (results.length > 0) {
-                // Usuario existe, mostrar error con lista actual
-                conexion.query('SELECT * FROM usuarios', (err, usuarios) => {
-                    if (err) {
-                        return conexion.rollback(() => {
-                            res.status(500).render('menu_admin/administrar_usuarios', {
-                                message: 'Error al cargar usuarios',
-                                usuarios: []
-                            });
-                        });
-                    }
-                    res.render('menu_admin/administrar_usuarios', {
-                        usuarios: usuarios,
-                        message: 'El usuario ya existe. Elige otro nombre.'
-                    });
-                });
-            } else {
-                // Registrar nuevo usuario
-                bcrypt.hash(contrasena, 12, (err, hashedPassword) => {
-                    if (err) {
-                        return conexion.rollback(() => {
-                            console.error("Error al hashear:", err);
-                            res.status(500).render('menu_admin/administrar_usuarios', {
-                                message: 'Error al hashear contraseña',
-                                usuarios: []
-                            });
-                        });
-                    }
+                // Usuario ya existe
+                req.flash("error", "El usuario ya existe. Elige otro nombre.");
+                return res.redirect("/menu_admin/administrar_usuarios");
+            }
 
-                    conexion.query(
-                        'INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, usuario, contrasena) VALUES (?, ?, ?, ?, ?)',
-                        [nombre, apellido_paterno, apellido_materno, usuario, hashedPassword],
-                        (err, result) => {
+            // Registrar nuevo usuario
+            bcrypt.hash(contrasena, 12, (err, hashedPassword) => {
+                if (err) {
+                    return conexion.rollback(() => {
+                        console.error("Error al hashear contraseña:", err);
+                        req.flash("error", "Error al hashear contraseña.");
+                        res.redirect("/menu_admin/administrar_usuarios");
+                    });
+                }
+
+                conexion.query(
+                    'INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, usuario, contrasena) VALUES (?, ?, ?, ?, ?)',
+                    [nombre, apellido_paterno, apellido_materno, usuario, hashedPassword],
+                    (err, result) => {
+                        if (err) {
+                            return conexion.rollback(() => {
+                                console.error("Error al insertar usuario:", err);
+                                req.flash("error", "Error al registrar usuario.");
+                                res.redirect("/menu_admin/administrar_usuarios");
+                            });
+                        }
+
+                        conexion.commit(err => {
                             if (err) {
                                 return conexion.rollback(() => {
-                                    console.error("Error al insertar:", err);
-                                    res.status(500).render('menu_admin/administrar_usuarios', {
-                                        message: 'Error al registrar usuario',
-                                        usuarios: []
-                                    });
+                                    console.error("Error al confirmar registro:", err);
+                                    req.flash("error", "Error al confirmar registro.");
+                                    res.redirect("/menu_admin/administrar_usuarios");
                                 });
                             }
 
-                            conexion.commit(err => {
-                                if (err) {
-                                    return conexion.rollback(() => {
-                                        console.error("Error al commit:", err);
-                                        res.status(500).render('menu_admin/administrar_usuarios', {
-                                            message: 'Error al confirmar registro',
-                                            usuarios: []
-                                        });
-                                    });
-                                }
-                                
-                                // Redirigir a GET con mensaje de éxito
-                                res.redirect('/menu_admin/administrar_usuarios?message=Usuario registrado exitosamente');
-                            });
-                        }
-                    );
-                });
-            }
+                            req.flash("success", "Usuario registrado exitosamente");
+                            res.redirect("/menu_admin/administrar_usuarios");
+                        });
+                    }
+                );
+            });
         });
     });
 }
@@ -1301,8 +1276,8 @@ function historialVentas(req, res) {
         SELECT v.id_venta, v.fecha_venta, 
                v.nombre_medicamento AS medicamento,
                v.cantidad, v.precio_unitario, v.total,
-               IFNULL(u.nombre, 'Sin vendedor') AS vendedor,
-               IFNULL(c.nombre, 'Sin cliente') AS cliente
+               IFNULL(u.nombre, 'Usuario') AS vendedor,
+               IFNULL(c.nombre, 'Eliminado') AS cliente
         FROM ventas v
         LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
         LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
@@ -1410,8 +1385,8 @@ function exportarVentasPDF(req, res) {
             v.cantidad, 
             v.precio_unitario, 
             v.total,
-            IFNULL(u.nombre, 'Sin vendedor') AS vendedor,
-            IFNULL(c.nombre, 'Sin cliente') AS cliente
+            IFNULL(u.nombre, 'Usuario') AS vendedor,
+            IFNULL(c.nombre, 'Eliminado') AS cliente
         FROM ventas v
         LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
         LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
