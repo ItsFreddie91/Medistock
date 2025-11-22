@@ -577,7 +577,7 @@ function post_datos_medicamentos(req, res) {
              m.fecha_caducidad,
              p.presentacion AS nombre_presentacion,
              c.controlado AS nombre_controlado,
-             IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
+             IF(m.proveedores_id IS NULL, 'Eliminado', pr.nombre) AS nombre_proveedor
            FROM 
              medicamentos m
            JOIN 
@@ -597,7 +597,7 @@ function post_datos_medicamentos(req, res) {
              m.fecha_caducidad,
              p.presentacion AS nombre_presentacion,
              c.controlado AS nombre_controlado,
-             IF(m.proveedores_id IS NULL, 'Proveedor eliminado', pr.nombre) AS nombre_proveedor
+             IF(m.proveedores_id IS NULL, 'Eliminado', pr.nombre) AS nombre_proveedor
            FROM 
              medicamentos m
            JOIN 
@@ -1378,6 +1378,16 @@ function eliminarVenta(req, res) {
 function exportarVentasPDF(req, res) {
     const PDFDocument = require('pdfkit');
 
+    // ==============================
+    // FUNCIÓN PARA FECHA DE MÉXICO
+    // ==============================
+    function fechaMX(fecha) {
+        const f = new Date(fecha.getTime() - (fecha.getTimezoneOffset() * 60000));
+        return `${f.getDate().toString().padStart(2,'0')}/${
+            (f.getMonth()+1).toString().padStart(2,'0')
+        }/${f.getFullYear()}`;
+    }
+
     const query = `
         SELECT 
             v.fecha_venta, 
@@ -1413,7 +1423,9 @@ function exportarVentasPDF(req, res) {
         doc.moveDown(0.5);
         doc.fontSize(14).text('Historial de Ventas - MediStock', { align: 'center' });
         doc.moveDown(0.5);
-        doc.fontSize(10).text(`Fecha de generación: ${new Date().toLocaleDateString('es-MX')}`, { align: 'right' });
+
+        // FECHA SIN DESFASE
+        doc.fontSize(10).text(`Fecha de generación: ${fechaMX(new Date())}`, { align: 'right' });
         doc.moveDown(2);
 
         // ==============================
@@ -1486,8 +1498,11 @@ function exportarVentasPDF(req, res) {
                 doc.font('Helvetica').fontSize(9);
             }
 
+            // CORREGIR FECHA DE CADA VENTA
+            const fechaOK = fechaMX(new Date(v.fecha_venta));
+
             const datos = [
-                new Date(v.fecha_venta).toLocaleDateString('es-MX'),
+                fechaOK,
                 v.medicamento,
                 v.cantidad.toString(),
                 `$${Number(v.precio_unitario).toFixed(2)}`,
@@ -1503,12 +1518,15 @@ function exportarVentasPDF(req, res) {
             });
 
             y += 16;
-            doc.moveTo(startX, y - 3).lineTo(endX, y - 3).strokeColor('#dddddd').stroke();
+            doc.moveTo(startX, y - 3).lineTo(endX, y - 3)
+                .strokeColor('#dddddd')
+                .stroke();
         });
 
         doc.end();
     });
 }
+
 
 
 
