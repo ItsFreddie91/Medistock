@@ -1180,8 +1180,15 @@ function exportarVentasPDF(req, res) {
         doc.fontSize(14).text('Historial de Ventas - MediStock', { align: 'center' });
         doc.moveDown(0.5);
 
-        // FECHA SIN DESFASE
-        doc.fontSize(10).text(`Fecha de generación: ${fechaMX(new Date())}`, { align: 'right' });
+        // FECHA CORREGIDA (Railway no adelantará el día)
+        const fechaGen = new Intl.DateTimeFormat('es-MX', {
+            timeZone: 'America/Mexico_City',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        }).format(new Date());
+
+        doc.fontSize(10).text(`Fecha de generación: ${fechaGen}`, { align: 'right' });
         doc.moveDown(2);
 
         // ==============================
@@ -1254,7 +1261,7 @@ function exportarVentasPDF(req, res) {
                 doc.font('Helvetica').fontSize(9);
             }
 
-            // CORREGIR FECHA DE CADA VENTA
+            // CORREGIR FECHA DE CADA VENTA (esto ya funcionaba bien)
             const fechaOK = fechaMX(new Date(v.fecha_venta));
 
             const datos = [
