@@ -106,35 +106,34 @@
         </main>
     </div>
     <script>
-        // Capturar el evento submit del formulario
-        document.getElementById('formulario-proveedor').addEventListener('submit', async (event) => {
-            event.preventDefault(); // Evita la recarga de la página
-            // Obtener los datos del formulario
-            const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData);
-            try {
-                // Enviar los datos al servidor
-                const response = await fetch('/menu_admin/proveedores_admin', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                });
-                // Verificar si la respuesta fue exitosa
-                if (response.ok) {
-                    // Mostrar el mensaje de alerta
-                    alert('Proveedor registrado exitosamente!');
-                    // Limpiar el formulario
-                    event.target.reset();
-                } else {
-                    alert('Hubo un error al registrar el proveedor.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('No se pudo conectar con el servidor.');
+    document.getElementById('formulario-proveedor').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const data = Object.fromEntries(formData);
+
+        try {
+            const response = await fetch('/menu_admin/proveedores_admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(result.message);
+                event.target.reset();
+            } else {
+                alert(result.message);  // ← Aquí aparece: "El proveedor ya está registrado."
             }
-        });
-    </script>
+
+        } catch (error) {
+            alert("Error de conexión con el servidor.");
+            console.error(error);
+        }
+    });
+</script>
+
 </body>
 </html>

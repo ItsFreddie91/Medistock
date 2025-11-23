@@ -113,39 +113,52 @@ function vista_proveedores(req, res) {
     res.render('menu_admin/proveedores_admin');
 }
 
-//PARA AGRAGR UN NUEVO PROVEEDOR
+// PARA AGREGAR UN NUEVO PROVEEDOR (versión para fetch)
 function post_proveedores(req, res) {
     const { nombre, direccion, telefono, correo } = req.body;
+
     conexion.beginTransaction(err => {
-        if (err) throw err;
+        if (err) return res.status(500).json({ success: false, message: "Error en la transacción." });
+
+        // Verifica si ya existe
         conexion.query('SELECT * FROM proveedores WHERE nombre = ?', [nombre], (err, results) => {
             if (err) {
                 return conexion.rollback(() => {
-                    throw err;
+                    res.status(500).json({ success: false, message: "Error al consultar proveedor." });
                 });
             }
+
             if (results.length > 0) {
-                res.render('menu_admin/proveedores_admin', { message: 'El proveedor ya está registrado.' });
-            } else {
-                conexion.query('INSERT INTO proveedores (nombre, direccion, telefono, correo) VALUES (?, ?, ?, ?)', [nombre, direccion, telefono, correo], (err, result) => {
+                return res.json({ success: false, message: "El proveedor ya está registrado." });
+            }
+
+            // Insertar nuevo proveedor
+            conexion.query(
+                'INSERT INTO proveedores (nombre, direccion, telefono, correo) VALUES (?, ?, ?, ?)',
+                [nombre, direccion, telefono, correo],
+                (err, result) => {
+
                     if (err) {
                         return conexion.rollback(() => {
-                            throw err;
+                            res.status(500).json({ success: false, message: "Error al registrar proveedor." });
                         });
                     }
+
                     conexion.commit(err => {
                         if (err) {
                             return conexion.rollback(() => {
-                                throw err;
+                                res.status(500).json({ success: false, message: "Error al guardar cambios." });
                             });
                         }
-                        res.render('menu_admin/proveedores_admin', { message: 'Proveedor registrado exitosamente.' });
+
+                        return res.json({ success: true, message: "Proveedor registrado exitosamente." });
                     });
-                });
-            }
+                }
+            );
         });
     });
 }
+
 
 function administrar_proveedores (req, res){//1
   const query = 'SELECT * FROM proveedores';
