@@ -424,9 +424,7 @@ function generarReportePDF(req, res) {
         LIMIT 50;
     `;
 
-
     conexion.query(query, (err, medicamentos) => {
-
         if (err) {
             console.error('Error al consultar medicamentos:', err);
             doc.fontSize(14).fillColor('red').text('Error al generar el reporte', { align: 'center' });
@@ -448,7 +446,6 @@ function generarReportePDF(req, res) {
         // NO HAY MEDICAMENTOS
         // ==============================
         if (medicamentos.length === 0) {
-
             doc.moveDown(4);
             doc.font('Helvetica-Bold')
                .fontSize(16)
@@ -456,15 +453,6 @@ function generarReportePDF(req, res) {
                .text('No hay medicamentos registrados en el inventario.', {
                     align: 'center'
                });
-
-            doc.moveDown(1);
-            doc.font('Helvetica')
-               .fontSize(12)
-               .fillColor('#666666')
-               .text('Por favor registre productos para generar un reporte con datos.', {
-                    align: 'center'
-               });
-
             doc.end();
             return;
         }
@@ -473,14 +461,15 @@ function generarReportePDF(req, res) {
         // TIENE MEDICAMENTOS → IMPRIMIR TABLA
         // ==============================
 
+        // ANCHOS OPTIMIZADOS - MÁS ESPACIO PARA PROVEEDOR
         const columnas = [
-            { header: 'Nombre', width: 120 },
-            { header: 'Cantidad', width: 65 },
-            { header: 'Precio', width: 60 },
-            { header: 'Caducidad', width: 80 },
-            { header: 'Presentación', width: 85 },
-            { header: 'Controlado', width: 75 },
-            { header: 'Proveedor', width: 100 }
+            { header: 'Nombre', width: 100 },        // Reducido
+            { header: 'Cantidad', width: 55 },       // Reducido
+            { header: 'Precio', width: 55 },         // Reducido
+            { header: 'Caducidad', width: 70 },      // Reducido
+            { header: 'Presentación', width: 75 },   // Reducido
+            { header: 'Controlado', width: 65 },     // Reducido
+            { header: 'Proveedor', width: 130 }      // AUMENTADO significativamente
         ];
 
         const tableWidth = columnas.reduce((sum, c) => sum + c.width, 0);
@@ -498,17 +487,33 @@ function generarReportePDF(req, res) {
         let endX = startX + tableWidth;
         let y = doc.y;
 
-        doc.font('Helvetica-Bold').fontSize(10);
+        // FUNCIÓN PARA TRUNCAR TEXTO LARGO
+        const truncarTexto = (texto, anchoMaximo) => {
+            if (doc.widthOfString(texto) <= anchoMaximo) return texto;
+            
+            let textoTruncado = texto;
+            while (textoTruncado.length > 5 && doc.widthOfString(textoTruncado + '...') > anchoMaximo) {
+                textoTruncado = textoTruncado.slice(0, -1);
+            }
+            return textoTruncado + '...';
+        };
+
+        // ENCABEZADOS DE TABLA
+        doc.font('Helvetica-Bold').fontSize(9); // Fuente más pequeña
         let x = startX;
         columnas.forEach(col => {
-            doc.text(col.header, x, y, { width: col.width, align: 'left' });
+            doc.text(col.header, x, y, { 
+                width: col.width, 
+                align: 'left',
+                lineBreak: false // Evita saltos de línea en encabezados
+            });
             x += col.width;
         });
 
         y += 18;
         doc.moveTo(startX, y - 5).lineTo(endX, y - 5).stroke();
 
-        doc.font('Helvetica').fontSize(9);
+        doc.font('Helvetica').fontSize(8); // Fuente más pequeña para datos
 
         medicamentos.forEach((med) => {
             if (y > 750) {
@@ -517,15 +522,19 @@ function generarReportePDF(req, res) {
                 endX = startX + tableWidth;
                 y = 50;
 
-                doc.font('Helvetica-Bold').fontSize(10);
+                // REIMPRIMIR ENCABEZADOS EN NUEVA PÁGINA
+                doc.font('Helvetica-Bold').fontSize(9);
                 x = startX;
                 columnas.forEach(col => {
-                    doc.text(col.header, x, y, { width: col.width });
+                    doc.text(col.header, x, y, { 
+                        width: col.width,
+                        lineBreak: false 
+                    });
                     x += col.width;
                 });
                 y += 18;
                 doc.moveTo(startX, y - 5).lineTo(endX, y - 5).stroke();
-                doc.font('Helvetica').fontSize(9);
+                doc.font('Helvetica').fontSize(8);
             }
 
             const datos = [
@@ -533,14 +542,24 @@ function generarReportePDF(req, res) {
                 med.cantidad.toString(),
                 `$${Number(med.precio).toFixed(2)}`,
                 new Date(med.fecha_caducidad).toLocaleDateString(),
-                med.nombre_presentacion || 'No disponible',
-                med.nombre_controlado || 'No disponible',
-                med.nombre_proveedor || 'No disponible'
+                med.nombre_presentacion || 'N/D',
+                med.nombre_controlado || 'N/D',
+                med.nombre_proveedor || 'N/D'
             ];
 
             x = startX;
             datos.forEach((dato, i) => {
-                doc.text(dato, x, y, { width: columnas[i].width });
+                const texto = dato.toString();
+                const anchoColumna = columnas[i].width - 2; // Pequeño margen
+                
+                // Aplicar truncado solo si es necesario (especialmente para proveedor)
+                const textoMostrar = (i === 6) ? truncarTexto(texto, anchoColumna) : texto;
+                
+                doc.text(textoMostrar, x, y, { 
+                    width: columnas[i].width, 
+                    align: 'left',
+                    lineBreak: false // EVITA QUE EL TEXTO SE AMONTONE
+                });
                 x += columnas[i].width;
             });
 
@@ -1131,43 +1150,164 @@ function eliminarVenta(req, res) {
 
 
 
-// Agregar esta función antes de definir las columnas
-function calcularAnchosColumnas(ventas) {
-    // Anchos mínimos basados en los encabezados
-    const minWidths = [80, 100, 50, 80, 60, 80, 90];
-    const maxWidths = [100, 150, 60, 90, 70, 120, 150];
-    
-    // Calcular ancho total disponible
-    const pageWidth = 595.28; // A4 width in points
-    const margins = 80; // 40 left + 40 right
-    const availableWidth = pageWidth - margins;
-    
-    // Distribuir el espacio disponible
-    const totalMinWidth = minWidths.reduce((sum, w) => sum + w, 0);
-    const extraSpace = availableWidth - totalMinWidth;
-    
-    if (extraSpace > 0) {
-        // Distribuir espacio extra proporcionalmente
-        return minWidths.map((minWidth, index) => {
-            const proportion = minWidth / totalMinWidth;
-            return minWidth + Math.floor(extraSpace * proportion);
-        });
-    }
-    
-    return minWidths;
-}
+function exportarVentasPDF(req, res) {
+    const PDFDocument = require('pdfkit');
 
-// Luego en tu código, reemplaza la definición de columnas con:
-const anchos = calcularAnchosColumnas(ventas);
-const columnas = [
-    { header: 'Fecha de Venta', width: anchos[0] },
-    { header: 'Medicamento', width: anchos[1] },
-    { header: 'Cantidad', width: anchos[2] },
-    { header: 'Precio Unitario', width: anchos[3] },
-    { header: 'Total', width: anchos[4] },
-    { header: 'Vendedor', width: anchos[5] },
-    { header: 'Cliente', width: anchos[6] }
-];
+    // ==============================
+    // FUNCIÓN PARA FECHA DE MÉXICO
+    // ==============================
+    function fechaMX(fecha) {
+        const f = new Date(fecha.getTime() - (fecha.getTimezoneOffset() * 60000));
+        return `${f.getDate().toString().padStart(2,'0')}/${
+            (f.getMonth()+1).toString().padStart(2,'0')
+        }/${f.getFullYear()}`;
+    }
+
+    const query = `
+        SELECT 
+            v.fecha_venta, 
+            v.nombre_medicamento AS medicamento, 
+            v.cantidad, 
+            v.precio_unitario, 
+            v.total,
+            IFNULL(u.nombre, 'Usuario') AS vendedor,
+            IFNULL(c.nombre, 'Eliminado') AS cliente
+        FROM ventas v
+        LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
+        LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
+        ORDER BY v.fecha_venta DESC;
+    `;
+
+    conexion.query(query, (err, ventas) => {
+        if (err) {
+            console.error('Error al obtener datos de ventas:', err);
+            return res.status(500).send('Error al generar reporte');
+        }
+
+        // Crear PDF
+        const doc = new PDFDocument({ margin: 40, size: 'A4' });
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename="historial_ventas.pdf"');
+        doc.pipe(res);
+
+        // ==============================
+        // ENCABEZADO GENERAL
+        // ==============================
+        doc.fontSize(18).text('Centro de Salud de Teoloyucan', { align: 'center' });
+        doc.moveDown(0.5);
+        doc.fontSize(14).text('Historial de Ventas - MediStock', { align: 'center' });
+        doc.moveDown(0.5);
+
+        // FECHA CORREGIDA (Railway no adelantará el día)
+        const fechaGen = new Intl.DateTimeFormat('es-MX', {
+            timeZone: 'America/Mexico_City',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        }).format(new Date());
+
+        doc.fontSize(10).text(`Fecha de generación: ${fechaGen}`, { align: 'right' });
+        doc.moveDown(2);
+
+        // ==============================
+        // CASO: NO HAY DATOS
+        // ==============================
+        if (ventas.length === 0) {
+            doc.fontSize(14).text('No se encontraron ventas registradas.', { align: 'center' });
+            doc.end();
+            return;
+        }
+
+        // ==============================
+        // TABLA
+        // ==============================
+        const columnas = [
+            { header: 'Fecha de Venta', width: 90 },
+            { header: 'Medicamento', width: 100 },
+            { header: 'Cantidad', width: 60 },
+            { header: 'Precio Unitario', width: 80 },
+            { header: 'Total', width: 70 },
+            { header: 'Vendedor', width: 80 },
+            { header: 'Cliente', width: 90 }
+        ];
+
+        const tableWidth = columnas.reduce((sum, c) => sum + c.width, 0);
+
+        const computeStartX = () => {
+            const pageWidth = doc.page.width;
+            const marginLeft = doc.page.margins.left || 40;
+            const marginRight = doc.page.margins.right || 40;
+            const usableWidth = pageWidth - marginLeft - marginRight;
+            const offset = Math.max(0, (usableWidth - tableWidth) / 2);
+            return marginLeft + offset;
+        };
+
+        let startX = computeStartX();
+        let endX = startX + tableWidth;
+        let y = doc.y;
+
+        // ENCABEZADOS
+        doc.font('Helvetica-Bold').fontSize(10);
+        let x = startX;
+        columnas.forEach(col => {
+            doc.text(col.header, x, y, { width: col.width, align: 'left' });
+            x += col.width;
+        });
+
+        y += 18;
+        doc.moveTo(startX, y - 5).lineTo(endX, y - 5).stroke();
+        doc.font('Helvetica').fontSize(9);
+
+        // FILAS
+        ventas.forEach(v => {
+            if (y > 750) {
+                doc.addPage();
+                startX = computeStartX();
+                endX = startX + tableWidth;
+                y = 50;
+
+                // Redibujar encabezados
+                x = startX;
+                doc.font('Helvetica-Bold').fontSize(10);
+                columnas.forEach(col => {
+                    doc.text(col.header, x, y, { width: col.width });
+                    x += col.width;
+                });
+
+                y += 18;
+                doc.moveTo(startX, y - 5).lineTo(endX, y - 5).stroke();
+                doc.font('Helvetica').fontSize(9);
+            }
+
+            // CORREGIR FECHA DE CADA VENTA (esto ya funcionaba bien)
+            const fechaOK = fechaMX(new Date(v.fecha_venta));
+
+            const datos = [
+                fechaOK,
+                v.medicamento,
+                v.cantidad.toString(),
+                `$${Number(v.precio_unitario).toFixed(2)}`,
+                `$${Number(v.total).toFixed(2)}`,
+                v.vendedor,
+                v.cliente
+            ];
+
+            x = startX;
+            datos.forEach((dato, i) => {
+                doc.text(dato, x, y, { width: columnas[i].width, align: 'left' });
+                x += columnas[i].width;
+            });
+
+            y += 16;
+            doc.moveTo(startX, y - 3).lineTo(endX, y - 3)
+                .strokeColor('#dddddd')
+                .stroke();
+        });
+
+        doc.end();
+    });
+}
 
 
 module.exports = {
