@@ -1409,6 +1409,7 @@ function eliminarVenta(req, res) {
 
 function exportarVentasPDF(req, res) {
     const PDFDocument = require('pdfkit');
+    const conexion = require('./tu-archivo-de-conexion'); // Ajusta la ruta según donde tengas tu conexión
 
     function fechaMX(fecha) {
         const f = new Date(fecha.getTime() - (fecha.getTimezoneOffset() * 60000));
@@ -1417,7 +1418,7 @@ function exportarVentasPDF(req, res) {
         }/${f.getFullYear()}`;
     }
 
-    // CONSULTA MODIFICADA - Usa los campos almacenados directamente
+    // CONSULTA CORRECTA - Ya usa los campos almacenados directamente
     const query = `
         SELECT 
             v.fecha_venta, 
@@ -1437,7 +1438,7 @@ function exportarVentasPDF(req, res) {
             return res.status(500).send('Error al generar reporte');
         }
 
-        // Resto del código igual...
+        // Crear PDF
         const doc = new PDFDocument({ margin: 40, size: 'A4' });
 
         res.setHeader('Content-Type', 'application/pdf');
@@ -1466,7 +1467,7 @@ function exportarVentasPDF(req, res) {
             return;
         }
 
-        // TABLA (igual que antes)
+        // TABLA
         const columnas = [
             { header: 'Fecha de Venta', width: 90 },
             { header: 'Medicamento', width: 100 },
@@ -1532,8 +1533,8 @@ function exportarVentasPDF(req, res) {
                 v.cantidad.toString(),
                 `$${Number(v.precio_unitario).toFixed(2)}`,
                 `$${Number(v.total).toFixed(2)}`,
-                v.vendedor,  // Ahora mostrará el nombre correcto aunque el usuario fue eliminado
-                v.cliente    // Lo mismo para el cliente
+                v.vendedor,  // ✅ Ahora mostrará el nombre correcto aunque el usuario fue eliminado
+                v.cliente    // ✅ Lo mismo para el cliente
             ];
 
             x = startX;
