@@ -29,11 +29,10 @@ function autenticarUsuario(req, res) {
 
         const user = results[0];
 
-        // ⚠️ USUARIO DESACTIVADO → NO DEJAR INICIAR SESIÓN
-        if (user.activo === 0) {
-            return res.render('login/index', { message: 'Usuario no Existe, Inténtalo nuevamente.' });
+        // ⚠️ NO PERMITIR INICIAR SESIÓN SI ESTÁ DESACTIVADO
+        if (Number(user.activo) === 0) {
+            return res.render('login/index', { message: 'Este usuario está desactivado.' });
         }
-
 
         // Comparar contraseña
         bcrypt.compare(contrasena, user.contrasena, (err, isMatch) => {
