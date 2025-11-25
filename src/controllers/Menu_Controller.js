@@ -1065,7 +1065,8 @@ function tabla_medicamentos(req, res) {
     LEFT JOIN 
       proveedores pr ON m.proveedores_id = pr.id_proveedores
     WHERE 
-      m.estatus = 1
+      m.activo = 1
+      AND m.cantidad > 0
     ORDER BY 
       m.id_medicamentos DESC;
   `;
@@ -1079,6 +1080,7 @@ function tabla_medicamentos(req, res) {
     });
 }
 
+
 function tabla_clientes(req, res) {
     const query = `
     SELECT 
@@ -1089,8 +1091,8 @@ function tabla_clientes(req, res) {
       apellido_materno
     FROM 
       clientes
-    WHERE
-      estatus = 1
+    WHERE 
+      activo = 1
     ORDER BY 
       id_clientes DESC;
     `;
@@ -1115,8 +1117,8 @@ function tabla_proveedores(req, res) {
       correo
     FROM 
       proveedores
-    WHERE
-      estatus = 1
+    WHERE 
+      activo = 1
     ORDER BY 
       id_proveedores DESC;
     `;
