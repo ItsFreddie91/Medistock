@@ -120,44 +120,51 @@ function post_proveedores(req, res) {
     conexion.beginTransaction(err => {
         if (err) return res.status(500).json({ success: false, message: "Error en la transacción." });
 
-        // Verifica si ya existe
-        conexion.query('SELECT * FROM proveedores WHERE nombre = ?', [nombre], (err, results) => {
-            if (err) {
-                return conexion.rollback(() => {
-                    res.status(500).json({ success: false, message: "Error al consultar proveedor." });
-                });
-            }
+        // Solo buscar proveedores activos
+        conexion.query(
+            'SELECT * FROM proveedores WHERE nombre = ? AND activo = 1',
+            [nombre],
+            (err, results) => {
 
-            if (results.length > 0) {
-                return res.json({ success: false, message: "El proveedor ya está registrado." });
-            }
+                if (err) {
+                    return conexion.rollback(() => {
+                        res.status(500).json({ success: false, message: "Error al consultar proveedor." });
+                    });
+                }
 
-            // Insertar nuevo proveedor
-            conexion.query(
-                'INSERT INTO proveedores (nombre, direccion, telefono, correo) VALUES (?, ?, ?, ?)',
-                [nombre, direccion, telefono, correo],
-                (err, result) => {
+                // Si existe y está activo → NO permitir
+                if (results.length > 0) {
+                    return res.json({ success: false, message: "El proveedor ya está registrado y activo." });
+                }
 
-                    if (err) {
-                        return conexion.rollback(() => {
-                            res.status(500).json({ success: false, message: "Error al registrar proveedor." });
-                        });
-                    }
+                // Insertar nuevo proveedor (si estaba desactivado NO importa)
+                conexion.query(
+                    'INSERT INTO proveedores (nombre, direccion, telefono, correo, activo) VALUES (?, ?, ?, ?, 1)',
+                    [nombre, direccion, telefono, correo],
+                    (err, result) => {
 
-                    conexion.commit(err => {
                         if (err) {
                             return conexion.rollback(() => {
-                                res.status(500).json({ success: false, message: "Error al guardar cambios." });
+                                res.status(500).json({ success: false, message: "Error al registrar proveedor." });
                             });
                         }
 
-                        return res.json({ success: true, message: "Proveedor registrado exitosamente." });
-                    });
-                }
-            );
-        });
+                        conexion.commit(err => {
+                            if (err) {
+                                return conexion.rollback(() => {
+                                    res.status(500).json({ success: false, message: "Error al guardar cambios." });
+                                });
+                            }
+
+                            return res.json({ success: true, message: "Proveedor registrado exitosamente." });
+                        });
+                    }
+                );
+            }
+        );
     });
 }
+
 
 
 function administrar_proveedores (req, res){//1
