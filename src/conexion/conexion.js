@@ -42,6 +42,39 @@ function configurarCamposActivo() {
 }
 
 // ---------------------------------------
+// QUITAR ÍNDICE UNIQUE DE usuarios.usuario
+// ---------------------------------------
+function quitarUniqueUsuarios() {
+    const sqlBuscar = `
+        SHOW INDEX FROM usuarios 
+        WHERE Column_name = 'usuario' AND Non_unique = 0
+    `;
+
+    conexion.query(sqlBuscar, (err, results) => {
+        if (err) {
+            console.log("⚠️ Error al buscar índice UNIQUE:", err.message);
+            return;
+        }
+
+        if (results.length === 0) {
+            console.log("✔️ No existe índice UNIQUE en usuarios.usuario");
+            return;
+        }
+
+        const nombreIndice = results[0].Key_name;
+        const sqlEliminar = `ALTER TABLE usuarios DROP INDEX \`${nombreIndice}\``;
+
+        conexion.query(sqlEliminar, (err2) => {
+            if (err2) {
+                console.log("⚠️ Error al eliminar índice UNIQUE:", err2.message);
+            } else {
+                console.log(`🗑️ Índice UNIQUE eliminado: ${nombreIndice}`);
+            }
+        });
+    });
+}
+
+// ---------------------------------------
 // RECONECTAR AUTOMÁTICAMENTE
 // ---------------------------------------
 function handleDisconnect() {
@@ -53,7 +86,9 @@ function handleDisconnect() {
             setTimeout(handleDisconnect, 2000);
         } else {
             console.log('✅ Conectado a MySQL 🚀');
-            configurarCamposActivo();
+
+            configurarCamposActivo();   // Crea campo activo si no existe
+            quitarUniqueUsuarios();     // Elimina índice UNIQUE del username
         }
     });
 
@@ -70,24 +105,3 @@ function handleDisconnect() {
 handleDisconnect();
 
 module.exports = conexion;
-
-
-
-
-// const mysql = require('mysql2');
-// const conexion = mysql.createConnection({
-//     host: 'localhost',
-//     user: 'root',
-//     password: '',
-//     database: 'centro'
-// });
-
-// conexion.connect((err) => {
-//     if (err) {
-//         console.error('Error conectando a la base de datos:', err.stack);
-//         return;
-//     }
-//     console.log('BASE DE DATOS CONECTADA');
-// });
-
-// module.exports = conexion;
