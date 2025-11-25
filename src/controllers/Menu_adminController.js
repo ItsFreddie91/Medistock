@@ -474,9 +474,6 @@ function vista_datos_medicamentos(req, res) {
 
 
 
-
-
-
 function tabla_medicamentos(req, res) {
     const query = `
     SELECT 
