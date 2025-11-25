@@ -1,3 +1,10 @@
+const conexion = require('../conexion/conexion');
+const bcrypt = require('bcrypt');
+
+function mostrarLogin(req, res) {
+    res.render('login/index');
+}
+
 function autenticarUsuario(req, res) {
     const { usuario, contrasena } = req.body;
 
@@ -44,3 +51,8 @@ function autenticarUsuario(req, res) {
         });
     });
 }
+
+module.exports = {
+    mostrarLogin,
+    autenticarUsuario
+};
