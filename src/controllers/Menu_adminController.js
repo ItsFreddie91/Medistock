@@ -238,12 +238,13 @@ function eliminarProveedor(req, res) {
 
 
 function buscarProveedor(req, res) {
-    const busqueda = req.query.nombre; // mismo input del formulario
+    const busqueda = req.query.nombre;
 
     const query = `
         SELECT * FROM proveedores 
-        WHERE nombre LIKE ?
-           OR direccion LIKE ?
+        WHERE activo = 1
+        AND (nombre LIKE ?
+         OR direccion LIKE ?)
     `;
 
     const valor = `%${busqueda}%`;
@@ -260,6 +261,7 @@ function buscarProveedor(req, res) {
         });
     });
 }
+
 
 
 

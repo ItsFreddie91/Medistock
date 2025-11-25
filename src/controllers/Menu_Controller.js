@@ -272,55 +272,35 @@ function eliminarCliente(req, res) {
 
 //MUESRA LA TABLA DE MEDICAMENTOS
 function vista_datos_medicamentos(req, res) {
-    const cantidad = parseInt(req.query.cantidad, 10); // Captura la cantidad desde la URL
+    const cantidad = parseInt(req.query.cantidad, 10);
 
-    // Construir la consulta con o sin límite dependiendo de si se especificó una cantidad válida
-    const query = cantidad
-        ? `SELECT 
-             m.id_medicamentos,
-             m.nombre,
-             m.cantidad,
-             m.precio,
-             m.fecha_caducidad,
-             p.presentacion AS nombre_presentacion,
-             c.controlado AS nombre_controlado,
-             IF(m.proveedores_id IS NULL, 'Eliminado', pr.nombre) AS nombre_proveedor
-           FROM 
-             medicamentos m
-           JOIN 
-             presentacion p ON m.presentation_id = p.id_presentacion
-           JOIN 
-             controlado c ON m.controlado_id = c.id_controlado
-           LEFT JOIN 
-             proveedores pr ON m.proveedores_id = pr.id_proveedores
-           WHERE 
-             m.cantidad > 0
-           ORDER BY 
-             m.id_medicamentos DESC
-           LIMIT ?`
-        : `SELECT 
-             m.id_medicamentos,
-             m.nombre,
-             m.cantidad,
-             m.precio,
-             m.fecha_caducidad,
-             p.presentacion AS nombre_presentacion,
-             c.controlado AS nombre_controlado,
-             IF(m.proveedores_id IS NULL, 'Eliminado', pr.nombre) AS nombre_proveedor
-           FROM 
-             medicamentos m
-           JOIN 
-             presentacion p ON m.presentation_id = p.id_presentacion
-           JOIN 
-             controlado c ON m.controlado_id = c.id_controlado
-           LEFT JOIN 
-             proveedores pr ON m.proveedores_id = pr.id_proveedores
-           WHERE 
-             m.cantidad > 0
-           ORDER BY 
-             m.id_medicamentos DESC`;
+    const baseQuery = `
+        SELECT 
+            m.id_medicamentos,
+            m.nombre,
+            m.cantidad,
+            m.precio,
+            m.fecha_caducidad,
+            p.presentacion AS nombre_presentacion,
+            c.controlado AS nombre_controlado,
+            pr.nombre AS nombre_proveedor
+        FROM 
+            medicamentos m
+        JOIN 
+            presentacion p ON m.presentation_id = p.id_presentacion
+        JOIN 
+            controlado c ON m.controlado_id = c.id_controlado
+        LEFT JOIN 
+            proveedores pr ON m.proveedores_id = pr.id_proveedores
+        WHERE 
+            m.cantidad > 0
+            AND m.activo = 1
+        ORDER BY 
+            m.id_medicamentos DESC
+    `;
 
-    // Ejecutar consulta con o sin parámetros
+    const query = cantidad ? baseQuery + ` LIMIT ?` : baseQuery;
+
     conexion.query(query, cantidad ? [cantidad] : [], (err, results) => {
         if (err) {
             console.error('Error al consultar medicamentos:', err);
@@ -329,7 +309,7 @@ function vista_datos_medicamentos(req, res) {
 
         res.render('menu/datos_medicamentos', { 
             medicamentos: results,
-            cantidad // por si deseas mostrar la cantidad actual en la vista
+            cantidad
         });
     });
 }
