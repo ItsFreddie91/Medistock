@@ -401,10 +401,10 @@ function mostrarClienteActualizado(req, res) {
 }
 
 function eliminarCliente(req, res) {
-    const id_clientes = req.params.id_clientes; // Obtén el ID del cliente desde los parámetros
-    const nombreBuscado = req.query.nombre; // Captura el nombre buscado desde la consulta en la URL
+    const id_clientes = req.params.id_clientes; 
+    const nombreBuscado = req.query.nombre; 
 
-    const query = 'DELETE FROM clientes WHERE id_clientes = ?';
+    const query = 'UPDATE clientes SET activo = 0 WHERE id_clientes = ?';
 
     conexion.query(query, [id_clientes], (err) => {
         if (err) {
@@ -412,10 +412,10 @@ function eliminarCliente(req, res) {
             return res.status(500).send('Error al eliminar el cliente');
         }
 
-        // Redirige a la página de resultados de búsqueda usando el nombre que se buscó
         res.redirect(`/menu_admin/buscar-cliente?nombre=${encodeURIComponent(nombreBuscado)}`);
     });
 }
+
 
 
 
@@ -991,13 +991,12 @@ function actualizarUsuario(req, res) {
 function eliminarUsuario(req, res) {
     const id_usuario = parseInt(req.params.id_usuario);
 
-    // Prevenir eliminación del administrador
-if (id_usuario === 1) {
-    return res.redirect('/menu_admin/administrar_usuarios?alerta=No%20se%20puede%20eliminar%20al%20Administrador%20del%20sistema');
-}
+    // No dejar eliminar al Admin (ID = 1)
+    if (id_usuario === 1) {
+        return res.redirect('/menu_admin/administrar_usuarios?alerta=No%20se%20puede%20eliminar%20al%20Administrador%20del%20sistema');
+    }
 
-
-    const query = 'DELETE FROM usuarios WHERE id_usuario = ?';
+    const query = 'UPDATE usuarios SET activo = 0 WHERE id_usuario = ?';
 
     conexion.query(query, [id_usuario], (err) => {
         if (err) {
@@ -1008,6 +1007,7 @@ if (id_usuario === 1) {
         res.redirect('/menu_admin/administrar_usuarios');
     });
 }
+
 
 
     //para meidicamentos
@@ -1053,22 +1053,22 @@ function buscarMedicamento(req, res) {
 }
 
 
-    function eliminarMedicamento(req, res) {
-        const id_medicamentos = req.params.id_medicamentos; 
-        const nombreBuscado = req.query.nombre; 
-    
-        const query = 'DELETE FROM medicamentos WHERE id_medicamentos = ?';
-    
-        conexion.query(query, [id_medicamentos], (err) => {
-            if (err) {
-                console.error('Error al eliminar el medicamento:', err);
-                return res.status(500).send('Error al eliminar el medicamento');
-            }
-    
-            // Redirige a la página de resultados de búsqueda usando el nombre que se buscó
-            res.redirect(`/menu_admin/buscar-medicamento?nombre=${encodeURIComponent(nombreBuscado)}`);
-        });
-    }
+function eliminarMedicamento(req, res) {
+    const id_medicamentos = req.params.id_medicamentos; 
+    const nombreBuscado = req.query.nombre; 
+
+    const query = 'UPDATE medicamentos SET activo = 0 WHERE id_medicamentos = ?';
+
+    conexion.query(query, [id_medicamentos], (err) => {
+        if (err) {
+            console.error('Error al eliminar el medicamento:', err);
+            return res.status(500).send('Error al eliminar el medicamento');
+        }
+
+        res.redirect(`/menu_admin/buscar-medicamento?nombre=${encodeURIComponent(nombreBuscado)}`);
+    });
+}
+
 
 function actualizarMedicamento(req, res) {
     const idMedicamento = req.params.id_medicamentos;
@@ -1409,8 +1409,10 @@ function eliminarVenta(req, res) {
 
 function exportarVentasPDF(req, res) {
     const PDFDocument = require('pdfkit');
-    const conexion = require('./tu-archivo-de-conexion'); // Ajusta la ruta según donde tengas tu conexión
 
+    // ==============================
+    // FUNCIÓN PARA FECHA DE MÉXICO
+    // ==============================
     function fechaMX(fecha) {
         const f = new Date(fecha.getTime() - (fecha.getTimezoneOffset() * 60000));
         return `${f.getDate().toString().padStart(2,'0')}/${
@@ -1418,7 +1420,6 @@ function exportarVentasPDF(req, res) {
         }/${f.getFullYear()}`;
     }
 
-    // CONSULTA CORRECTA - Ya usa los campos almacenados directamente
     const query = `
         SELECT 
             v.fecha_venta, 
@@ -1426,9 +1427,11 @@ function exportarVentasPDF(req, res) {
             v.cantidad, 
             v.precio_unitario, 
             v.total,
-            v.nombre_usuario AS vendedor,  -- Usar el campo almacenado
-            v.nombre_cliente AS cliente    -- Usar el campo almacenado
+            IFNULL(u.nombre, 'Usuario') AS vendedor,
+            IFNULL(c.nombre, 'Eliminado') AS cliente
         FROM ventas v
+        LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
+        LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
         ORDER BY v.fecha_venta DESC;
     `;
 
@@ -1445,12 +1448,15 @@ function exportarVentasPDF(req, res) {
         res.setHeader('Content-Disposition', 'attachment; filename="historial_ventas.pdf"');
         doc.pipe(res);
 
-        // ENCABEZADO
+        // ==============================
+        // ENCABEZADO GENERAL
+        // ==============================
         doc.fontSize(18).text('Centro de Salud de Teoloyucan', { align: 'center' });
         doc.moveDown(0.5);
         doc.fontSize(14).text('Historial de Ventas - MediStock', { align: 'center' });
         doc.moveDown(0.5);
 
+        // FECHA CORREGIDA (Railway no adelantará el día)
         const fechaGen = new Intl.DateTimeFormat('es-MX', {
             timeZone: 'America/Mexico_City',
             day: '2-digit',
@@ -1461,13 +1467,18 @@ function exportarVentasPDF(req, res) {
         doc.fontSize(10).text(`Fecha de generación: ${fechaGen}`, { align: 'right' });
         doc.moveDown(2);
 
+        // ==============================
+        // CASO: NO HAY DATOS
+        // ==============================
         if (ventas.length === 0) {
             doc.fontSize(14).text('No se encontraron ventas registradas.', { align: 'center' });
             doc.end();
             return;
         }
 
+        // ==============================
         // TABLA
+        // ==============================
         const columnas = [
             { header: 'Fecha de Venta', width: 90 },
             { header: 'Medicamento', width: 100 },
@@ -1513,6 +1524,7 @@ function exportarVentasPDF(req, res) {
                 endX = startX + tableWidth;
                 y = 50;
 
+                // Redibujar encabezados
                 x = startX;
                 doc.font('Helvetica-Bold').fontSize(10);
                 columnas.forEach(col => {
@@ -1525,6 +1537,7 @@ function exportarVentasPDF(req, res) {
                 doc.font('Helvetica').fontSize(9);
             }
 
+            // CORREGIR FECHA DE CADA VENTA (esto ya funcionaba bien)
             const fechaOK = fechaMX(new Date(v.fecha_venta));
 
             const datos = [
@@ -1533,8 +1546,8 @@ function exportarVentasPDF(req, res) {
                 v.cantidad.toString(),
                 `$${Number(v.precio_unitario).toFixed(2)}`,
                 `$${Number(v.total).toFixed(2)}`,
-                v.vendedor,  // ✅ Ahora mostrará el nombre correcto aunque el usuario fue eliminado
-                v.cliente    // ✅ Lo mismo para el cliente
+                v.vendedor,
+                v.cliente
             ];
 
             x = startX;

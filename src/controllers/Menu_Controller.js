@@ -1152,8 +1152,10 @@ function eliminarVenta(req, res) {
 
 function exportarVentasPDF(req, res) {
     const PDFDocument = require('pdfkit');
-    const conexion = require('./tu-archivo-de-conexion'); // Ajusta la ruta según donde tengas tu conexión
 
+    // ==============================
+    // FUNCIÓN PARA FECHA DE MÉXICO
+    // ==============================
     function fechaMX(fecha) {
         const f = new Date(fecha.getTime() - (fecha.getTimezoneOffset() * 60000));
         return `${f.getDate().toString().padStart(2,'0')}/${
@@ -1161,7 +1163,6 @@ function exportarVentasPDF(req, res) {
         }/${f.getFullYear()}`;
     }
 
-    // CONSULTA CORRECTA - Ya usa los campos almacenados directamente
     const query = `
         SELECT 
             v.fecha_venta, 
@@ -1169,9 +1170,11 @@ function exportarVentasPDF(req, res) {
             v.cantidad, 
             v.precio_unitario, 
             v.total,
-            v.nombre_usuario AS vendedor,  -- Usar el campo almacenado
-            v.nombre_cliente AS cliente    -- Usar el campo almacenado
+            IFNULL(u.nombre, 'Usuario') AS vendedor,
+            IFNULL(c.nombre, 'Eliminado') AS cliente
         FROM ventas v
+        LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
+        LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
         ORDER BY v.fecha_venta DESC;
     `;
 
@@ -1188,12 +1191,15 @@ function exportarVentasPDF(req, res) {
         res.setHeader('Content-Disposition', 'attachment; filename="historial_ventas.pdf"');
         doc.pipe(res);
 
-        // ENCABEZADO
+        // ==============================
+        // ENCABEZADO GENERAL
+        // ==============================
         doc.fontSize(18).text('Centro de Salud de Teoloyucan', { align: 'center' });
         doc.moveDown(0.5);
         doc.fontSize(14).text('Historial de Ventas - MediStock', { align: 'center' });
         doc.moveDown(0.5);
 
+        // FECHA CORREGIDA (Railway no adelantará el día)
         const fechaGen = new Intl.DateTimeFormat('es-MX', {
             timeZone: 'America/Mexico_City',
             day: '2-digit',
@@ -1204,13 +1210,18 @@ function exportarVentasPDF(req, res) {
         doc.fontSize(10).text(`Fecha de generación: ${fechaGen}`, { align: 'right' });
         doc.moveDown(2);
 
+        // ==============================
+        // CASO: NO HAY DATOS
+        // ==============================
         if (ventas.length === 0) {
             doc.fontSize(14).text('No se encontraron ventas registradas.', { align: 'center' });
             doc.end();
             return;
         }
 
+        // ==============================
         // TABLA
+        // ==============================
         const columnas = [
             { header: 'Fecha de Venta', width: 90 },
             { header: 'Medicamento', width: 100 },
@@ -1256,6 +1267,7 @@ function exportarVentasPDF(req, res) {
                 endX = startX + tableWidth;
                 y = 50;
 
+                // Redibujar encabezados
                 x = startX;
                 doc.font('Helvetica-Bold').fontSize(10);
                 columnas.forEach(col => {
@@ -1268,6 +1280,7 @@ function exportarVentasPDF(req, res) {
                 doc.font('Helvetica').fontSize(9);
             }
 
+            // CORREGIR FECHA DE CADA VENTA (esto ya funcionaba bien)
             const fechaOK = fechaMX(new Date(v.fecha_venta));
 
             const datos = [
@@ -1276,8 +1289,8 @@ function exportarVentasPDF(req, res) {
                 v.cantidad.toString(),
                 `$${Number(v.precio_unitario).toFixed(2)}`,
                 `$${Number(v.total).toFixed(2)}`,
-                v.vendedor,  // ✅ Ahora mostrará el nombre correcto aunque el usuario fue eliminado
-                v.cliente    // ✅ Lo mismo para el cliente
+                v.vendedor,
+                v.cliente
             ];
 
             x = startX;
