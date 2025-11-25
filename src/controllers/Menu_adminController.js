@@ -631,24 +631,28 @@ function generarReportePDF(req, res) {
     doc.pipe(res);
 
     // Consulta SQL
-    const query = `
-        SELECT 
-            m.id_medicamentos,
-            m.nombre,
-            m.cantidad,
-            m.precio,
-            m.fecha_caducidad,
-            p.presentacion AS nombre_presentacion,
-            c.controlado AS nombre_controlado,
-            IF(m.proveedores_id IS NULL, 'Eliminado', pr.nombre) AS nombre_proveedor
-        FROM medicamentos m
-        LEFT JOIN presentacion p ON m.presentation_id = p.id_presentacion
-        LEFT JOIN controlado c ON m.controlado_id = c.id_controlado
-        LEFT JOIN proveedores pr ON m.proveedores_id = pr.id_proveedores
-        WHERE m.cantidad > 0               -- ← AQUÍ SE FILTRA EL STOCK
-        ORDER BY m.id_medicamentos DESC
-        LIMIT 50;
-    `;
+const query = `
+    SELECT 
+        m.id_medicamentos,
+        m.nombre,
+        m.cantidad,
+        m.precio,
+        m.fecha_caducidad,
+        p.presentacion AS nombre_presentacion,
+        c.controlado AS nombre_controlado,
+        IF(m.proveedores_id IS NULL, 'Eliminado', pr.nombre) AS nombre_proveedor
+    FROM medicamentos m
+    LEFT JOIN presentacion p ON m.presentation_id = p.id_presentacion
+    LEFT JOIN controlado c ON m.controlado_id = c.id_controlado
+    LEFT JOIN proveedores pr ON m.proveedores_id = pr.id_proveedores
+    WHERE 
+        m.cantidad > 0
+        AND m.activo = 1        
+    ORDER BY 
+        m.id_medicamentos DESC
+    LIMIT 50;
+`;
+
 
     conexion.query(query, (err, medicamentos) => {
         if (err) {
