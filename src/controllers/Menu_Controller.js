@@ -142,13 +142,17 @@ function post_clientes(req, res) {
 }
 
 function buscarCliente(req, res) {
-    const busqueda = req.query.nombre; // tu input se llama nombre
+    const busqueda = req.query.nombre;
+
     const query = `
         SELECT * FROM clientes 
-        WHERE nombre LIKE ?
-           OR apellido_paterno LIKE ?
-           OR apellido_materno LIKE ?
-           OR receta LIKE ?
+        WHERE activo = 1
+          AND (
+                nombre LIKE ?
+                OR apellido_paterno LIKE ?
+                OR apellido_materno LIKE ?
+                OR receta LIKE ?
+          )
     `;
     
     const valor = `%${busqueda}%`;
@@ -246,10 +250,10 @@ function mostrarClienteActualizado(req, res) {
 
 
 function eliminarCliente(req, res) {
-    const id_clientes = req.params.id_clientes; // Obtén el ID del cliente desde los parámetros
-    const nombreBuscado = req.query.nombre; // Captura el nombre buscado desde la consulta en la URL
+    const id_clientes = req.params.id_clientes; 
+    const nombreBuscado = req.query.nombre; 
 
-    const query = 'DELETE FROM clientes WHERE id_clientes = ?';
+    const query = 'UPDATE clientes SET activo = 0 WHERE id_clientes = ?';
 
     conexion.query(query, [id_clientes], (err) => {
         if (err) {
@@ -257,8 +261,7 @@ function eliminarCliente(req, res) {
             return res.status(500).send('Error al eliminar el cliente');
         }
 
-        // Redirige a la página de resultados de búsqueda usando el nombre que se buscó
-        res.redirect(`/menu/buscar-cliente?nombre=${encodeURIComponent(nombreBuscado)}`);
+        res.redirect(`/menu_admin/buscar-cliente?nombre=${encodeURIComponent(nombreBuscado)}`);
     });
 }
 
@@ -880,7 +883,9 @@ function buscarMedicamento(req, res) {
         LEFT JOIN presentacion p ON m.presentation_id = p.id_presentacion
         LEFT JOIN controlado c ON m.controlado_id = c.id_controlado
         LEFT JOIN proveedores pr ON m.proveedores_id = pr.id_proveedores
-        WHERE m.nombre LIKE ? AND m.cantidad > 0
+        WHERE m.activo = 1
+          AND m.nombre LIKE ?
+          AND m.cantidad > 0
     `;
 
     conexion.query(query, [`%${nombreBuscado}%`], (err, resultados) => {
@@ -889,7 +894,6 @@ function buscarMedicamento(req, res) {
             return res.status(500).send('Error al buscar medicamentos');
         }
 
-        // Formatear la fecha de caducidad
         const medicamentosFormateados = resultados.map(medicamento => {
             const fecha = new Date(medicamento.fecha_caducidad);
             const fechaISO = fecha.toISOString().split('T')[0];
@@ -900,32 +904,31 @@ function buscarMedicamento(req, res) {
             };
         });
 
-        res.render('menu/resultadoMedicamento', {
+        res.render('menu_admin/resultadoMedicamento_admin', {
             medicamentos: medicamentosFormateados,
             nombreBuscado
-
         });
     });
 }
 
 
 
-    function eliminarMedicamento(req, res) {
-        const id_medicamentos = req.params.id_medicamentos; 
-        const nombreBuscado = req.query.nombre; 
-    
-        const query = 'DELETE FROM medicamentos WHERE id_medicamentos = ?';
-    
-        conexion.query(query, [id_medicamentos], (err) => {
-            if (err) {
-                console.error('Error al eliminar el medicamento:', err);
-                return res.status(500).send('Error al eliminar el medicamento');
-            }
-    
-            // Redirige a la página de resultados de búsqueda usando el nombre que se buscó
-            res.redirect(`/menu/buscar-medicamento?nombre=${encodeURIComponent(nombreBuscado)}`);
-        });
-    }
+function eliminarMedicamento(req, res) {
+    const id_medicamentos = req.params.id_medicamentos; 
+    const nombreBuscado = req.query.nombre; 
+
+    const query = 'UPDATE medicamentos SET activo = 0 WHERE id_medicamentos = ?';
+
+    conexion.query(query, [id_medicamentos], (err) => {
+        if (err) {
+            console.error('Error al eliminar el medicamento:', err);
+            return res.status(500).send('Error al eliminar el medicamento');
+        }
+
+        res.redirect(`/menu_admin/buscar-medicamento?nombre=${encodeURIComponent(nombreBuscado)}`);
+    });
+}
+
 
     function actualizarMedicamento(req, res) {
     const idMedicamento = req.params.id_medicamentos;
