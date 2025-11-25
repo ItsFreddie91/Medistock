@@ -838,7 +838,6 @@ function administrar_usuarios(req, res) {
 function formulario(req, res) {
     const { nombre, apellido_paterno, apellido_materno, usuario, contrasena } = req.body;
 
-    // Validación básica
     if (!nombre || !usuario || !contrasena) {
         req.flash("error", "Nombre, usuario y contraseña son obligatorios");
         return res.redirect("/menu_admin/administrar_usuarios");
@@ -851,26 +850,27 @@ function formulario(req, res) {
             return res.redirect("/menu_admin/administrar_usuarios");
         }
 
-        // 1️⃣ Verificar si el usuario ya existe
-        const queryBuscar = "SELECT * FROM usuarios WHERE usuario = ?";
-        conexion.query(queryBuscar, [usuario], (err, results) => {
+        // 1️⃣ Verificar si el usuario existe y está ACTIVO
+        conexion.query(
+            "SELECT * FROM usuarios WHERE usuario = ? AND activo = 1",
+            [usuario],
+            (err, results) => {
 
-            if (err) {
-                return conexion.rollback(() => {
-                    console.error("Error al verificar usuario:", err);
-                    req.flash("error", "Error al verificar usuario");
-                    res.redirect("/menu_admin/administrar_usuarios");
-                });
-            }
+                if (err) {
+                    return conexion.rollback(() => {
+                        console.error("Error al verificar usuario:", err);
+                        req.flash("error", "Error al verificar usuario");
+                        res.redirect("/menu_admin/administrar_usuarios");
+                    });
+                }
 
-            // 2️⃣ Usuario existe y está ACTIVO → ERROR
-            if (results.length > 0 && results[0].activo === 1) {
-                req.flash("error", "El usuario ya existe y está activo.");
-                return res.redirect("/menu_admin/administrar_usuarios");
-            }
+                // Si existe un usuario ACTIVO con ese mismo username → NO permitir
+                if (results.length > 0) {
+                    req.flash("error", "El usuario ya existe y está activo.");
+                    return res.redirect("/menu_admin/administrar_usuarios");
+                }
 
-            // 3️⃣ Usuario existe y está INACTIVO → REACTIVAR
-            if (results.length > 0 && results[0].activo === 0) {
+                // 2️⃣ Registrar nuevo usuario (si no hay activos con ese nombre)
                 bcrypt.hash(contrasena, 12, (err, hashedPassword) => {
                     if (err) {
                         return conexion.rollback(() => {
@@ -880,19 +880,16 @@ function formulario(req, res) {
                         });
                     }
 
-                    const reactivarQuery = `
-                        UPDATE usuarios 
-                        SET nombre = ?, apellido_paterno = ?, apellido_materno = ?, contrasena = ?, activo = 1
-                        WHERE usuario = ?
-                    `;
-
-                    conexion.query(reactivarQuery,
-                        [nombre, apellido_paterno, apellido_materno, hashedPassword, usuario],
+                    conexion.query(
+                        `INSERT INTO usuarios 
+                         (nombre, apellido_paterno, apellido_materno, usuario, contrasena, activo) 
+                         VALUES (?, ?, ?, ?, ?, 1)`,
+                        [nombre, apellido_paterno, apellido_materno, usuario, hashedPassword],
                         (err) => {
                             if (err) {
                                 return conexion.rollback(() => {
-                                    console.error("Error al reactivar usuario:", err);
-                                    req.flash("error", "Error al reactivar usuario.");
+                                    console.error("Error al registrar usuario:", err);
+                                    req.flash("error", "Error al registrar usuario.");
                                     res.redirect("/menu_admin/administrar_usuarios");
                                 });
                             }
@@ -900,66 +897,23 @@ function formulario(req, res) {
                             conexion.commit(err => {
                                 if (err) {
                                     return conexion.rollback(() => {
-                                        console.error("Error al confirmar reactivación:", err);
-                                        req.flash("error", "Error al confirmar reactivación.");
+                                        console.error("Error al guardar cambios:", err);
+                                        req.flash("error", "Error al guardar cambios.");
                                         res.redirect("/menu_admin/administrar_usuarios");
                                     });
                                 }
 
-                                req.flash("success", "Usuario reactivado exitosamente");
+                                req.flash("success", "Usuario registrado exitosamente");
                                 res.redirect("/menu_admin/administrar_usuarios");
                             });
                         }
                     );
                 });
-
-                return; // importante
             }
-
-            // 4️⃣ Usuario NO existe → REGISTRAR NORMAL
-            bcrypt.hash(contrasena, 12, (err, hashedPassword) => {
-                if (err) {
-                    return conexion.rollback(() => {
-                        console.error("Error al hashear contraseña:", err);
-                        req.flash("error", "Error al hashear contraseña.");
-                        res.redirect("/menu_admin/administrar_usuarios");
-                    });
-                }
-
-                const insertQuery = `
-                    INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, usuario, contrasena, activo)
-                    VALUES (?, ?, ?, ?, ?, 1)
-                `;
-
-                conexion.query(insertQuery,
-                    [nombre, apellido_paterno, apellido_materno, usuario, hashedPassword],
-                    (err) => {
-                        if (err) {
-                            return conexion.rollback(() => {
-                                console.error("Error al insertar usuario:", err);
-                                req.flash("error", "Error al registrar usuario.");
-                                res.redirect("/menu_admin/administrar_usuarios");
-                            });
-                        }
-
-                        conexion.commit(err => {
-                            if (err) {
-                                return conexion.rollback(() => {
-                                    console.error("Error al confirmar registro:", err);
-                                    req.flash("error", "Error al confirmar registro.");
-                                    res.redirect("/menu_admin/administrar_usuarios");
-                                });
-                            }
-
-                            req.flash("success", "Usuario registrado exitosamente");
-                            res.redirect("/menu_admin/administrar_usuarios");
-                        });
-                    }
-                );
-            });
-        });
+        );
     });
 }
+
 
 
 // Función para mostrar el formulario de edición de usuario
