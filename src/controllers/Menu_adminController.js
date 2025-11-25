@@ -134,7 +134,7 @@ function post_proveedores(req, res) {
 
                 // Si existe y está activo → NO permitir
                 if (results.length > 0) {
-                    return res.json({ success: false, message: "El proveedor ya está registrado y activo." });
+                    return res.json({ success: false, message: "El proveedor ya está registrado." });
                 }
 
                 // Insertar nuevo proveedor (si estaba desactivado NO importa)
@@ -849,62 +849,67 @@ function formulario(req, res) {
             return res.redirect("/menu_admin/administrar_usuarios");
         }
 
-        // Verificar si usuario existe
-        conexion.query("SELECT * FROM usuarios WHERE usuario = ?", [usuario], (err, results) => {
-            if (err) {
-                return conexion.rollback(() => {
-                    console.error("Error al verificar usuario:", err);
-                    req.flash("error", "Error al verificar usuario");
-                    res.redirect("/menu_admin/administrar_usuarios");
-                });
-            }
-
-            if (results.length > 0) {
-                // Usuario ya existe
-                req.flash("error", "El usuario ya existe. Elige otro nombre.");
-                return res.redirect("/menu_admin/administrar_usuarios");
-            }
-
-            // Registrar nuevo usuario
-            bcrypt.hash(contrasena, 12, (err, hashedPassword) => {
+        // Verificar si ya existe un usuario ACTIVO
+        conexion.query(
+            "SELECT * FROM usuarios WHERE usuario = ? AND activo = 1",
+            [usuario],
+            (err, results) => {
                 if (err) {
                     return conexion.rollback(() => {
-                        console.error("Error al hashear contraseña:", err);
-                        req.flash("error", "Error al hashear contraseña.");
+                        console.error("Error al verificar usuario:", err);
+                        req.flash("error", "Error al verificar usuario");
                         res.redirect("/menu_admin/administrar_usuarios");
                     });
                 }
 
-                conexion.query(
-                    'INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, usuario, contrasena) VALUES (?, ?, ?, ?, ?)',
-                    [nombre, apellido_paterno, apellido_materno, usuario, hashedPassword],
-                    (err, result) => {
-                        if (err) {
-                            return conexion.rollback(() => {
-                                console.error("Error al insertar usuario:", err);
-                                req.flash("error", "Error al registrar usuario.");
-                                res.redirect("/menu_admin/administrar_usuarios");
-                            });
-                        }
+                if (results.length > 0) {
+                    // Usuario existe y está activo → NO permitir
+                    req.flash("error", "El usuario ya existe y está activo. Elige otro nombre.");
+                    return res.redirect("/menu_admin/administrar_usuarios");
+                }
 
-                        conexion.commit(err => {
+                // Registrar nuevo usuario (aunque exista uno desactivado)
+                bcrypt.hash(contrasena, 12, (err, hashedPassword) => {
+                    if (err) {
+                        return conexion.rollback(() => {
+                            console.error("Error al hashear contraseña:", err);
+                            req.flash("error", "Error al hashear contraseña.");
+                            res.redirect("/menu_admin/administrar_usuarios");
+                        });
+                    }
+
+                    conexion.query(
+                        'INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, usuario, contrasena, activo) VALUES (?, ?, ?, ?, ?, 1)',
+                        [nombre, apellido_paterno, apellido_materno, usuario, hashedPassword],
+                        (err, result) => {
                             if (err) {
                                 return conexion.rollback(() => {
-                                    console.error("Error al confirmar registro:", err);
-                                    req.flash("error", "Error al confirmar registro.");
+                                    console.error("Error al insertar usuario:", err);
+                                    req.flash("error", "Error al registrar usuario.");
                                     res.redirect("/menu_admin/administrar_usuarios");
                                 });
                             }
 
-                            req.flash("success", "Usuario registrado exitosamente");
-                            res.redirect("/menu_admin/administrar_usuarios");
-                        });
-                    }
-                );
-            });
-        });
+                            conexion.commit(err => {
+                                if (err) {
+                                    return conexion.rollback(() => {
+                                        console.error("Error al confirmar registro:", err);
+                                        req.flash("error", "Error al confirmar registro.");
+                                        res.redirect("/menu_admin/administrar_usuarios");
+                                    });
+                                }
+
+                                req.flash("success", "Usuario registrado exitosamente");
+                                res.redirect("/menu_admin/administrar_usuarios");
+                            });
+                        }
+                    );
+                });
+            }
+        );
     });
 }
+
 
 // Función para mostrar el formulario de edición de usuario
 function editarUsuario(req, res) {
