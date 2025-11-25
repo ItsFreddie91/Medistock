@@ -8,7 +8,7 @@ function mostrarLogin(req, res) {
 function autenticarUsuario(req, res) {
     const { usuario, contrasena } = req.body;
 
-    // Autenticación del administrador (usuario fijo)
+    // 🟦 Login del administrador fijo
     if (usuario === 'admin' && contrasena === 'admin') {
         req.session.usuarioId = 1;
         req.session.usuarioNombre = 'Administrador';
@@ -16,40 +16,49 @@ function autenticarUsuario(req, res) {
         return res.redirect('/menu_admin/inicio_admin');
     }
     
-    // Autenticación para otros usuarios
-    conexion.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario], (err, results) => {
-        if (err) {
-            return res.render('login/index', { message: 'Hubo un error en el servidor. Inténtalo nuevamente.' });
-        }
+    // 🟩 Login para usuarios de la BD
+    conexion.query(
+        'SELECT * FROM usuarios WHERE usuario = ? LIMIT 1',
+        [usuario],
+        (err, results) => {
 
-        // Usuario no existe
-        if (results.length === 0) {
-            return res.render('login/index', { message: 'Este Usuario no Existe, Inténtalo de Nuevo.' });
-        }
-
-        const user = results[0];
-
-        // ⚠️ NO PERMITIR INICIAR SESIÓN SI ESTÁ DESACTIVADO
-        if (Number(user.activo) === 0) {
-            return res.render('login/index', { message: 'Este usuario está desactivado.' });
-        }
-
-        // Comparar contraseña
-        bcrypt.compare(contrasena, user.contrasena, (err, isMatch) => {
             if (err) {
-                return res.render('login/index', { message: 'Hubo un error en el servidor. Inténtalo nuevamente.' });
+                return res.render('login/index', { message: 'Error en el servidor. Inténtalo nuevamente.' });
             }
 
-            if (isMatch) {
+            // Usuario NO existe
+            if (results.length === 0) {
+                return res.render('login/index', { message: 'Este usuario no existe.' });
+            }
+
+            const user = results[0];
+
+            // 🔴 Usuario DESACTIVADO → NO permitir login
+            if (Number(user.activo) === 0) {
+                return res.render('login/index', { 
+                    message: 'Este usuario está eliminado o desactivado.' 
+                });
+            }
+
+            // Comparar contraseña
+            bcrypt.compare(contrasena, user.contrasena, (err, isMatch) => {
+                if (err) {
+                    return res.render('login/index', { message: 'Error en el servidor.' });
+                }
+
+                if (!isMatch) {
+                    return res.render('login/index', { message: 'Contraseña incorrecta.' });
+                }
+
+                // 🟢 Login correcto
                 req.session.usuarioId = user.id_usuario;
                 req.session.usuarioNombre = user.nombre;
                 req.session.tipoUsuario = 'vendedor';
+
                 return res.redirect('/menu/inicio');
-            } else {
-                return res.render('login/index', { message: 'Contraseña incorrecta. Inténtalo nuevamente.' });
-            }
-        });
-    });
+            });
+        }
+    );
 }
 
 module.exports = {
