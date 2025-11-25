@@ -33,6 +33,7 @@ function autenticarUsuario(req, res) {
         if (user.activo === 0) {
             return res.render('login/index', { message: 'Este usuario está desactivado. Contacta al administrador.' });
         }
+        
 
         // Comparar contraseña
         bcrypt.compare(contrasena, user.contrasena, (err, isMatch) => {
