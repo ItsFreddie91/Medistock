@@ -261,7 +261,7 @@ function eliminarCliente(req, res) {
             return res.status(500).send('Error al eliminar el cliente');
         }
 
-        res.redirect(`/menu_admin/buscar-cliente?nombre=${encodeURIComponent(nombreBuscado)}`);
+        res.redirect(`/menu/buscar-cliente?nombre=${encodeURIComponent(nombreBuscado)}`);
     });
 }
 
@@ -925,7 +925,7 @@ function eliminarMedicamento(req, res) {
             return res.status(500).send('Error al eliminar el medicamento');
         }
 
-        res.redirect(`/menu_admin/buscar-medicamento?nombre=${encodeURIComponent(nombreBuscado)}`);
+        res.redirect(`/menu/buscar-medicamento?nombre=${encodeURIComponent(nombreBuscado)}`);
     });
 }
 
@@ -1065,7 +1065,7 @@ function tabla_medicamentos(req, res) {
     LEFT JOIN 
       proveedores pr ON m.proveedores_id = pr.id_proveedores
     WHERE 
-      m.cantidad > 0
+      m.estatus = 1
     ORDER BY 
       m.id_medicamentos DESC;
   `;
@@ -1079,9 +1079,6 @@ function tabla_medicamentos(req, res) {
     });
 }
 
-
-
-
 function tabla_clientes(req, res) {
     const query = `
     SELECT 
@@ -1092,6 +1089,8 @@ function tabla_clientes(req, res) {
       apellido_materno
     FROM 
       clientes
+    WHERE
+      estatus = 1
     ORDER BY 
       id_clientes DESC;
     `;
@@ -1105,6 +1104,7 @@ function tabla_clientes(req, res) {
     });
 }
 
+
 function tabla_proveedores(req, res) {
     const query = `
     SELECT 
@@ -1115,6 +1115,8 @@ function tabla_proveedores(req, res) {
       correo
     FROM 
       proveedores
+    WHERE
+      estatus = 1
     ORDER BY 
       id_proveedores DESC;
     `;
@@ -1127,6 +1129,7 @@ function tabla_proveedores(req, res) {
         res.render('menu/tabla_proveedores', { proveedores: results });
     });
 }
+
 
 
 
