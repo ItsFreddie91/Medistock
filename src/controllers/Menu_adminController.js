@@ -303,13 +303,17 @@ function post_clientes(req, res) {
 
 
 function buscarCliente(req, res) {
-    const busqueda = req.query.nombre; // tu input se llama nombre
+    const busqueda = req.query.nombre;
+
     const query = `
         SELECT * FROM clientes 
-        WHERE nombre LIKE ?
-           OR apellido_paterno LIKE ?
-           OR apellido_materno LIKE ?
-           OR receta LIKE ?
+        WHERE activo = 1
+          AND (
+                nombre LIKE ?
+                OR apellido_paterno LIKE ?
+                OR apellido_materno LIKE ?
+                OR receta LIKE ?
+          )
     `;
     
     const valor = `%${busqueda}%`;
@@ -327,6 +331,7 @@ function buscarCliente(req, res) {
         });
     });
 }
+
 
 
 
@@ -816,21 +821,24 @@ function generarReportePDF(req, res) {
 // Función para obtener y mostrar todos los usuarios
 // GET - Mostrar lista de usuarios
 function administrar_usuarios(req, res) {
-    const query = 'SELECT * FROM usuarios';
+    const query = 'SELECT * FROM usuarios WHERE activo = 1';
+
     conexion.query(query, (err, results) => {
         if (err) {
             console.error('Error al obtener usuarios:', err);
             return res.status(500).render('menu_admin/administrar_usuarios', {
                 message: 'Error al obtener usuarios',
-                usuarios: [] // Pasa array vacío para evitar errores en EJS
+                usuarios: []
             });
         }
+
         res.render('menu_admin/administrar_usuarios', { 
             usuarios: results,
-            message: req.query.message // Para mensajes de redirección
+            message: req.query.message
         });
     });
 }
+
 
 // POST - Registrar nuevo usuario
 function formulario(req, res) {
@@ -1024,7 +1032,9 @@ function buscarMedicamento(req, res) {
         LEFT JOIN presentacion p ON m.presentation_id = p.id_presentacion
         LEFT JOIN controlado c ON m.controlado_id = c.id_controlado
         LEFT JOIN proveedores pr ON m.proveedores_id = pr.id_proveedores
-        WHERE m.nombre LIKE ? AND m.cantidad > 0
+        WHERE m.activo = 1
+          AND m.nombre LIKE ?
+          AND m.cantidad > 0
     `;
 
     conexion.query(query, [`%${nombreBuscado}%`], (err, resultados) => {
@@ -1033,7 +1043,6 @@ function buscarMedicamento(req, res) {
             return res.status(500).send('Error al buscar medicamentos');
         }
 
-        // Formatear la fecha de caducidad
         const medicamentosFormateados = resultados.map(medicamento => {
             const fecha = new Date(medicamento.fecha_caducidad);
             const fechaISO = fecha.toISOString().split('T')[0];
@@ -1047,10 +1056,10 @@ function buscarMedicamento(req, res) {
         res.render('menu_admin/resultadoMedicamento_admin', {
             medicamentos: medicamentosFormateados,
             nombreBuscado
-
         });
     });
 }
+
 
 
 function eliminarMedicamento(req, res) {
