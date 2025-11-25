@@ -849,13 +849,8 @@ function formulario(req, res) {
             return res.redirect("/menu_admin/administrar_usuarios");
         }
 
-        // Buscar si ya existe un usuario con ese nombre
-        const query = `
-            SELECT * FROM usuarios 
-            WHERE usuario = ? AND status = 1
-        `;
-
-        conexion.query(query, [usuario], (err, results) => {
+        // Verificar si usuario existe
+        conexion.query("SELECT * FROM usuarios WHERE usuario = ?", [usuario], (err, results) => {
             if (err) {
                 return conexion.rollback(() => {
                     console.error("Error al verificar usuario:", err);
@@ -864,34 +859,29 @@ function formulario(req, res) {
                 });
             }
 
-            // SI EXISTE Y ESTÁ ACTIVO → NO PERMITIR
             if (results.length > 0) {
-                req.flash("error", "El usuario ya está registrado.");
+                // Usuario ya existe
+                req.flash("error", "El usuario ya existe. Elige otro nombre.");
                 return res.redirect("/menu_admin/administrar_usuarios");
             }
 
-            // SI NO EXISTE O ESTÁ DESACTIVADO → PERMITIR REGISTRAR
+            // Registrar nuevo usuario
             bcrypt.hash(contrasena, 12, (err, hashedPassword) => {
                 if (err) {
                     return conexion.rollback(() => {
                         console.error("Error al hashear contraseña:", err);
-                        req.flash("error", "Error al procesar contraseña.");
+                        req.flash("error", "Error al hashear contraseña.");
                         res.redirect("/menu_admin/administrar_usuarios");
                     });
                 }
 
-                const insert = `
-                    INSERT INTO usuarios 
-                    (nombre, apellido_paterno, apellido_materno, usuario, contrasena, status) 
-                    VALUES (?, ?, ?, ?, ?, 1)
-                `;
-
-                conexion.query(insert,
+                conexion.query(
+                    'INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, usuario, contrasena) VALUES (?, ?, ?, ?, ?)',
                     [nombre, apellido_paterno, apellido_materno, usuario, hashedPassword],
                     (err, result) => {
                         if (err) {
                             return conexion.rollback(() => {
-                                console.error("Error al registrar usuario:", err);
+                                console.error("Error al insertar usuario:", err);
                                 req.flash("error", "Error al registrar usuario.");
                                 res.redirect("/menu_admin/administrar_usuarios");
                             });
@@ -901,12 +891,12 @@ function formulario(req, res) {
                             if (err) {
                                 return conexion.rollback(() => {
                                     console.error("Error al confirmar registro:", err);
-                                    req.flash("error", "Error al guardar cambios.");
+                                    req.flash("error", "Error al confirmar registro.");
                                     res.redirect("/menu_admin/administrar_usuarios");
                                 });
                             }
 
-                            req.flash("success", "Usuario registrado exitosamente.");
+                            req.flash("success", "Usuario registrado exitosamente");
                             res.redirect("/menu_admin/administrar_usuarios");
                         });
                     }
@@ -915,7 +905,6 @@ function formulario(req, res) {
         });
     });
 }
-
 
 // Función para mostrar el formulario de edición de usuario
 function editarUsuario(req, res) {
