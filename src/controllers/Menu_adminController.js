@@ -520,7 +520,8 @@ function tabla_medicamentos(req, res) {
     LEFT JOIN 
       proveedores pr ON m.proveedores_id = pr.id_proveedores
     WHERE 
-      m.cantidad > 0
+      m.activo = 1
+      AND m.cantidad > 0
     ORDER BY 
       m.id_medicamentos DESC;
   `;
@@ -545,6 +546,8 @@ function tabla_clientes(req, res) {
       apellido_materno
     FROM 
       clientes
+    WHERE 
+      activo = 1
     ORDER BY 
       id_clientes DESC;
     `;
@@ -569,6 +572,8 @@ function tabla_proveedores(req, res) {
       correo
     FROM 
       proveedores
+    WHERE 
+      activo = 1
     ORDER BY 
       id_proveedores DESC;
     `;
