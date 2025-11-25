@@ -833,6 +833,8 @@ function administrar_usuarios(req, res) {
 
 
 // POST - Registrar nuevo usuario
+
+// POST - Registrar nuevo usuario
 function formulario(req, res) {
     const { nombre, apellido_paterno, apellido_materno, usuario, contrasena } = req.body;
 
@@ -849,8 +851,10 @@ function formulario(req, res) {
             return res.redirect("/menu_admin/administrar_usuarios");
         }
 
-        // Verificar si usuario existe
-        conexion.query("SELECT * FROM usuarios WHERE usuario = ?", [usuario], (err, results) => {
+        // 1️⃣ Verificar si el usuario ya existe
+        const queryBuscar = "SELECT * FROM usuarios WHERE usuario = ?";
+        conexion.query(queryBuscar, [usuario], (err, results) => {
+
             if (err) {
                 return conexion.rollback(() => {
                     console.error("Error al verificar usuario:", err);
@@ -859,13 +863,60 @@ function formulario(req, res) {
                 });
             }
 
-            if (results.length > 0) {
-                // Usuario ya existe
-                req.flash("error", "El usuario ya existe. Elige otro nombre.");
+            // 2️⃣ Usuario existe y está ACTIVO → ERROR
+            if (results.length > 0 && results[0].activo === 1) {
+                req.flash("error", "El usuario ya existe y está activo.");
                 return res.redirect("/menu_admin/administrar_usuarios");
             }
 
-            // Registrar nuevo usuario
+            // 3️⃣ Usuario existe y está INACTIVO → REACTIVAR
+            if (results.length > 0 && results[0].activo === 0) {
+                bcrypt.hash(contrasena, 12, (err, hashedPassword) => {
+                    if (err) {
+                        return conexion.rollback(() => {
+                            console.error("Error al hashear contraseña:", err);
+                            req.flash("error", "Error al hashear contraseña.");
+                            res.redirect("/menu_admin/administrar_usuarios");
+                        });
+                    }
+
+                    const reactivarQuery = `
+                        UPDATE usuarios 
+                        SET nombre = ?, apellido_paterno = ?, apellido_materno = ?, contrasena = ?, activo = 1
+                        WHERE usuario = ?
+                    `;
+
+                    conexion.query(reactivarQuery,
+                        [nombre, apellido_paterno, apellido_materno, hashedPassword, usuario],
+                        (err) => {
+                            if (err) {
+                                return conexion.rollback(() => {
+                                    console.error("Error al reactivar usuario:", err);
+                                    req.flash("error", "Error al reactivar usuario.");
+                                    res.redirect("/menu_admin/administrar_usuarios");
+                                });
+                            }
+
+                            conexion.commit(err => {
+                                if (err) {
+                                    return conexion.rollback(() => {
+                                        console.error("Error al confirmar reactivación:", err);
+                                        req.flash("error", "Error al confirmar reactivación.");
+                                        res.redirect("/menu_admin/administrar_usuarios");
+                                    });
+                                }
+
+                                req.flash("success", "Usuario reactivado exitosamente");
+                                res.redirect("/menu_admin/administrar_usuarios");
+                            });
+                        }
+                    );
+                });
+
+                return; // importante
+            }
+
+            // 4️⃣ Usuario NO existe → REGISTRAR NORMAL
             bcrypt.hash(contrasena, 12, (err, hashedPassword) => {
                 if (err) {
                     return conexion.rollback(() => {
@@ -875,10 +926,14 @@ function formulario(req, res) {
                     });
                 }
 
-                conexion.query(
-                    'INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, usuario, contrasena) VALUES (?, ?, ?, ?, ?)',
+                const insertQuery = `
+                    INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, usuario, contrasena, activo)
+                    VALUES (?, ?, ?, ?, ?, 1)
+                `;
+
+                conexion.query(insertQuery,
                     [nombre, apellido_paterno, apellido_materno, usuario, hashedPassword],
-                    (err, result) => {
+                    (err) => {
                         if (err) {
                             return conexion.rollback(() => {
                                 console.error("Error al insertar usuario:", err);
@@ -905,6 +960,7 @@ function formulario(req, res) {
         });
     });
 }
+
 
 // Función para mostrar el formulario de edición de usuario
 function editarUsuario(req, res) {
