@@ -219,10 +219,11 @@ function actualizarProveedor(req, res) {
 
 // Eliminar proveedor
 function eliminarProveedor(req, res) {
-    const id_proveedores = req.params.id_proveedores; // Obtén el ID del proveedor desde los parámetros
-    const nombreBuscado = req.query.nombre; // Captura el nombre buscado desde la consulta en la URL
+    const id_proveedores = req.params.id_proveedores;
+    const nombreBuscado = req.query.nombre;
 
-    const query = 'DELETE FROM proveedores WHERE id_proveedores = ?';
+    // En lugar de borrar, solo lo marcamos como inactivo
+    const query = 'UPDATE proveedores SET activo = 0 WHERE id_proveedores = ?';
 
     conexion.query(query, [id_proveedores], (err) => {
         if (err) {
@@ -230,10 +231,10 @@ function eliminarProveedor(req, res) {
             return res.status(500).send('Error al eliminar el proveedor');
         }
 
-        // Redirige a la página de resultados de búsqueda usando el nombre que se buscó
         res.redirect(`/menu_admin/buscar-proveedor?nombre=${encodeURIComponent(nombreBuscado)}`);
     });
 }
+
 
 
 function buscarProveedor(req, res) {
@@ -431,7 +432,6 @@ function eliminarCliente(req, res) {
 function vista_datos_medicamentos(req, res) {
     const cantidad = parseInt(req.query.cantidad, 10);
 
-    // Consulta base (compartida para ambas)
     const baseQuery = `
         SELECT 
             m.id_medicamentos,
@@ -441,7 +441,7 @@ function vista_datos_medicamentos(req, res) {
             m.fecha_caducidad,
             p.presentacion AS nombre_presentacion,
             c.controlado AS nombre_controlado,
-            IF(pr.activo = 1, pr.nombre, 'Eliminado') AS nombre_proveedor
+            pr.nombre AS nombre_proveedor
         FROM 
             medicamentos m
         JOIN 
@@ -457,10 +457,7 @@ function vista_datos_medicamentos(req, res) {
             m.id_medicamentos DESC
     `;
 
-    // Con límite
-    const queryConLimite = baseQuery + ` LIMIT ?`;
-
-    const query = cantidad ? queryConLimite : baseQuery;
+    const query = cantidad ? baseQuery + ` LIMIT ?` : baseQuery;
 
     conexion.query(query, cantidad ? [cantidad] : [], (err, results) => {
         if (err) {
@@ -474,6 +471,7 @@ function vista_datos_medicamentos(req, res) {
         });
     });
 }
+
 
 
 
