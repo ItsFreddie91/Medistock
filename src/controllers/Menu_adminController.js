@@ -850,10 +850,19 @@ function formulario(req, res) {
             return res.redirect("/menu_admin/administrar_usuarios");
         }
 
-        // 1️⃣ Buscar CUALQUIER usuario con ese nombre (activo o no)
+        // 1️⃣ Buscar usuarios activos que coincidan con el NOMBRE REAL o con el USERNAME
+        const sqlBuscar = `
+            SELECT * FROM usuarios
+            WHERE activo = 1 AND 
+            (
+                (nombre = ? AND apellido_paterno = ? AND apellido_materno = ?)
+                OR usuario = ?
+            )
+        `;
+
         conexion.query(
-            "SELECT * FROM usuarios WHERE usuario = ?",
-            [usuario],
+            sqlBuscar,
+            [nombre, apellido_paterno, apellido_materno, usuario],
             (err, results) => {
 
                 if (err) {
@@ -864,13 +873,13 @@ function formulario(req, res) {
                     });
                 }
 
-                // 2️⃣ Si existe y está ACTIVO → no permitir
-                if (results.length > 0 && results[0].activo == 1) {
-                    req.flash("error", "El usuario ya existe y está activo.");
+                // 2️⃣ Si existe un usuario ACTIVO con esos datos → NO permitir
+                if (results.length > 0) {
+                    req.flash("error", "Ya existe un usuario activo con este nombre o usuario.");
                     return res.redirect("/menu_admin/administrar_usuarios");
                 }
 
-                // 3️⃣ Si no está activo o no existe → registrar uno nuevo
+                // 3️⃣ Si NO existe uno activo → registrar uno nuevo (aunque exista desactivado)
                 bcrypt.hash(contrasena, 12, (err, hashedPassword) => {
                     if (err) {
                         return conexion.rollback(() => {
@@ -913,6 +922,7 @@ function formulario(req, res) {
         );
     });
 }
+
 
 
 
