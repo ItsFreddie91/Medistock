@@ -1198,28 +1198,30 @@ function actualizarMedicamento(req, res) {
         });
     }
 
-    function venta_medicamentos(req, res) {
-        // Consultar los medicamentos disponibles
-        conexion.query('SELECT * FROM medicamentos WHERE cantidad > 0', (err, medicamentos) => {
+function venta_medicamentos(req, res) {
+    // Consultar medicamentos activos y con cantidad > 0
+    conexion.query('SELECT * FROM medicamentos WHERE cantidad > 0 AND activo = 1', (err, medicamentos) => {
+        if (err) {
+            console.error(err);
+            req.flash('error', 'Ocurrió un error al cargar los medicamentos.');
+            return res.redirect('/menu_admin/inicio_admin');
+        }
+
+        // Consultar clientes activos
+        conexion.query('SELECT * FROM clientes WHERE activo = 1', (err, clientes) => {
             if (err) {
                 console.error(err);
-                req.flash('error', 'Ocurrió un error al cargar los medicamentos.');
+                req.flash('error', 'Ocurrió un error al cargar los clientes.');
                 return res.redirect('/menu_admin/inicio_admin');
             }
-    
-            // Consultar los clientes disponibles
-            conexion.query('SELECT * FROM clientes', (err, clientes) => {
-                if (err) {
-                    console.error(err);
-                    req.flash('error', 'Ocurrió un error al cargar los clientes.');
-                    return res.redirect('/menu_admin/inicio_admin');
-                }
-    
-                // Renderizar la vista con los datos de medicamentos y clientes
-                res.render('menu_admin/venta', { medicamentos: medicamentos, clientes: clientes });
-            });
+
+            // Renderizar la vista con los datos filtrados
+            res.render('menu_admin/venta', { medicamentos, clientes });
         });
-    }
+    });
+}
+
+
     
       
 function venta_medicamentos_vista(req, res) {

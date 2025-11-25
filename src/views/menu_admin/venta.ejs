@@ -86,15 +86,19 @@
                     <label for="medicamento">Seleccionar Medicamento:</label>
                     <select id="medicamento" name="medicamento" required>
                         <option value="" disabled selected>Selecciona un medicamento</option>
-                        <% if (medicamentos && medicamentos.length > 0) { %>
-                            <% medicamentos.forEach(medicamento => { %>
-                                <option value="<%= medicamento.id_medicamentos %>" data-precio="<%= medicamento.precio %>">
-                                    <%= medicamento.nombre %> (Disponibles: <%= medicamento.cantidad %> - Precio: $<%= medicamento.precio %>)
-                                </option>
-                            <% }); %>
-                        <% } else { %>
-                            <option disabled>No hay medicamentos disponibles</option>
-                        <% } %>
+<% if (medicamentos && medicamentos.length > 0) { %>
+    <% medicamentos.forEach(medicamento => { %>
+        <option 
+            value="<%= medicamento.id_medicamentos %>" 
+            data-precio="<%= medicamento.precio %>"
+            <%= medicamento.cantidad <= 0 ? 'disabled' : '' %>>
+            <%= medicamento.nombre %> (Disponibles: <%= medicamento.cantidad %> - Precio: $<%= medicamento.precio %>)
+        </option>
+    <% }); %>
+<% } else { %>
+    <option disabled>No hay medicamentos disponibles</option>
+<% } %>
+
                     </select>
                     <br><br>
                     <label for="cantidad">Cantidad a Vender:</label>
