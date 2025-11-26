@@ -1098,102 +1098,108 @@ function actualizarMedicamento(req, res) {
     const idMedicamento = req.params.id_medicamentos;
     const { nombre, precio, cantidad, fecha_caducidad, presentation_id, controlado_id, proveedor_id } = req.body;
 
+    // Validación
     if (!nombre || !precio || !cantidad || !fecha_caducidad || !presentation_id || !controlado_id) {
         req.flash("error", "Todos los campos son obligatorios.");
         return res.redirect("back");
     }
 
     const proveedorIdFinal = proveedor_id || null;
+    const presentacionIdFinal = presentation_id || null;
 
     const query = `
         UPDATE medicamentos 
         SET nombre = ?, precio = ?, cantidad = ?, fecha_caducidad = ?, 
             presentation_id = ?, controlado_id = ?, proveedores_id = ?
-        WHERE id_medicamentos = ? AND estado = 1
+        WHERE id_medicamentos = ?
     `;
 
     const values = [
         nombre, precio, cantidad, fecha_caducidad,
-        presentation_id, controlado_id, proveedorIdFinal,
+        presentacionIdFinal, controlado_id, proveedorIdFinal,
         idMedicamento
     ];
 
-    conexion.query(query, values, (err, result) => {
+    conexion.query(query, values, (err) => {
         if (err) {
             console.error("Error al actualizar medicamento:", err);
             req.flash("error", "Error al actualizar el medicamento.");
             return res.redirect("back");
         }
 
-        if (result.affectedRows === 0) {
-            req.flash("error", "Este medicamento está desactivado y no se puede modificar.");
-            return res.redirect("/menu_admin/medicamentos_admin");
-        }
-
+        // 🔹 Guarda mensaje de éxito
         req.flash("success", "El medicamento se actualizó correctamente.");
-        res.redirect(`/menu_admin/buscar-medicamento?nombre=${encodeURIComponent(nombre)}`);
+
+        // 🔹 Vuelve a la vista anterior
+         res.redirect(`/menu_admin/buscar-medicamento?nombre=${encodeURIComponent(nombre)}`);
+
     });
 }
 
 
-function editarMedicamento(req, res) {
-    const id = req.params.id_medicamentos;
 
-    // Solo obtener medicamentos ACTIVOS
-    const queryMedicamento = 'SELECT * FROM medicamentos WHERE id_medicamentos = ? AND estado = 1';
+    function editarMedicamento(req, res) {
+        const id = req.params.id_medicamentos;
+    
+        // Consulta para obtener el medicamento por ID
+        const queryMedicamento = 'SELECT * FROM medicamentos WHERE id_medicamentos = ?';
+    
+        // Consulta para obtener todas las presentaciones
+        const queryPresentaciones = 'SELECT * FROM presentacion';
+    
+        // Consulta para obtener todos los medicamentos controlados
+        const queryControlados = 'SELECT * FROM controlado';
+    
+        // Consulta para obtener todos los proveedores
+        const queryProveedores = 'SELECT * FROM proveedores WHERE activo = 1';
 
-    // Solo presentaciones activas
-    const queryPresentaciones = 'SELECT * FROM presentacion WHERE estado = 1';
-
-    // Solo controlados activos
-    const queryControlados = 'SELECT * FROM controlado WHERE estado = 1';
-
-    // Solo proveedores activos
-    const queryProveedores = 'SELECT * FROM proveedores WHERE estado = 1';
-
-    conexion.query(queryMedicamento, [id], (err, medicamentoResults) => {
-        if (err) {
-            console.error('Error al obtener el medicamento:', err);
-            return res.status(500).send('Error al obtener el medicamento');
-        }
-
-        if (medicamentoResults.length === 0) {
-            req.flash("error", "Este medicamento está desactivado o no existe.");
-            return res.redirect("/menu_admin/medicamentos_admin");
-        }
-
-        conexion.query(queryPresentaciones, (err, presentacionesResults) => {
+    
+        // Obtener datos del medicamento
+        conexion.query(queryMedicamento, [id], (err, medicamentoResults) => {
             if (err) {
-                console.error('Error al obtener las presentaciones:', err);
-                return res.status(500).send('Error al obtener las presentaciones');
-            }
-
-            conexion.query(queryControlados, (err, controladosResults) => {
-                if (err) {
-                    console.error('Error al obtener los medicamentos controlados:', err);
-                    return res.status(500).send('Error al obtener los medicamentos controlados');
-                }
-
-                conexion.query(queryProveedores, (err, proveedoresResults) => {
+                console.error('Error al obtener el medicamento:', err);
+                res.status(500).send('Error al obtener el medicamento');
+            } else if (medicamentoResults.length === 0) {
+                res.status(404).send('El medicamento no existe');
+            } else {
+                // Obtener datos de las presentaciones
+                conexion.query(queryPresentaciones, (err, presentacionesResults) => {
                     if (err) {
-                        console.error('Error al obtener los proveedores:', err);
-                        return res.status(500).send('Error al obtener los proveedores');
+                        console.error('Error al obtener las presentaciones:', err);
+                        res.status(500).send('Error al obtener las presentaciones');
+                    } else {
+                        // Obtener datos de los medicamentos controlados
+                        conexion.query(queryControlados, (err, controladosResults) => {
+                            if (err) {
+                                console.error('Error al obtener los medicamentos controlados:', err);
+                                res.status(500).send('Error al obtener los medicamentos controlados');
+                            } else {
+                                // Obtener datos de los proveedores
+                                conexion.query(queryProveedores, (err, proveedoresResults) => {
+                                    if (err) {
+                                        console.error('Error al obtener los proveedores:', err);
+                                        res.status(500).send('Error al obtener los proveedores');
+                                    } else {
+                                        // Renderizar la vista con todos los datos
+                                      res.render('menu_admin/modificar_medicamento_admin', {
+                                        medicamento: medicamentoResults[0],
+                                        presentaciones: presentacionesResults,
+                                        controlados: controladosResults,
+                                        proveedores: proveedoresResults,
+                                        success: req.flash("success"),
+                                        error: req.flash("error")
+                                    });
+
+
+                                    }
+                                });
+                            }
+                        });
                     }
-
-                    res.render('menu_admin/modificar_medicamento_admin', {
-                        medicamento: medicamentoResults[0],
-                        presentaciones: presentacionesResults,
-                        controlados: controladosResults,
-                        proveedores: proveedoresResults,
-                        success: req.flash("success"),
-                        error: req.flash("error")
-                    });
                 });
-            });
+            }
         });
-    });
-}
-
+    }
 
 function venta_medicamentos(req, res) {
     // Consultar medicamentos activos y con cantidad > 0

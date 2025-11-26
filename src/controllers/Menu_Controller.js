@@ -975,7 +975,7 @@ function eliminarMedicamento(req, res) {
         const queryControlados = 'SELECT * FROM controlado';
     
         // Consulta para obtener todos los proveedores
-        const queryProveedores = 'SELECT * FROM proveedores';
+        const queryProveedores = 'SELECT * FROM proveedores WHERE activo = 1';
     
         // Obtener datos del medicamento
         conexion.query(queryMedicamento, [id], (err, medicamentoResults) => {
