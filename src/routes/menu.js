@@ -27,8 +27,14 @@ router.get('/reporte_medicamentos', Menu_Controller.generarReportePDF);
 
 
 
-router.post('/venta_vendedor', Menu_Controller.venta_medicamentos_vista);    
-router.get('/venta_vendedor', Menu_Controller.venta_medicamentos);  
+
+
+router.get('/venta', Menu_Controller.venta_medicamentos); 
+router.post('/venta', Menu_Controller.venta_medicamentos_vista);    
+ 
+
+
+
 router.get('/historial_ventas', Menu_Controller.historialVentas);          // Vista principal del historial
 router.get('/buscar_ventas', Menu_Controller.buscarVentas);  
 
