@@ -755,6 +755,7 @@ conexion.query(
 
 
     // Controlador para mostrar el historial de ventas
+    // Controlador para mostrar el historial de ventas
 function historialVentas(req, res) {
     const query = `
         SELECT 
@@ -767,7 +768,6 @@ function historialVentas(req, res) {
 
             IFNULL(u.nombre, 'Usuario') AS vendedor,
 
-            -- 🔹 AQUÍ SE CORRIGE: NOMBRE + APELLIDO
             IF(
                 c.id_clientes IS NULL,
                 'Eliminado',
@@ -792,13 +792,18 @@ function historialVentas(req, res) {
             total: parseFloat(v.total) || 0
         }));
 
-        res.render('menu_admin/historial_ventas', { 
+        res.render('menu/historial_ventas', { 
             ventas: ventasFormateadas,
             titulo: 'Historial de Ventas'
         });
     });
 }
 
+
+
+
+
+// Controlador para buscar ventas
 function buscarVentas(req, res) {
     const { fecha, cliente } = req.query;
 
@@ -813,7 +818,6 @@ function buscarVentas(req, res) {
 
             IFNULL(u.nombre, 'Sin vendedor') AS vendedor,
 
-            -- 🔹 AQUÍ TAMBIÉN SE CORRIGE
             IF(
                 c.id_clientes IS NULL,
                 'Sin cliente',
@@ -845,7 +849,7 @@ function buscarVentas(req, res) {
             return res.status(500).render('error', { error: 'Error en la búsqueda' });
         }
 
-        res.render('menu_admin/historial_ventas', {
+        res.render('menu/historial_ventas', {
             ventas,
             titulo: 'Resultados de Búsqueda',
             criterios: { fecha, cliente }
