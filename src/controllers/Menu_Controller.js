@@ -1160,18 +1160,25 @@ function exportarVentasPDF(req, res) {
     }
 
     const query = `
-        SELECT 
-            v.fecha_venta, 
-            v.nombre_medicamento AS medicamento, 
-            v.cantidad, 
-            v.precio_unitario, 
-            v.total,
-            IFNULL(u.nombre, 'Usuario') AS vendedor,
-            IFNULL(c.nombre, 'Eliminado') AS cliente
-        FROM ventas v
-        LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
-        LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
-        ORDER BY v.fecha_venta DESC;
+SELECT 
+    v.fecha_venta, 
+    v.nombre_medicamento AS medicamento, 
+    v.cantidad, 
+    v.precio_unitario, 
+    v.total,
+    IFNULL(u.nombre, 'Usuario') AS vendedor,
+
+    -- 🔹 CONCATENA NOMBRE + APELLIDO (si existe)
+    IF(
+        c.id_clientes IS NULL,
+        'Eliminado',
+        CONCAT(c.nombre, ' ', COALESCE(c.apellido_paterno, ''))
+    ) AS cliente
+
+FROM ventas v
+LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
+LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
+ORDER BY v.fecha_venta DESC;
     `;
 
     conexion.query(query, (err, ventas) => {
