@@ -46,7 +46,7 @@ const queryMedicamentosAgotarse = `
                 `El medicamento ${med.nombre} tiene una cantidad baja (${med.cantidad} unidades).`
             );
 
-            res.render('menu/inicio', {
+            res.render('menu_admin/inicio_admin', {
                 mensajesProximos: JSON.stringify(mensajesProximos),
                 mensajesAgotarse: JSON.stringify(mensajesAgotarse)
             });
@@ -84,7 +84,7 @@ function vista_medicamentos(req, res) {
                 return res.status(500).send('Error al obtener los medicamentos próximos a caducar');
             }
 
-            res.render('menu/medicamentos', { 
+            res.render('menu_admin/medicamentos_admin', { 
                 proveedores: proveedores, 
                 medicamentosProximos: medicamentosProximos 
             });
