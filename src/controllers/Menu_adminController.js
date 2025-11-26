@@ -1336,14 +1336,7 @@ function historialVentas(req, res) {
                v.nombre_medicamento AS medicamento,
                v.cantidad, v.precio_unitario, v.total,
                IFNULL(u.nombre, 'Usuario') AS vendedor,
-
-               -- 🔹 Nombre + apellido si existe
-               -- 🔹 Si cliente eliminado, usar lo guardado en ventas
-               IF(c.id_clientes IS NOT NULL,
-                    CONCAT(c.nombre, ' ', c.apellido_paterno),
-                    v.cliente
-               ) AS cliente
-
+               IFNULL(c.nombre, 'Eliminado') AS cliente
         FROM ventas v
         LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
         LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
@@ -1368,7 +1361,6 @@ function historialVentas(req, res) {
         });
     });
 }
-
 
 
 
