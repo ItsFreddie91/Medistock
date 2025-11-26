@@ -2,21 +2,22 @@ const conexion = require('../conexion/conexion');
 
 function inicio(req, res) {
 
-    const queryMedicamentosProximos = `
-        SELECT nombre, fecha_caducidad 
-        FROM medicamentos 
-        WHERE estado = 'activo'
-          AND fecha_caducidad IS NOT NULL
-          AND fecha_caducidad BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
-    `;
+const queryMedicamentosProximos = `
+    SELECT nombre, fecha_caducidad 
+    FROM medicamentos 
+    WHERE activo = 1
+      AND fecha_caducidad IS NOT NULL
+      AND fecha_caducidad BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+`;
+
     
-    const queryMedicamentosAgotarse = `
-        SELECT nombre, cantidad
-        FROM medicamentos 
-        WHERE estado = 'activo'
-          AND cantidad > 0 
-          AND cantidad <= 5
-    `;
+const queryMedicamentosAgotarse = `
+    SELECT nombre, cantidad
+    FROM medicamentos 
+    WHERE activo = 1
+      AND cantidad > 0 
+      AND cantidad <= 5
+`;
 
     conexion.query(queryMedicamentosProximos, (err, medicamentosProximos) => {
         if (err) {
