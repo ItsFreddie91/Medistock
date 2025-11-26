@@ -6,6 +6,7 @@ function inicio(req, res) {
         SELECT nombre, fecha_caducidad 
         FROM medicamentos 
         WHERE estado = 'activo'
+          AND fecha_caducidad IS NOT NULL
           AND fecha_caducidad BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
     `;
     
@@ -29,12 +30,16 @@ function inicio(req, res) {
                 return res.status(500).send("Error al obtener datos de medicamentos próximos a agotarse");
             }
 
-            const mensajesProximos = medicamentosProximos.map(
-                med => `El medicamento ${med.nombre} caduca el ${new Date(med.fecha_caducidad).toLocaleDateString('es-MX')}.`
-            );
+            // Evita errores si fecha_caducidad = NULL
+            const mensajesProximos = medicamentosProximos.map(med => {
+                const fecha = med.fecha_caducidad
+                    ? new Date(med.fecha_caducidad).toLocaleDateString('es-MX')
+                    : "sin fecha registrada";
+                return `El medicamento ${med.nombre} caduca el ${fecha}.`;
+            });
 
-            const mensajesAgotarse = medicamentosAgotarse.map(
-                med => `El medicamento ${med.nombre} tiene una cantidad baja (${med.cantidad} unidades).`
+            const mensajesAgotarse = medicamentosAgotarse.map(med =>
+                `El medicamento ${med.nombre} tiene una cantidad baja (${med.cantidad} unidades).`
             );
 
             res.render('menu/inicio', {
@@ -49,14 +54,19 @@ function inicio(req, res) {
 
 
 function vista_medicamentos(req, res) {
-    // Obtener proveedores ACTIVOS
-    const queryProveedores = 'SELECT id_proveedores, nombre FROM proveedores WHERE activo = 1';
 
-    // Obtener medicamentos próximos a caducar
+    const queryProveedores = `
+        SELECT id_proveedores, nombre 
+        FROM proveedores 
+        WHERE activo = 1
+    `;
+
     const queryMedicamentosProximos = `
         SELECT nombre, fecha_caducidad 
         FROM medicamentos 
-        WHERE fecha_caducidad BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+        WHERE estado = 'activo'
+          AND fecha_caducidad IS NOT NULL
+          AND fecha_caducidad BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
     `;
 
     conexion.query(queryProveedores, (err, proveedores) => {
@@ -71,7 +81,6 @@ function vista_medicamentos(req, res) {
                 return res.status(500).send('Error al obtener los medicamentos próximos a caducar');
             }
 
-            // Renderizar la vista pasando proveedores activos + medicamentos próximos
             res.render('menu/medicamentos', { 
                 proveedores: proveedores, 
                 medicamentosProximos: medicamentosProximos 
@@ -79,6 +88,7 @@ function vista_medicamentos(req, res) {
         });
     });
 }
+
 
 
 
