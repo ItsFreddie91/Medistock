@@ -1,6 +1,6 @@
 const conexion = require('../conexion/conexion'); 
 
-function inicio_admin(req, res) {
+function inicio(req, res) {
 
     const queryMedicamentosProximos = `
         SELECT nombre, fecha_caducidad 
