@@ -712,7 +712,7 @@ conexion.query(
         })
         .catch(err => {
             console.error('Error al procesar la venta:', err);
-            req.flash('error', 'Ocurrió un error al realizar la venta.');
+            req.flash('error', 'Medicamento Insuficiente.');
             res.json({ success: false, message: 'Error al procesar la venta.' });
         });
 }
