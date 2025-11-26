@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('Venta realizada con éxito.');
                 location.reload();
             } else {
-                alert('Ocurrió un error al realizar la venta.');
+                alert('Medicamento Insuficiente.');
             }
         })
         .catch(error => {
