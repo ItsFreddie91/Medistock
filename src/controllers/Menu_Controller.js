@@ -43,8 +43,8 @@ function inicio(req, res) {
 
 
 function vista_medicamentos(req, res) {
-    // Obtener proveedores
-    const queryProveedores = 'SELECT id_proveedores, nombre FROM proveedores';
+    // Obtener proveedores ACTIVOS
+    const queryProveedores = 'SELECT id_proveedores, nombre FROM proveedores WHERE activo = 1';
 
     // Obtener medicamentos próximos a caducar
     const queryMedicamentosProximos = `
@@ -65,11 +65,15 @@ function vista_medicamentos(req, res) {
                 return res.status(500).send('Error al obtener los medicamentos próximos a caducar');
             }
 
-            // Renderizar la vista pasando tanto proveedores como medicamentosProximos
-            res.render('menu/medicamentos', { proveedores: proveedores, medicamentosProximos: medicamentosProximos });
+            // Renderizar la vista pasando proveedores activos + medicamentos próximos
+            res.render('menu/medicamentos', { 
+                proveedores: proveedores, 
+                medicamentosProximos: medicamentosProximos 
+            });
         });
     });
 }
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
