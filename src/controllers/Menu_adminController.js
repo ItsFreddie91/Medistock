@@ -1332,11 +1332,16 @@ conexion.query(
     // Controlador para mostrar el historial de ventas
 function historialVentas(req, res) {
     const query = `
-        SELECT v.id_venta, v.fecha_venta, 
+        SELECT v.id_venta, v.fecha_venta,
                v.nombre_medicamento AS medicamento,
                v.cantidad, v.precio_unitario, v.total,
                IFNULL(u.nombre, 'Usuario') AS vendedor,
-               IFNULL(c.nombre, 'Eliminado') AS cliente
+
+               IF(c.id_clientes IS NOT NULL,
+                   CONCAT(c.nombre, ' ', c.apellido_paterno),
+                   v.cliente
+               ) AS cliente
+
         FROM ventas v
         LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
         LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
@@ -1352,15 +1357,16 @@ function historialVentas(req, res) {
         const ventasFormateadas = ventas.map(v => ({
             ...v,
             precio_unitario: parseFloat(v.precio_unitario) || 0,
-            total: parseFloat(v.total) || 0
+            total: parseFloat(v.total) || 0,
         }));
 
-        res.render('menu_admin/historial_ventas', { 
+        res.render('menu_admin/historial_ventas', {
             ventas: ventasFormateadas,
             titulo: 'Historial de Ventas'
         });
     });
 }
+
 
 
 
