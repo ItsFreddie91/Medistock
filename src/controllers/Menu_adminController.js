@@ -4,23 +4,21 @@ const PDFDocument = require('pdfkit');
 
 function inicio_admin(req, res) {
 
-const queryMedicamentosProximos = `
-    SELECT nombre, fecha_caducidad 
-    FROM medicamentos 
-    WHERE activo = 1
-      AND fecha_caducidad IS NOT NULL
-      AND fecha_caducidad BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
-`;
-
+    const queryMedicamentosProximos = `
+        SELECT nombre, fecha_caducidad 
+        FROM medicamentos 
+        WHERE activo = 1
+          AND fecha_caducidad IS NOT NULL
+          AND fecha_caducidad BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+    `;
     
-const queryMedicamentosAgotarse = `
-    SELECT nombre, cantidad
-    FROM medicamentos 
-    WHERE activo = 1
-      AND cantidad > 0 
-      AND cantidad <= 5
-`;
-
+    const queryMedicamentosAgotarse = `
+        SELECT nombre, cantidad 
+        FROM medicamentos 
+        WHERE activo = 1
+          AND cantidad > 0 
+          AND cantidad <= 5
+    `;
 
     conexion.query(queryMedicamentosProximos, (err, medicamentosProximos) => {
         if (err) {
@@ -34,16 +32,12 @@ const queryMedicamentosAgotarse = `
                 return res.status(500).send("Error al obtener datos de medicamentos próximos a agotarse");
             }
 
-            // Evita errores si fecha_caducidad = NULL
-            const mensajesProximos = medicamentosProximos.map(med => {
-                const fecha = med.fecha_caducidad
-                    ? new Date(med.fecha_caducidad).toLocaleDateString('es-MX')
-                    : "sin fecha registrada";
-                return `El medicamento ${med.nombre} caduca el ${fecha}.`;
-            });
+            const mensajesProximos = medicamentosProximos.map(
+                med => `El medicamento ${med.nombre} caduca el ${new Date(med.fecha_caducidad).toLocaleDateString('es-MX')}.`
+            );
 
-            const mensajesAgotarse = medicamentosAgotarse.map(med =>
-                `El medicamento ${med.nombre} tiene una cantidad baja (${med.cantidad} unidades).`
+            const mensajesAgotarse = medicamentosAgotarse.map(
+                med => `El medicamento ${med.nombre} tiene una cantidad baja (${med.cantidad} unidades).`
             );
 
             res.render('menu_admin/inicio_admin', {
@@ -55,21 +49,15 @@ const queryMedicamentosAgotarse = `
 }
 
 
-
 function vista_medicamentos(req, res) {
+    // Obtener proveedores ACTIVOS
+    const queryProveedores = 'SELECT id_proveedores, nombre FROM proveedores WHERE activo = 1';
 
-    const queryProveedores = `
-        SELECT id_proveedores, nombre 
-        FROM proveedores 
-        WHERE activo = 1
-    `;
-
+    // Obtener medicamentos próximos a caducar
     const queryMedicamentosProximos = `
         SELECT nombre, fecha_caducidad 
         FROM medicamentos 
-        WHERE estado = 'activo'
-          AND fecha_caducidad IS NOT NULL
-          AND fecha_caducidad BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+        WHERE fecha_caducidad BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
     `;
 
     conexion.query(queryProveedores, (err, proveedores) => {
@@ -84,6 +72,7 @@ function vista_medicamentos(req, res) {
                 return res.status(500).send('Error al obtener los medicamentos próximos a caducar');
             }
 
+            // Renderizar la vista pasando proveedores activos + medicamentos próximos
             res.render('menu_admin/medicamentos_admin', { 
                 proveedores: proveedores, 
                 medicamentosProximos: medicamentosProximos 
@@ -91,7 +80,6 @@ function vista_medicamentos(req, res) {
         });
     });
 }
-
 
 
 
@@ -1389,60 +1377,6 @@ function historialVentas(req, res) {
         res.render('menu_admin/historial_ventas', { 
             ventas: ventasFormateadas,
             titulo: 'Historial de Ventas'
-        });
-    });
-}
-
-function buscarVentas(req, res) {
-    const { fecha, cliente } = req.query;
-
-    let query = `
-        SELECT 
-            v.id_venta, 
-            v.fecha_venta, 
-            v.nombre_medicamento AS medicamento,
-            v.cantidad, 
-            v.precio_unitario, 
-            v.total,
-
-            IFNULL(u.nombre, 'Sin vendedor') AS vendedor,
-
-            -- 🔹 AQUÍ TAMBIÉN SE CORRIGE
-            IF(
-                c.id_clientes IS NULL,
-                'Sin cliente',
-                CONCAT(c.nombre, ' ', COALESCE(c.apellido_paterno, ''))
-            ) AS cliente
-
-        FROM ventas v
-        LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
-        LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
-        WHERE 1=1`;
-
-    const params = [];
-
-    if (fecha) {
-        query += ' AND DATE(v.fecha_venta) = ?';
-        params.push(fecha);
-    }
-
-    if (cliente) {
-        query += ' AND c.nombre LIKE ?';
-        params.push(`%${cliente}%`);
-    }
-
-    query += ' ORDER BY v.fecha_venta DESC';
-
-    conexion.query(query, params, function(err, ventas) {
-        if (err) {
-            console.error('Error en buscarVentas:', err);
-            return res.status(500).render('error', { error: 'Error en la búsqueda' });
-        }
-
-        res.render('menu_admin/historial_ventas', {
-            ventas,
-            titulo: 'Resultados de Búsqueda',
-            criterios: { fecha, cliente }
         });
     });
 }
