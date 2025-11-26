@@ -61,7 +61,7 @@ function autenticarUsuario(req, res) {
 
                     if (desactivados.length > 0) {
                         return res.render('login/index', {
-                            message: 'Este usuario está eliminado o desactivado.'
+                            message: 'Este usuario no existe. Inténtalo nuevamente.'
                         });
                     }
 
