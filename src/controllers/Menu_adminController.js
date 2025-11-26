@@ -1332,15 +1332,22 @@ conexion.query(
     // Controlador para mostrar el historial de ventas
 function historialVentas(req, res) {
     const query = `
-        SELECT v.id_venta, v.fecha_venta,
-               v.nombre_medicamento AS medicamento,
-               v.cantidad, v.precio_unitario, v.total,
-               IFNULL(u.nombre, 'Usuario') AS vendedor,
+        SELECT 
+            v.id_venta, 
+            v.fecha_venta, 
+            v.nombre_medicamento AS medicamento,
+            v.cantidad, 
+            v.precio_unitario, 
+            v.total,
 
-               IF(c.id_clientes IS NOT NULL,
-                   CONCAT(c.nombre, ' ', c.apellido_paterno),
-                   v.cliente
-               ) AS cliente
+            IFNULL(u.nombre, 'Usuario') AS vendedor,
+
+            -- 🔹 AQUÍ SE CORRIGE: NOMBRE + APELLIDO
+            IF(
+                c.id_clientes IS NULL,
+                'Eliminado',
+                CONCAT(c.nombre, ' ', COALESCE(c.apellido_paterno, ''))
+            ) AS cliente
 
         FROM ventas v
         LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
@@ -1357,28 +1364,37 @@ function historialVentas(req, res) {
         const ventasFormateadas = ventas.map(v => ({
             ...v,
             precio_unitario: parseFloat(v.precio_unitario) || 0,
-            total: parseFloat(v.total) || 0,
+            total: parseFloat(v.total) || 0
         }));
 
-        res.render('menu_admin/historial_ventas', {
+        res.render('menu_admin/historial_ventas', { 
             ventas: ventasFormateadas,
             titulo: 'Historial de Ventas'
         });
     });
 }
 
-
-
-
-// Controlador para buscar ventas
 function buscarVentas(req, res) {
     const { fecha, cliente } = req.query;
+
     let query = `
-        SELECT v.id_venta, v.fecha_venta, 
-               v.nombre_medicamento AS medicamento, 
-               v.cantidad, v.precio_unitario, v.total,
-               IFNULL(u.nombre, 'Sin vendedor') AS vendedor,
-               IFNULL(c.nombre, 'Sin cliente') AS cliente
+        SELECT 
+            v.id_venta, 
+            v.fecha_venta, 
+            v.nombre_medicamento AS medicamento,
+            v.cantidad, 
+            v.precio_unitario, 
+            v.total,
+
+            IFNULL(u.nombre, 'Sin vendedor') AS vendedor,
+
+            -- 🔹 AQUÍ TAMBIÉN SE CORRIGE
+            IF(
+                c.id_clientes IS NULL,
+                'Sin cliente',
+                CONCAT(c.nombre, ' ', COALESCE(c.apellido_paterno, ''))
+            ) AS cliente
+
         FROM ventas v
         LEFT JOIN usuarios u ON v.id_usuario = u.id_usuario
         LEFT JOIN clientes c ON v.id_cliente = c.id_clientes
@@ -1404,13 +1420,14 @@ function buscarVentas(req, res) {
             return res.status(500).render('error', { error: 'Error en la búsqueda' });
         }
 
-        res.render('menu_admin/historial_ventas', { 
+        res.render('menu_admin/historial_ventas', {
             ventas,
             titulo: 'Resultados de Búsqueda',
             criterios: { fecha, cliente }
         });
     });
 }
+
 
 
 
