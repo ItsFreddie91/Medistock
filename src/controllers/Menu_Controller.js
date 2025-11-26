@@ -755,7 +755,6 @@ conexion.query(
 
 
     // Controlador para mostrar el historial de ventas
-    // Controlador para mostrar el historial de ventas
 function historialVentas(req, res) {
     const query = `
         SELECT 
