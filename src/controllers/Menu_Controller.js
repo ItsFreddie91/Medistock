@@ -591,7 +591,7 @@ function venta_medicamentos(req, res) {
         if (err) {
             console.error(err);
             req.flash('error', 'Ocurrió un error al cargar los medicamentos.');
-            return res.redirect('/menu_admin/inicio_admin');
+            return res.redirect('/menu/inicio');
         }
 
         // Consultar clientes activos
@@ -599,11 +599,11 @@ function venta_medicamentos(req, res) {
             if (err) {
                 console.error(err);
                 req.flash('error', 'Ocurrió un error al cargar los clientes.');
-                return res.redirect('/menu_admin/inicio_admin');
+                return res.redirect('/menu/inicio');
             }
 
             // Renderizar la vista con los datos filtrados
-            res.render('menu_admin/venta', { medicamentos, clientes });
+            res.render('menu/venta', { medicamentos, clientes });
         });
     });
 }
@@ -925,7 +925,7 @@ function buscarMedicamento(req, res) {
             };
         });
 
-        res.render('menu_admin/resultadoMedicamento_admin', {
+        res.render('menu/resultadoMedicamento', {
             medicamentos: medicamentosFormateados,
             nombreBuscado
         });
