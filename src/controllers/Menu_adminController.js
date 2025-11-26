@@ -3,15 +3,20 @@ const bcrypt = require('bcrypt');
 const PDFDocument = require('pdfkit');
 
 function inicio_admin(req, res) {
+
     const queryMedicamentosProximos = `
         SELECT nombre, fecha_caducidad 
         FROM medicamentos 
-        WHERE fecha_caducidad BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+        WHERE estado = 'activo'
+          AND fecha_caducidad BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
     `;
     
     const queryMedicamentosAgotarse = `
-        SELECT * FROM medicamentos WHERE cantidad > 0 AND cantidad <= 5;
-
+        SELECT nombre, cantidad
+        FROM medicamentos 
+        WHERE estado = 'activo'
+          AND cantidad > 0 
+          AND cantidad <= 5
     `;
 
     conexion.query(queryMedicamentosProximos, (err, medicamentosProximos) => {
@@ -27,20 +32,21 @@ function inicio_admin(req, res) {
             }
 
             const mensajesProximos = medicamentosProximos.map(
-                med => `El medicamento ${med.nombre} caduca el ${new Date(med.fecha_caducidad).toLocaleDateString()}.`
+                med => `El medicamento ${med.nombre} caduca el ${new Date(med.fecha_caducidad).toLocaleDateString('es-MX')}.`
             );
 
             const mensajesAgotarse = medicamentosAgotarse.map(
                 med => `El medicamento ${med.nombre} tiene una cantidad baja (${med.cantidad} unidades).`
             );
 
-            res.render('menu_admin/inicio_admin', {
+            res.render('menu/inicio', {
                 mensajesProximos: JSON.stringify(mensajesProximos),
                 mensajesAgotarse: JSON.stringify(mensajesAgotarse)
             });
         });
     });
 }
+
 
 function vista_medicamentos(req, res) {
     // Obtener proveedores ACTIVOS

@@ -1,15 +1,20 @@
 const conexion = require('../conexion/conexion'); 
 
 function inicio(req, res) {
+
     const queryMedicamentosProximos = `
         SELECT nombre, fecha_caducidad 
         FROM medicamentos 
-        WHERE fecha_caducidad BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+        WHERE estado = 'activo'
+          AND fecha_caducidad BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
     `;
     
     const queryMedicamentosAgotarse = `
-        SELECT * FROM medicamentos WHERE cantidad > 0 AND cantidad <= 5;
-
+        SELECT nombre, cantidad
+        FROM medicamentos 
+        WHERE estado = 'activo'
+          AND cantidad > 0 
+          AND cantidad <= 5
     `;
 
     conexion.query(queryMedicamentosProximos, (err, medicamentosProximos) => {
@@ -25,7 +30,7 @@ function inicio(req, res) {
             }
 
             const mensajesProximos = medicamentosProximos.map(
-                med => `El medicamento ${med.nombre} caduca el ${new Date(med.fecha_caducidad).toLocaleDateString()}.`
+                med => `El medicamento ${med.nombre} caduca el ${new Date(med.fecha_caducidad).toLocaleDateString('es-MX')}.`
             );
 
             const mensajesAgotarse = medicamentosAgotarse.map(
@@ -39,6 +44,7 @@ function inicio(req, res) {
         });
     });
 }
+
 
 
 
