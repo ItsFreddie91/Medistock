@@ -8,6 +8,7 @@ function inicio_admin(req, res) {
         SELECT nombre, fecha_caducidad 
         FROM medicamentos 
         WHERE activo = 1
+          AND cantidad > 0
           AND fecha_caducidad IS NOT NULL
           AND fecha_caducidad BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
     `;
